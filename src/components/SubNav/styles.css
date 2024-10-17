@@ -1,0 +1,18 @@
+.breadcrumb {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.breadcrumb-item {
+  margin-right: 0.5rem;
+}
+
+.breadcrumb-item a {
+  text-decoration: none;
+  color: #abd;
+  content: ">"
+}
+
+.breadcrumb-item.active {
+  color: #fff;
+}
