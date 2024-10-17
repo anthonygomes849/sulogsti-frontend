@@ -7,5 +7,5 @@ export default defineConfig({
   build: {
     outDir: 'dist', // Saída do build será na pasta dist
   },
-  base: './' // Caminho relativo para servir os arquivos
+  // base: './' // Caminho relativo para servir os arquivos
 })
