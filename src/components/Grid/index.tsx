@@ -67,7 +67,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   ];
 
   // const [showCrudButtons] = useState(props.showCrudButtons);
-  const [gridApi, setGridApi] = useState<any>(null);
+  // const [gridApi, setGridApi] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const onGridReady = useCallback(async (params: any) => {
@@ -87,7 +87,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
     });
 
     setColDefs(cols);
-    setGridApi(params.api);
+    // setGridApi(params.api);
 
     const dataSource = {
       getRows: async (params: any) => {
@@ -95,7 +95,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         // Fazer uma requisição ao servidor passando os parâmetros da página
         const page = params.endRow / 100 - 1;
 
-        let filters = props.filters;
+        // let filters = props.filters;
 
         // Adiciona os filtros de colunas customizados.
         // if (params.filterModel != null) {
