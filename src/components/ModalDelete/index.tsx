@@ -12,7 +12,7 @@ const ModalDelete: React.FC<Props> = ({
   onConfirm,
 }: Props) => {
   return (
-    <Modal isOpen={isOpen} style={{ position: 'absolute', zIndex: '999999' }}>
+    <Modal isOpen={isOpen} dialogClassName="my-modal" style={{ display: 'block' }}>
       <ModalBody>
        Deseja realmente remove esse registro?
       </ModalBody>
