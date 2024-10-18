@@ -18,6 +18,7 @@ const ListVeiculo: React.FC = () => {
       field: "uf_estado",
       headerName: "Estado",
       cellStyle: { textAlign: "left" },
+      filter: true
     },
     {
       field: "tipo_parte_veiculo",
@@ -34,18 +35,22 @@ const ListVeiculo: React.FC = () => {
       field: "renavam",
       headerName: "RENAVAM",
       cellStyle: { textAlign: "left" },
+      filter: true
     },
     {
       field: 'rntrc',
-      headerName: 'RNTRC'
+      headerName: 'RNTRC',
+      filter: true
     },
     {
       field: 'data_expiracao_rntrc',
-      headerName: 'Expiraçao do RNTRC'
+      headerName: 'Expiraçao do RNTRC',
+      filter: true
     },
     {
       field: 'ano_exercicio_crlv',
-      headerName: 'Ano de Exercício do CRLV'
+      headerName: 'Ano de Exercício do CRLV',
+      filter: true
     },
     {
       field: 'livre_acesso_patio',
