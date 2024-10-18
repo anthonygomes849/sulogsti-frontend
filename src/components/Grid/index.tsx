@@ -98,41 +98,45 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         // Fazer uma requisição ao servidor passando os parâmetros da página
         const page = params.endRow / 100 - 1;
 
-        let filters = props.filters;
+        let filters = {};
+
+        console.log(params);
 
         // Adiciona os filtros de colunas customizados.
-        // if (params.filterModel != null) {
-        //   for (const customFilter in params.filterModel) {
-        //     // Tem que fazer o teste se é um array, pois caso o receba
-        //     // será um filtro por período.
-        //     if (Array.isArray(params.filterModel[customFilter].value)) {
-        //       let newFilters: any[] = params.filterModel[customFilter].value;
-        //       filters = removeFilterByField(filters, newFilters[0].field);
+        if (params.filterModel != null) {
+          for (const customFilter in params.filterModel) {
+            // Tem que fazer o teste se é um array, pois caso o receba
+            // será um filtro por período.
+           
+            console.log(customFilter);
+              let newFilter: any = params.filterModel[customFilter];
+              // filters = removeFilterByField(filters, newFilter.field);
 
-        //       // Adiciona os novos filtros.
-        //       for (var i = 0; i < newFilters.length; i++) {
-        //         filters.push({
-        //           field: newFilters[i].field,
-        //           value: newFilters[i].value,
-        //           operation: newFilters[i].operation,
-        //         });
-        //       }
-        //     } else {
-        //       let newFilter: any = params.filterModel[customFilter].value;
-        //       filters = removeFilterByField(filters, newFilter.field);
-        //       if (newFilter.value != '') {
-        //         filters.push({
-        //           field: newFilter.field,
-        //           value: newFilter.value,
-        //           operation: newFilter.operation,
-        //         });
-        //       }
-        //     }
-        //   }
+              Object.defineProperty(filters, `${customFilter}`, {
+                value: newFilter.filter
+              });
+
+              // if (newFilter.value != '') {
+              //   filters = {
+
+              //   }
+              //   filters.push({
+              //     field: newFilter.field,
+              //     value: newFilter.value,
+              //     operation: newFilter.operation,
+              //   });
+              // }
+          }
+        }
+
+        console.log(filters);
+
+
         const reqDTO = {
+          ...filters,
           qtd_por_pagina: 100,
-          order_by: "data_historico",
-          order_direction: "desc",
+          order_by: params.sortModel.length > 0 ? params.sortModel[0].colId.replace('uf_estado', 'id_estado') :"data_historico",
+          order_direction: params.sortModel.length > 0 ? params.sortModel[0].sort : "desc",
         };
 
         const response = await api.post(`${path}?page=${page + 1}`, reqDTO);
