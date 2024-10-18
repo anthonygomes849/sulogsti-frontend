@@ -1,10 +1,8 @@
 import { ValueFormatterParams } from "ag-grid-community";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 
 import Grid from "../../../../../components/Grid";
 import { ColumnDef } from "../../../../../components/Grid/model/Grid";
-import Loading from "../../../../../core/common/Loading";
-import api from "../../../../../services/api";
 
 // import { Container } from './styles';
 
@@ -77,27 +75,27 @@ const ListVeiculo: React.FC = () => {
     },
   ]);
   const [isRemove, setIsRemove] = useState<boolean>(false);
-  const [entityId, setEntityId] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  // const [entityId, setEntityId] = useState<number | null>(null);
+  // const [loading, setLoading] = useState<boolean>(false);
 
-  const onDelete = useCallback(async (rowId: number | null) => {
-    try {
-      setLoading(true);
-      const body = {
-        id_veiculo: rowId
-      }
+  // const onDelete = useCallback(async (rowId: number | null) => {
+  //   try {
+  //     setLoading(true);
+  //     const body = {
+  //       id_veiculo: rowId
+  //     }
 
-     await api.post('/deletar/veiculos', body);
+  //    await api.post('/deletar/veiculos', body);
       
-      setLoading(false);
-    }catch{
-      setLoading(false);
-    }
-  }, [])
+  //     setLoading(false);
+  //   }catch{
+  //     setLoading(false);
+  //   }
+  // }, [])
 
   return (
     <>
-      <Loading loading={loading} />
+      {/* <Loading loading={loading} /> */}
     <div className="flex flex-col w-full h-screen">
 
       {/* <ModalDelete isOpen={isRemove} onConfirm={() => onDelete(entityId)} onCancel={() => setIsRemove(!isRemove)} /> */}
@@ -109,7 +107,6 @@ const ListVeiculo: React.FC = () => {
           pagination
           path="/listar/veiculos"
           onDelete={(rowId: number) => {
-            setEntityId(rowId);
             setIsRemove(!isRemove)
           }}
         />
