@@ -70,7 +70,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   ];
 
   // const [showCrudButtons] = useState(props.showCrudButtons);
-  const [gridApi, setGridApi] = useState<any>(null);
+  // const [gridApi, setGridApi] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const onGridReady = useCallback(async (params: any) => {
@@ -90,7 +90,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
     });
 
     setColDefs(cols);
-    setGridApi(params.api);
+    // setGridApi(params.api);
 
     const dataSource = {
       getRows: async (params: any) => {
@@ -98,45 +98,31 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         // Fazer uma requisição ao servidor passando os parâmetros da página
         const page = params.endRow / 100 - 1;
 
-        let filters = {};
-
-        console.log(params);
+        let filters: any = {};
 
         // Adiciona os filtros de colunas customizados.
         if (params.filterModel != null) {
           for (const customFilter in params.filterModel) {
             // Tem que fazer o teste se é um array, pois caso o receba
             // será um filtro por período.
-           
-            console.log(customFilter);
-              let newFilter: any = params.filterModel[customFilter];
-              // filters = removeFilterByField(filters, newFilter.field);
 
-              Object.defineProperty(filters, `${customFilter}`, {
-                value: newFilter.filter
-              });
+            let newFilter: any = params.filterModel[customFilter];
 
-              // if (newFilter.value != '') {
-              //   filters = {
-
-              //   }
-              //   filters.push({
-              //     field: newFilter.field,
-              //     value: newFilter.value,
-              //     operation: newFilter.operation,
-              //   });
-              // }
+            filters[`${customFilter}`] = newFilter.filter;
           }
         }
 
         console.log(filters);
 
-
         const reqDTO = {
-          ...filters,
           qtd_por_pagina: 100,
-          order_by: params.sortModel.length > 0 ? params.sortModel[0].colId.replace('uf_estado', 'id_estado') :"data_historico",
-          order_direction: params.sortModel.length > 0 ? params.sortModel[0].sort : "desc",
+          order_by:
+            params.sortModel.length > 0
+              ? params.sortModel[0].colId.replace("uf_estado", "id_estado")
+              : "data_historico",
+          order_direction:
+            params.sortModel.length > 0 ? params.sortModel[0].sort : "desc",
+          ...filters,
         };
 
         const response = await api.post(`${path}?page=${page + 1}`, reqDTO);
