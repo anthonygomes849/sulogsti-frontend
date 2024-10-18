@@ -3,7 +3,6 @@ import React, { useCallback, useState } from "react";
 
 import Grid from "../../../../../components/Grid";
 import { ColumnDef } from "../../../../../components/Grid/model/Grid";
-import ModalDelete from "../../../../../components/ModalDelete";
 import Loading from "../../../../../core/common/Loading";
 import api from "../../../../../services/api";
 
@@ -97,10 +96,11 @@ const ListVeiculo: React.FC = () => {
   }, [])
 
   return (
-    <div className="flex flex-col w-full h-screen">
+    <>
       <Loading loading={loading} />
+    <div className="flex flex-col w-full h-screen">
 
-      <ModalDelete isOpen={isRemove} onConfirm={() => onDelete(entityId)} onCancel={() => setIsRemove(!isRemove)} />
+      {/* <ModalDelete isOpen={isRemove} onConfirm={() => onDelete(entityId)} onCancel={() => setIsRemove(!isRemove)} /> */}
 
       <div className="flex w-screen">
         <Grid
@@ -115,6 +115,8 @@ const ListVeiculo: React.FC = () => {
         />
       </div>
     </div>
+    </>
+
   );
 };
 
