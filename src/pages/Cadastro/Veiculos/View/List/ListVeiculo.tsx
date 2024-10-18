@@ -88,7 +88,7 @@ const ListVeiculo: React.FC = () => {
         id_veiculo: rowId
       }
 
-      const response = await api.post('/deletar/veiculos', body);
+     await api.post('/deletar/veiculos', body);
       
       setLoading(false);
     }catch{
