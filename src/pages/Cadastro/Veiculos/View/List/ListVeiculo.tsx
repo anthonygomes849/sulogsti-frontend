@@ -107,6 +107,7 @@ const ListVeiculo: React.FC = () => {
           pagination
           path="/listar/veiculos"
           onDelete={(rowId: number) => {
+            console.log(rowId)
             setIsRemove(!isRemove)
           }}
         />
