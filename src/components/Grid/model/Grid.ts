@@ -9,7 +9,7 @@ export interface GridProps {
   selectedRows?: any[];
   setSelectedRows?: (rows: any[]) => void;
   onUpdate?: () => void;
-  onDelete?: () => void;
+  onDelete: (id: number) => void;
   onCreate?: () => void;
   // showCrudButtons: boolean;
   // customButtons?: CustomButtons[];

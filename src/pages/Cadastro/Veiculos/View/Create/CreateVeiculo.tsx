@@ -4,7 +4,8 @@ import RadioGroupCustom from "../../../../../components/RadioGroup";
 import SelectCustom from "../../../../../components/SelectCustom";
 import api from "../../../../../services/api";
 
-import { useFormik } from 'formik';
+import { useFormik } from "formik";
+import Loading from "../../../../../core/common/Loading";
 import history from "../../../../../services/history";
 import formValidator from "./validators/formValidator";
 
@@ -22,6 +23,31 @@ interface FormValues {
 
 const CreateVeiculos: React.FC = () => {
   const [states, setStates] = useState([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleSubmit = useCallback(async (values: FormValues) => {
+    try {
+      setLoading(true);
+
+      const body = {
+        placa: values.placa,
+        id_estado: values.id_estado,
+        renavam: values.renavam,
+        tipo_parte_veiculo: values.tipoParteVeiculo,
+        rntrc: values.rntrc,
+        data_expiracao_rntrc: values.dataExpiracaoRNTRC,
+        ano_exercicio_crlv: values.anoExercicioCRLV,
+        livre_acesso_patio: values.livreAcessoPatio,
+        ativo: values.ativo,
+      };
+
+      await api.post("/cadastrar/veiculos", body);
+
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
+  }, []);
 
   const getStates = useCallback(async () => {
     try {
@@ -30,9 +56,9 @@ const CreateVeiculos: React.FC = () => {
       const mappingData = response.data.map((rows: any) => {
         return {
           id: rows.id_estado,
-          label: rows.nome
-        }
-      })
+          label: rows.nome,
+        };
+      });
 
       setStates(mappingData);
 
@@ -40,31 +66,31 @@ const CreateVeiculos: React.FC = () => {
     } catch {}
   }, []);
 
-  const initialValues: FormValues  = {
-    placa: '',
+  const initialValues: FormValues = {
+    placa: "",
     id_estado: null,
-    renavam: '',
+    renavam: "",
     tipoParteVeiculo: false,
-    rntrc: '',
-    dataExpiracaoRNTRC: '',
+    rntrc: "",
+    dataExpiracaoRNTRC: "",
     anoExercicioCRLV: null,
     livreAcessoPatio: false,
-    ativo: true
+    ativo: true,
   };
 
   const formik = useFormik({
     initialValues,
     validationSchema: formValidator,
-    onSubmit: (values: FormValues) => {
-      console.log(values);
-    }
-  })
+    onSubmit: (values: FormValues) => handleSubmit(values),
+  });
+
   useEffect(() => {
     getStates();
   }, [getStates]);
 
   return (
     <div className="!w-full h-full flex flex-col !pt-16 !pr-16 !pl-16 !pb-16 !mb-48">
+      <Loading loading={loading} />
       <div className="flex items-start justify-start w-3/4 mb-11">
         <div className="w-[300px] min-w-[300px] flex flex-col items-start justify-start">
           <h1 className="text-sm font-bold text-[#333]">Identificação</h1>
@@ -77,25 +103,43 @@ const CreateVeiculos: React.FC = () => {
             <InputCustom
               title="Placa"
               placeholder="AAA-0000 OU AAA-0A00"
-              onChange={formik.handleChange('placa')}
+              onChange={formik.handleChange("placa")}
               touched={formik.touched.placa}
               error={formik.errors.placa}
+              value={formik.values.placa}
             />
           </div>
           <div className="!mt-4 w-full">
-            <SelectCustom data={states} onChange={() => {}} title="Estado" />
+            <SelectCustom
+              data={states}
+              onChange={(selectedOption: any) =>
+                formik.setFieldValue("id_estado", selectedOption.id)
+              }
+              title="Estado"
+              touched={formik.touched.id_estado}
+              error={formik.errors.id_estado}
+            />
           </div>
-          <div className="flex items-center !mt-6 w-full">
+          <div className="flex items-center justify-center !mt-6 w-full">
             <div className="flex flex-col w-[80%]">
               <InputCustom
                 title="Renavam"
                 typeInput="mask"
                 mask="99.99.99.99.99-9"
                 placeholder="00.00.00.00.00-0"
-                onChange={() => {}}
+                onChange={formik.handleChange("renavam")}
+                touched={formik.touched.renavam}
+                error={formik.errors.renavam}
+                value={formik.values.renavam}
               />
             </div>
-            <button className="bg-[#e9ecef] w-28 h-10 !mt-9 text-[#666] border-[#ced4da] rounded-[2px] hover:bg-[#edb20e] hover:text-[#fff]">
+            <button
+              className={`bg-[#e9ecef] w-28 h-10 ${
+                formik.touched.renavam && formik.errors.renavam
+                  ? "!mt-4"
+                  : "!mt-9"
+              } text-[#666] border-[#ced4da] rounded-[2px] hover:bg-[#edb20e] hover:text-[#fff]`}
+            >
               Coletar
             </button>
           </div>
@@ -111,7 +155,12 @@ const CreateVeiculos: React.FC = () => {
         </div>
         <div className="flex flex-col w-full">
           <div className="!mt-2 w-full">
-            <RadioGroupCustom title="Motorizado" onChange={() => {}} />
+            <RadioGroupCustom
+              title="Motorizado"
+              onChange={(value: string) =>
+                formik.setFieldValue("tipoParteVeiculo", value === "true")
+              }
+            />
           </div>
         </div>
       </div>
@@ -126,7 +175,13 @@ const CreateVeiculos: React.FC = () => {
         </div>
         <div className="flex flex-col w-full">
           <div className="!mt-4 w-full">
-            <InputCustom title="RNTRC" placeholder="" onChange={formik.handleChange('rntrc')} touched={formik.touched.rntrc} error={formik.errors.rntrc} />
+            <InputCustom
+              title="RNTRC"
+              placeholder=""
+              onChange={formik.handleChange("rntrc")}
+              touched={formik.touched.rntrc}
+              error={formik.errors.rntrc}
+            />
           </div>
           <div className="flex items-center !mt-6 w-full">
             <div className="flex flex-col w-full">
@@ -134,7 +189,10 @@ const CreateVeiculos: React.FC = () => {
                 title="Expiração do RNTRC"
                 type="date"
                 placeholder=""
-                onChange={() => {}}
+                onChange={formik.handleChange("dataExpiracaoRNTRC")}
+                touched={formik.touched.dataExpiracaoRNTRC}
+                error={formik.errors.dataExpiracaoRNTRC}
+                value={formik.values.dataExpiracaoRNTRC}
               />
             </div>
           </div>
@@ -144,7 +202,10 @@ const CreateVeiculos: React.FC = () => {
               title="Ano Exercício CRLV"
               type="number"
               placeholder=""
-              onChange={() => {}}
+              onChange={formik.handleChange("anoExercicioCRLV")}
+              touched={formik.touched.anoExercicioCRLV}
+              error={formik.errors.anoExercicioCRLV}
+              value={formik.values.anoExercicioCRLV}
             />
           </div>
         </div>
@@ -159,7 +220,10 @@ const CreateVeiculos: React.FC = () => {
         </div>
         <div className="flex flex-col w-full">
           <div className="!mt-2 w-full">
-            <RadioGroupCustom title="Livre Acesso ao Pátio" onChange={() => {}} />
+            <RadioGroupCustom
+              title="Livre Acesso ao Pátio"
+              onChange={() => {}}
+            />
           </div>
         </div>
       </div>
@@ -168,8 +232,8 @@ const CreateVeiculos: React.FC = () => {
         <div className="w-[300px] min-w-[300px] flex flex-col items-start justify-start">
           <h1 className="text-sm font-bold text-[#333]">Situação</h1>
           <span className="text-xs font-bold text-[#999] text-left">
-            Situação do veículo que pode estar ativo ou <br /> pode ser inativado por
-            motivos operacionais, financeiros, etc.
+            Situação do veículo que pode estar ativo ou <br /> pode ser
+            inativado por motivos operacionais, financeiros, etc.
           </span>
         </div>
         <div className="flex flex-col w-full">
@@ -180,14 +244,21 @@ const CreateVeiculos: React.FC = () => {
       </div>
 
       <div className="w-full h-full flex items-center justify-end mt-11 !mb-24">
-        <button className="bg-[#005491] w-24 h-10 text-[#fff] rounded-md mr-4" type="button" onClick={() => formik.handleSubmit()}>
+        <button
+          className="bg-[#005491] w-24 h-10 text-[#fff] rounded-md mr-4"
+          type="button"
+          onClick={() => formik.handleSubmit()}
+        >
           Salvar
         </button>
-        <button className="bg-[#e9ecef] w-24 h-10 text-[#666] rounded-md" onClick={() => {
-          history.push(window.location.pathname.replace('/adicionar', ''));
+        <button
+          className="bg-[#e9ecef] w-24 h-10 text-[#666] rounded-md"
+          onClick={() => {
+            history.push(window.location.pathname.replace("/adicionar", ""));
 
-          window.location.reload();
-        }}>
+            window.location.reload();
+          }}
+        >
           Cancelar
         </button>
       </div>
