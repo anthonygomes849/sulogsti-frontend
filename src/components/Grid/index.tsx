@@ -4,7 +4,7 @@ import { AgGridReact, CustomCellRendererProps } from "ag-grid-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { BsCheck, BsInfo, BsSlash, BsX } from "react-icons/bs";
 import { Link } from "react-router-dom";
-import LoadingIndicator from '../../core/common/Loading';
+import LoadingIndicator from "../../core/common/Loading";
 import api from "../../services/api";
 import Badge from "../Badge";
 import Loading from "./components/Loading";
@@ -40,12 +40,11 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         return (
           <div className="flex w-full h-full items-center justify-center">
             <Link
-              to={window.location.pathname + '/conhecer'}
+              to={window.location.pathname + "/conhecer"}
               onClick={() => {
                 setTimeout(() => {
                   window.location.reload();
-
-                }, 500)
+                }, 500);
               }}
               state={{ data: params.data }}
             >
@@ -54,7 +53,11 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
             <button>
               <BsSlash color="#FFA500" style={{ width: 24, height: 24 }} />
             </button>
-            <button>
+            <button
+              onClick={() => {
+                props.onDelete(params.data.id_veiculo);
+              }}
+            >
               <BsX color="#FF0000" style={{ width: 24, height: 24 }} />
             </button>
             <button>
@@ -91,7 +94,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
     const dataSource = {
       getRows: async (params: any) => {
-        setLoading(true);
+        // setLoading(true);
         // Fazer uma requisição ao servidor passando os parâmetros da página
         const page = params.endRow / 100 - 1;
 
@@ -128,6 +131,8 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         //   }
         const reqDTO = {
           qtd_por_pagina: 100,
+          order_by: "data_historico",
+          order_direction: "desc",
         };
 
         const response = await api.post(`${path}?page=${page + 1}`, reqDTO);
@@ -164,7 +169,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       style={{ width: "100%", height: "calc(100vh - 50px)" }}
     >
       <LoadingIndicator loading={loading} />
-      
+
       <AgGridReact
         ref={gridRef}
         rowData={rowData}
