@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
-import CreateVeiculos from "../pages/Cadastro/Veiculos/View/Create/CreateVeiculo";
-import InfoVeiculo from "../pages/Cadastro/Veiculos/View/Info";
-import ListVeiculo from "../pages/Cadastro/Veiculos/View/List/ListVeiculo";
+import ListVeiculo from "../pages/Cadastro/Veiculos";
+import CreateVeiculos from "../pages/Cadastro/Veiculos/Create";
+import InfoVeiculo from "../pages/Cadastro/Veiculos/Info";
 import Route from "./route";
 
 const router = createBrowserRouter([

@@ -1,8 +1,8 @@
 import { ValueFormatterParams } from "ag-grid-community";
 import React, { useState } from "react";
 
-import Grid from "../../../../../components/Grid";
-import { ColumnDef } from "../../../../../components/Grid/model/Grid";
+import Grid from "../../../components/Grid";
+import { ColumnDef } from "../../../components/Grid/model/Grid";
 
 // import { Container } from './styles';
 

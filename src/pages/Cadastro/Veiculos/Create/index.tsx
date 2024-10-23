@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
-import InputCustom from "../../../../../components/InputCustom";
-import RadioGroupCustom from "../../../../../components/RadioGroup";
-import SelectCustom from "../../../../../components/SelectCustom";
-import api from "../../../../../services/api";
+import InputCustom from "../../../../components/InputCustom";
+import RadioGroupCustom from "../../../../components/RadioGroup";
+import SelectCustom from "../../../../components/SelectCustom";
+import api from "../../../../services/api";
 
 import { useFormik } from "formik";
-import Loading from "../../../../../core/common/Loading";
-import history from "../../../../../services/history";
+import Loading from "../../../../core/common/Loading";
+import history from "../../../../services/history";
 import formValidator from "./validators/formValidator";
 
 interface FormValues {
@@ -121,7 +121,7 @@ const CreateVeiculos: React.FC = () => {
             />
           </div>
           <div className="flex items-center justify-center !mt-6 w-full">
-            <div className="flex flex-col w-[80%]">
+            <div className="flex flex-col w-full">
               <InputCustom
                 title="Renavam"
                 typeInput="mask"
@@ -133,15 +133,18 @@ const CreateVeiculos: React.FC = () => {
                 value={formik.values.renavam}
               />
             </div>
+            <div className="flex">
+
             <button
               className={`bg-[#e9ecef] w-28 h-10 ${
                 formik.touched.renavam && formik.errors.renavam
-                  ? "!mt-4"
-                  : "!mt-9"
+                ? "!mt-4"
+                : "!mt-9"
               } text-[#666] border-[#ced4da] rounded-[2px] hover:bg-[#edb20e] hover:text-[#fff]`}
-            >
+              >
               Coletar
             </button>
+              </div>
           </div>
         </div>
       </div>
