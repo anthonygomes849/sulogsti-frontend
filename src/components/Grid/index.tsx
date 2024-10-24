@@ -1,7 +1,12 @@
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { AgGridReact, CustomCellRendererProps } from "ag-grid-react";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import { BsCheck, BsInfo, BsSlash, BsX } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import LoadingIndicator from "../../core/common/Loading";
@@ -70,7 +75,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   ];
 
   // const [showCrudButtons] = useState(props.showCrudButtons);
-  // const [gridApi, setGridApi] = useState<any>(null);
+  const [gridApi, setGridApi] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const onGridReady = useCallback(async (params: any) => {
@@ -90,7 +95,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
     });
 
     setColDefs(cols);
-    // setGridApi(params.api);
 
     const dataSource = {
       getRows: async (params: any) => {
@@ -135,24 +139,14 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
     };
 
     params.api.setDatasource(dataSource);
+
+    // setGridApi(params.api);
   }, []);
 
   const loadingOverlayComponent = useMemo(() => {
     return Loading;
   }, []);
 
-  // useEffect(() => {
-  //   console.log(gridApi);
-  //   if (gridApi) {
-  //     console.log("entrou1");
-  //     const datasource = {
-  //       getRows: async (params: any) => {
-
-  //       }
-  //     };
-  //       // gridRef.current.setDatasource(dataSource);
-  //   }
-  // }, [gridApi]);
   return (
     <div
       className="ag-theme-quartz"

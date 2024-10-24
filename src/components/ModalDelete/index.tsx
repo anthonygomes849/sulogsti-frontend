@@ -1,32 +1,59 @@
-import React from 'react';
-import { Button, Modal, ModalBody, ModalFooter } from 'reactstrap';
+import CloseIcon from "@mui/icons-material/Close";
+import { Dialog, DialogActions, DialogTitle, IconButton } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import React from "react";
+import { Button } from "reactstrap";
+
 interface Props {
   isOpen?: boolean;
   onCancel?: any;
   onConfirm?: any;
 }
 
-const ModalDelete: React.FC<Props> = ({
-  isOpen,
-  onCancel,
-  onConfirm,
-}: Props) => {
+const ModalDelete: React.FC<Props> = ({ onConfirm, onCancel }: Props) => {
+  const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiDialogContent-root": {
+      minWidth: '500px',
+      padding: theme.spacing(2),
+    },
+    "& .MuiDialogActions-root": {
+      minWidth: '500px',
+      padding: theme.spacing(1),
+    },
+  }));
+
   return (
-    <Modal isOpen={isOpen} dialogClassName="my-modal" style={{ display: 'block' }}>
-      <ModalBody>
-       Deseja realmente remove esse registro?
-      </ModalBody>
-      <ModalFooter>
-        <Button color="danger" onClick={onConfirm}>
+    <BootstrapDialog
+      onClose={onCancel}
+      aria-labelledby="customized-dialog-title"
+      open={true}
+    >
+      <DialogTitle sx={{ m: 0, p: 2, fontSize: '16px' }} className="text-sm" id="customized-dialog-title">
+       Confirma remoção?
+      </DialogTitle>
+      <IconButton
+        aria-label="close"
+        onClick={onCancel}
+        sx={(theme) => ({
+          position: "absolute",
+          right: 8,
+          top: 2,
+          color: theme.palette.grey[500],
+        })}
+      >
+        <CloseIcon />
+      </IconButton>
+      <div className="w-full h-[1px] bg-[#ccc]" />
+      <DialogActions sx={{ padding: '20px' }}>
+        <Button className="w-full h-9 rounded-md bg-[#003459] text-sm text-[#fff]" onClick={onConfirm}>
           Confirmar
-        </Button>{' '}
-        <Button color="secondary" onClick={onCancel}>
+        </Button>
+        <Button className="w-full h-9 rounded-md bg-[#6C757D] text-sm text-[#fff]" onClick={onCancel}>
           Cancelar
         </Button>
-      </ModalFooter>
-    </Modal>
+      </DialogActions>
+    </BootstrapDialog>
   );
 };
-
 
 export default ModalDelete;

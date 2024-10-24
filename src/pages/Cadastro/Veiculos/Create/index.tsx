@@ -134,17 +134,16 @@ const CreateVeiculos: React.FC = () => {
               />
             </div>
             <div className="flex">
-
-            <button
-              className={`bg-[#e9ecef] w-28 h-10 ${
-                formik.touched.renavam && formik.errors.renavam
-                ? "!mt-4"
-                : "!mt-9"
-              } text-[#666] border-[#ced4da] rounded-[2px] hover:bg-[#edb20e] hover:text-[#fff]`}
+              <button
+                className={`bg-[#e9ecef] w-28 h-10 ${
+                  formik.touched.renavam && formik.errors.renavam
+                    ? "!mt-4"
+                    : "!mt-9"
+                } text-[#666] border-[#ced4da] rounded-[2px] hover:bg-[#edb20e] hover:text-[#fff]`}
               >
-              Coletar
-            </button>
-              </div>
+                Coletar
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -225,7 +224,9 @@ const CreateVeiculos: React.FC = () => {
           <div className="!mt-2 w-full">
             <RadioGroupCustom
               title="Livre Acesso ao Pátio"
-              onChange={() => {}}
+              onChange={(value: string) =>
+                formik.setFieldValue("livreAcessoPatio", value === "true")
+              }
             />
           </div>
         </div>
@@ -241,7 +242,12 @@ const CreateVeiculos: React.FC = () => {
         </div>
         <div className="flex flex-col w-full">
           <div className="!mt-2 w-full">
-            <RadioGroupCustom title="Ativo" onChange={() => {}} />
+            <RadioGroupCustom
+              title="Ativo"
+              onChange={(value: string) =>
+                formik.setFieldValue("ativo", value === "true")
+              }
+            />
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { ValueFormatterParams } from "ag-grid-community";
 import { CustomCellRendererProps } from "ag-grid-react";
 
 export interface GridProps {
+  ref: any;
   columns: ColumnDef[];
   pagination: boolean;
   rowSelection?: RowSelection;
