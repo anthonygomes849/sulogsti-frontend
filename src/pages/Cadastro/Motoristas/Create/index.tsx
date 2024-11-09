@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import InputCustom from "../../../../components/InputCustom";
 import RadioGroupCustom from "../../../../components/RadioGroup";
-import SelectCustom from "../../../../components/SelectCustom";
 import api from "../../../../services/api";
 
 import { useFormik } from "formik";
+import SelectCustom from "../../../../components/SelectCustom";
 import Loading from "../../../../core/common/Loading";
 import history from "../../../../services/history";
+import { CategoriaCNH } from "./types/types";
 import formValidator from "./validators/formValidator";
 
 interface FormValues {
@@ -21,7 +22,7 @@ interface FormValues {
   ativo: boolean;
 }
 
-const CreateVeiculos: React.FC = () => {
+const CreateMotoristas: React.FC = () => {
   const [states, setStates] = useState([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -30,28 +31,33 @@ const CreateVeiculos: React.FC = () => {
       setLoading(true);
 
       const body = {
-        placa: values.placa.replace('-', ''),
+        placa: values.placa.replace("-", ""),
         id_estado: values.id_estado,
-        renavam: String(values.renavam).replaceAll('.', '').replaceAll('-', '').length > 0 ? String(values.renavam).replaceAll('.', '').replaceAll('-', '') : null,
+        renavam:
+          String(values.renavam).replaceAll(".", "").replaceAll("-", "")
+            .length > 0
+            ? String(values.renavam).replaceAll(".", "").replaceAll("-", "")
+            : null,
         tipo_parte_veiculo: values.tipoParteVeiculo,
         rntrc: values.rntrc.length > 0 ? values.rntrc : null,
-        data_expiracao_rntrc: values.dataExpiracaoRNTRC.length > 0 ? values.dataExpiracaoRNTRC : null,
+        data_expiracao_rntrc:
+          values.dataExpiracaoRNTRC.length > 0
+            ? values.dataExpiracaoRNTRC
+            : null,
         ano_exercicio_crlv: values.anoExercicioCRLV,
         livre_acesso_patio: values.livreAcessoPatio,
         ativo: values.ativo,
         id_usuario_historico: 1,
-        status: 1
+        status: 1,
       };
 
       await api.post("/cadastrar/veiculos", body);
-      
 
       setLoading(false);
 
-      history.push(window.location.pathname.replace('/adicionar', ''));
+      history.push(window.location.pathname.replace("/adicionar", ""));
 
       window.location.reload();
-
     } catch {
       setLoading(false);
     }
@@ -103,40 +109,17 @@ const CreateVeiculos: React.FC = () => {
         <div className="w-[300px] min-w-[300px] flex flex-col items-start justify-start">
           <h1 className="text-sm font-bold text-[#333]">Identificação</h1>
           <span className="text-xs font-bold text-[#999] text-left">
-            Identificação do veículo utilizado para as operações do pátio
+            Identificação do motorista utilizado para as operações do pátio
           </span>
         </div>
         <div className="flex flex-col w-full">
-          <div className="!mt-4 w-full">
-            <InputCustom
-              title="Placa"
-              typeInput="mask"
-              mask="aaa-9*99"
-              placeholder="AAA-0000 OU AAA-0A00"
-              onChange={formik.handleChange("placa")}
-              touched={formik.touched.placa}
-              error={formik.errors.placa}
-              value={formik.values.placa}
-            />
-          </div>
-          <div className="!mt-4 w-full">
-            <SelectCustom
-              data={states}
-              onChange={(selectedOption: any) =>
-                formik.setFieldValue("id_estado", selectedOption.id)
-              }
-              title="Estado"
-              touched={formik.touched.id_estado}
-              error={formik.errors.id_estado}
-            />
-          </div>
           <div className="flex items-center justify-center !mt-6 w-full">
             <div className="flex flex-col w-full">
               <InputCustom
-                title="Renavam"
+                title="CPF"
                 typeInput="mask"
-                mask="99.99.99.99.99-9"
-                placeholder="00.00.00.00.00-0"
+                mask="999.999.999-99"
+                placeholder="000.000.000-00"
                 onChange={formik.handleChange("renavam")}
                 touched={formik.touched.renavam}
                 error={formik.errors.renavam}
@@ -155,12 +138,15 @@ const CreateVeiculos: React.FC = () => {
               </button>
             </div>
           </div>
+          <div className="!mt-4 w-full">
+            <InputCustom title="Nome" onChange={() => {}} placeholder="" />
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-start w-3/4">
+      {/* <div className="flex items-center justify-start w-3/4">
         <div className="w-[300px] min-w-[300px] flex flex-col items-start justify-start">
-          <h1 className="text-sm font-bold text-[#333]">Classificação</h1>
+          <h1 className="text-sm font-bold text-[#333]">Identificação Biométrica</h1>
           <span className="text-xs font-bold text-[#999] text-left">
             Classificação do veículo utilizado para as operações do pátio
           </span>
@@ -176,21 +162,23 @@ const CreateVeiculos: React.FC = () => {
             />
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex items-start justify-start w-3/4 mt-16">
         <div className="w-[300px] min-w-[300px] flex flex-col items-start justify-start">
-          <h1 className="text-sm font-bold text-[#333]">Licenciamento</h1>
+          <h1 className="text-sm font-bold text-[#333]">Habilitação</h1>
           <span className="text-xs font-bold text-[#999] text-left">
-            Licenciamento do veículo autorizado pelos órgãos e agências
-            governamentais
+            Informações sobre a Carteira Nacional de Habilitação (CNH) do
+            motorista
           </span>
         </div>
         <div className="flex flex-col w-full">
           <div className="!mt-4 w-full">
             <InputCustom
-              title="RNTRC"
-              placeholder=""
+              title="Número da CNH"
+              typeInput="mask"
+              mask="999.999.999-99"
+              placeholder="000.000.000-00"
               onChange={formik.handleChange("rntrc")}
               touched={formik.touched.rntrc}
               error={formik.errors.rntrc}
@@ -198,22 +186,74 @@ const CreateVeiculos: React.FC = () => {
           </div>
           <div className="flex items-center !mt-6 w-full">
             <div className="flex flex-col w-full">
-              <InputCustom
-                title="Expiração do RNTRC"
-                type="date"
-                placeholder=""
-                onChange={formik.handleChange("dataExpiracaoRNTRC")}
-                touched={formik.touched.dataExpiracaoRNTRC}
-                error={formik.errors.dataExpiracaoRNTRC}
-                value={formik.values.dataExpiracaoRNTRC}
+              <SelectCustom
+                data={Object.keys(CategoriaCNH).map(
+                  (item: any, index: number) => {
+                    return {
+                      id: index + 1,
+                      label: item,
+                    };
+                  }
+                )}
+                onChange={() => {}}
+                title="Categoria da CNH"
               />
             </div>
           </div>
 
           <div className="!mt-6 w-full">
             <InputCustom
-              title="Ano Exercício CRLV"
-              type="number"
+              title="Data de Expiração da CNH"
+              type="date"
+              placeholder=""
+              onChange={formik.handleChange("anoExercicioCRLV")}
+              touched={formik.touched.anoExercicioCRLV}
+              error={formik.errors.anoExercicioCRLV}
+              value={formik.values.anoExercicioCRLV}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-start justify-start w-3/4 mt-16">
+        <div className="w-[300px] min-w-[300px] flex flex-col items-start justify-start">
+          <h1 className="text-sm font-bold text-[#333]">Localização</h1>
+          <span className="text-xs font-bold text-[#999] text-left">
+            Localização do proprietário de carga utilizado para preenchimento da
+            nota fiscal
+          </span>
+        </div>
+        <div className="flex flex-col w-full">
+          <div className="!mt-4 w-full">
+            <InputCustom
+              title="Endereço"
+              placeholder="000.000.000-00"
+              onChange={formik.handleChange("rntrc")}
+              touched={formik.touched.rntrc}
+              error={formik.errors.rntrc}
+            />
+          </div>
+          <div className="flex items-center !mt-6 w-full">
+            <div className="flex flex-col w-full">
+              <SelectCustom
+                data={Object.keys(CategoriaCNH).map(
+                  (item: any, index: number) => {
+                    return {
+                      id: index + 1,
+                      label: item,
+                    };
+                  }
+                )}
+                onChange={() => {}}
+                title="Categoria da CNH"
+              />
+            </div>
+          </div>
+
+          <div className="!mt-6 w-full">
+            <InputCustom
+              title="Data de Expiração da CNH"
+              type="date"
               placeholder=""
               onChange={formik.handleChange("anoExercicioCRLV")}
               touched={formik.touched.anoExercicioCRLV}
@@ -290,4 +330,4 @@ const CreateVeiculos: React.FC = () => {
   );
 };
 
-export default CreateVeiculos;
+export default CreateMotoristas;

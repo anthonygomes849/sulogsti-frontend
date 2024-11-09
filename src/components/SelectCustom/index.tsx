@@ -8,6 +8,7 @@ interface Props {
   title: string;
   touched?: any;
   error?: any;
+  value?: any;
 }
 
 const SelectCustom: React.FC<Props> = (props: Props) => {
@@ -34,6 +35,10 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
     // singleValue: (styles, { data }) => ({ ...styles, ...dot(data.color) }),
   };
 
+  const defaultValue = props.data.find((value: any) => value.id == props.value);
+
+  console.log(props.data);
+
   return (
     <>
       <div>
@@ -42,7 +47,7 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
         <Select
           className="basic-single"
           classNamePrefix="select"
-          // defaultValue={props.data[0]}
+          // defaultValue={defaultValue.id}
           // isDisabled={isDisabled}
           // isLoading={isLoading}
           // isClearable={isClearable}
@@ -52,6 +57,7 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
           name="color"
           options={props.data}
           onChange={props.onChange}
+          value={defaultValue}
         />
       </div>
 

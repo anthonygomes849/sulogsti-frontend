@@ -5,6 +5,7 @@ import SelectCustom from "../../../../components/SelectCustom";
 import api from "../../../../services/api";
 
 import { useFormik } from "formik";
+import { useLocation } from "react-router-dom";
 import Loading from "../../../../core/common/Loading";
 import history from "../../../../services/history";
 import formValidator from "./validators/formValidator";
@@ -21,9 +22,14 @@ interface FormValues {
   ativo: boolean;
 }
 
-const CreateVeiculos: React.FC = () => {
+const UpdateVeiculos: React.FC = () => {
   const [states, setStates] = useState([]);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const { state: { data } } = useLocation();
+
+  console.log(data);
+
 
   const handleSubmit = useCallback(async (values: FormValues) => {
     try {
@@ -32,26 +38,18 @@ const CreateVeiculos: React.FC = () => {
       const body = {
         placa: values.placa.replace('-', ''),
         id_estado: values.id_estado,
-        renavam: String(values.renavam).replaceAll('.', '').replaceAll('-', '').length > 0 ? String(values.renavam).replaceAll('.', '').replaceAll('-', '') : null,
+        renavam: String(values.renavam).replaceAll('.', '').replaceAll('-', ''),
         tipo_parte_veiculo: values.tipoParteVeiculo,
-        rntrc: values.rntrc.length > 0 ? values.rntrc : null,
-        data_expiracao_rntrc: values.dataExpiracaoRNTRC.length > 0 ? values.dataExpiracaoRNTRC : null,
+        rntrc: values.rntrc,
+        data_expiracao_rntrc: values.dataExpiracaoRNTRC,
         ano_exercicio_crlv: values.anoExercicioCRLV,
         livre_acesso_patio: values.livreAcessoPatio,
         ativo: values.ativo,
-        id_usuario_historico: 1,
-        status: 1
       };
 
       await api.post("/cadastrar/veiculos", body);
-      
 
       setLoading(false);
-
-      history.push(window.location.pathname.replace('/adicionar', ''));
-
-      window.location.reload();
-
     } catch {
       setLoading(false);
     }
@@ -74,6 +72,22 @@ const CreateVeiculos: React.FC = () => {
     } catch {}
   }, []);
 
+  const onLoadFormValues = useCallback(() => {
+    const values = data;
+
+    formik.setFieldValue('placa', values.placa);
+    formik.setFieldValue('id_estado', values.id_estado);
+    formik.setFieldValue('renavam', values.renavam);
+    formik.setFieldValue('tipoParteVeiculo', values.tipo_parte_veiculo);
+    formik.setFieldValue('rntrc', values.rntrc);
+    formik.setFieldValue('dataExpiracaoRNTRC', values.data_expiracao_rntrc);
+    formik.setFieldValue('livreAcessoPatio', values.livre_acesso_patio);
+    formik.setFieldValue('anoExercicioCRLV', values.ano_exercicio_crlv);
+    formik.setFieldValue('ativo', values.ativo);
+
+    console.log(values);
+  }, [])
+
   const initialValues: FormValues = {
     placa: "",
     id_estado: null,
@@ -95,6 +109,10 @@ const CreateVeiculos: React.FC = () => {
   useEffect(() => {
     getStates();
   }, [getStates]);
+
+  useEffect(() => {
+    onLoadFormValues();
+  }, [onLoadFormValues])
 
   return (
     <div className="!w-full h-full flex flex-col !pt-16 !pr-16 !pl-16 !pb-16 !mb-48">
@@ -128,6 +146,7 @@ const CreateVeiculos: React.FC = () => {
               title="Estado"
               touched={formik.touched.id_estado}
               error={formik.errors.id_estado}
+              value={formik.values.id_estado}
             />
           </div>
           <div className="flex items-center justify-center !mt-6 w-full">
@@ -194,6 +213,7 @@ const CreateVeiculos: React.FC = () => {
               onChange={formik.handleChange("rntrc")}
               touched={formik.touched.rntrc}
               error={formik.errors.rntrc}
+              value={formik.values.rntrc}
             />
           </div>
           <div className="flex items-center !mt-6 w-full">
@@ -290,4 +310,4 @@ const CreateVeiculos: React.FC = () => {
   );
 };
 
-export default CreateVeiculos;
+export default UpdateVeiculos;

@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface Props {
-  color: string;
-  content: string;
+  color?: string;
+  content?: string;
 }
 
 const Badge: React.FC<Props> = (props: Props) => {

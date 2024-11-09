@@ -28,7 +28,11 @@ const SubNav: React.FC<Props> = (props: Props) => {
       .split("/")
       .slice(1, 3);
 
-    setPaths(paths);
+      console.log(paths);
+
+    const removePathsList = paths.filter((item: any) => item !== "listar"); 
+
+    setPaths(removePathsList);
   }, []);
 
   useEffect(() => {
@@ -98,15 +102,12 @@ const SubNav: React.FC<Props> = (props: Props) => {
           <h1 className="!mr-4 cursor-pointer hover:text-yellow-400 text-sm">
             Exportar
           </h1>
-          <h1 className="!mr-2 cursor-pointer hover:text-yellow-400 text-sm">
-            Filtrar
-          </h1>
 
-          <div className="w-32 h-6 !ml-5">
+          <div className="w-32 h-6 !ml-2">
             <button
               className="flex items-center justify-center w-20 h-6 bg-[#fff] rounded-2xl text-xs text-[#005491] hover:bg-[#edb20e] hover:text-[#fff]"
               onClick={() => {
-                history.push(window.location.pathname + "/adicionar");
+                history.push(window.location.pathname.replace('/listar', '') + "/adicionar");
                 window.location.reload();
               }}
             >

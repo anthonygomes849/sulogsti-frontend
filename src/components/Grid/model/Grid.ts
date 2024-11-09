@@ -1,5 +1,6 @@
 import { ValueFormatterParams } from "ag-grid-community";
 import { CustomCellRendererProps } from "ag-grid-react";
+import { StatusType } from "../components/Status";
 
 export interface GridProps {
   ref: any;
@@ -18,6 +19,7 @@ export interface GridProps {
   setRowData?: (rows: any[]) => void;
   perPage?: number;
   orders?: Order[];
+  status: StatusType[];
 }
 
 export type ColumnDef = {
@@ -32,6 +34,8 @@ export type ColumnDef = {
   cellRenderer?: (params: CustomCellRendererProps) => void;
   cellStyle?: any;
   pinned?: string;
+  cellDataType?: string;
+
 }
 
 export enum RowSelection {

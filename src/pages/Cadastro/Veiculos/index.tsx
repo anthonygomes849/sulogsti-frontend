@@ -5,6 +5,7 @@ import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
+import { STATUS_VEICULO } from "../../../helpers/status";
 import api from "../../../services/api";
 
 // import { Container } from './styles';
@@ -130,6 +131,7 @@ const ListVeiculo: React.FC = () => {
               setIsRemove(!isRemove);
               setEntityId(rowId);
             }}
+            status={STATUS_VEICULO}
           />
         </div>
       </div>
