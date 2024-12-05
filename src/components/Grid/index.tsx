@@ -1,14 +1,13 @@
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { AgGridReact, CustomCellRendererProps } from "ag-grid-react";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { BsCheck, BsInfo, BsSlash, BsX } from "react-icons/bs";
-import { Link } from "react-router-dom";
+import { BsInfo, BsSlash, BsX } from "react-icons/bs";
 import LoadingIndicator from "../../core/common/Loading";
+import { useBreadcrumb } from "../../hooks/BreadCrumbContext";
 import api from "../../services/api";
 import Loading from "./components/Loading";
-import Status from "./components/Status";
 import { GridProps } from "./model/Grid";
 
 // import { Container } from './styles';
@@ -21,18 +20,20 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   const [rowSelection] = useState(props.rowSelection);
   const [path] = useState(props.path);
   const [rowData, setRowData] = useState<any[]>();
+  const { addBreadcrumb } = useBreadcrumb();
+
   const defaultColumns = [
-    {
-      field: "status",
-      headerName: "Status",
-      cellStyle: { textAlign: "center" },
-      // pinned: "left",
-      cellRenderer: (params: CustomCellRendererProps) => {
-        if (params.value) {
-          return <Status data={props.status} status={params.value} />;
-        }
-      },
-    },
+    // {
+    //   field: "status",
+    //   headerName: "Status",
+    //   cellStyle: { textAlign: "center" },
+    //   // pinned: "left",
+    //   cellRenderer: (params: CustomCellRendererProps) => {
+    //     if (params.value) {
+    //       return <Status data={props.status} status={params.value} />;
+    //     }
+    //   },
+    // },
     {
       field: "",
       headerName: "",
@@ -40,28 +41,22 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cellRenderer: (params: CustomCellRendererProps) => {
         return (
           <div className="flex w-full h-full items-center justify-center">
-            <Link
-              to={window.location.pathname.replace('/listar', '') + "/conhecer"}
+            <button
               onClick={() => {
-                setTimeout(() => {
-                  window.location.reload();
-                }, 500);
+                addBreadcrumb("Conhecer");
+                props.onView(params.data);
               }}
-              state={{ data: params.data }}
             >
               <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
-            </Link>
-            <Link
-              to={window.location.pathname.replace('/listar', '') + "/editar"}
+            </button>
+            <button
               onClick={() => {
-                setTimeout(() => {
-                  window.location.reload();
-                }, 500);
+               addBreadcrumb("Editar");
+               props.onUpdate(params.data);
               }}
-              state={{ data: params.data }}
             >
               <BsSlash color="#FFA500" style={{ width: 24, height: 24 }} />
-            </Link>
+            </button>
             <button
               onClick={() => {
                 props.onDelete(params.data.id_veiculo);
@@ -69,9 +64,9 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
             >
               <BsX color="#FF0000" style={{ width: 24, height: 24 }} />
             </button>
-            <button>
+            {/* <button>
               <BsCheck color="#808080" style={{ width: 24, height: 24 }} />
-            </button>
+            </button> */}
           </div>
         );
       },
@@ -109,7 +104,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         let filters: any = {};
 
         console.log("Params", params);
-        
+
         // Adiciona os filtros de colunas customizados.
         if (params.filterModel != null) {
           for (const customFilter in params.filterModel) {
@@ -117,22 +112,25 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
             // Tem que fazer o teste se é um array, pois caso o receba
             // será um filtro por período.
 
-
             let newFilter: any = params.filterModel[customFilter];
 
-            if(customFilter === "data_historico") {
-              if(newFilter.dateFrom.length > 0) {
-                filters['data_inicial'] = newFilter.dateFrom;
+            if (customFilter === "data_historico") {
+              if (newFilter.dateFrom.length > 0) {
+                filters["data_inicial"] = newFilter.dateFrom;
               }
 
-              if(newFilter.dateTo !== null && newFilter.dateTo.length > 0) {
-                filters['data_final'] = newFilter.dateTo.replace('00:00:00', '23:59:59');
+              if (newFilter.dateTo !== null && newFilter.dateTo.length > 0) {
+                filters["data_final"] = newFilter.dateTo.replace(
+                  "00:00:00",
+                  "23:59:59"
+                );
               } else {
-                filters['data_final'] = `${format(new Date, 'yyyy-MM-dd')} 23:59:59`;
+                filters["data_final"] = `${format(
+                  new Date(),
+                  "yyyy-MM-dd"
+                )} 23:59:59`;
               }
             } else {
-
-              
               filters[`${customFilter}`] = newFilter.filter;
             }
           }

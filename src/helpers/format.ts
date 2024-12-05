@@ -21,3 +21,14 @@ export const formatDateBR = (value: string) => {
     locale: ptBR
   })
 }
+
+export const formatDateTimeBR = (value: string) => {
+  return format(new Date(value), 'dd/MM/yyyy HH:mm:ss', {
+    locale: ptBR
+  })
+}
+
+export const maskedPlate = (value: string) => {
+  value = value.replace(/(\d{3})(\d)/, "$1-$2")       //Coloca um ponto entre o terceiro e o quarto dígitos
+  return value
+}

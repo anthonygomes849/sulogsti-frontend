@@ -9,19 +9,23 @@ interface Props {
   touched?: any;
   error?: any;
   value?: any;
+  disabled?: boolean;
 }
 
 const SelectCustom: React.FC<Props> = (props: Props) => {
   const colourStyles: StylesConfig = {
+    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
     control: (styles: any, { isFocused }) => ({
       ...styles,
       backgroundColor: "white",
       border: isFocused && "1px solid #edb20e",
+      zIndex: '99999999'
     }),
     option: (styles: any, { isFocused }) => {
       // const color = chroma(data.color);
       return {
         ...styles,
+        zIndex: '9999999',
         backgroundColor: isFocused ? "#f9c100" : "#fff",
         color: "#000",
         ":active": {
@@ -42,13 +46,14 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
   return (
     <>
       <div>
-        <h1 className="text-[15px] text-[#000] mb-3">{props.title}</h1>
+        <h1 className="text-[15px] text-[#000] mb-4">{props.title}</h1>
 
         <Select
           className="basic-single"
           classNamePrefix="select"
+          menuPortalTarget={document.body}
           // defaultValue={defaultValue.id}
-          // isDisabled={isDisabled}
+          isDisabled={props.disabled}
           // isLoading={isLoading}
           // isClearable={isClearable}
           // isRtl={isRtl}

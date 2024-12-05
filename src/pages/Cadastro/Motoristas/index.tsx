@@ -7,7 +7,9 @@ import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
 import { formatDateBR, maskedCPF, maskedPhone } from "../../../helpers/format";
 import { STATUS_MOTORISTA } from "../../../helpers/status";
+import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
+import Create from "./components/Create";
 
 // import { Container } from './styles';
 
@@ -134,11 +136,6 @@ const ListMotorista: React.FC = () => {
       filter: true,
     },
     {
-      field: "email",
-      headerName: "E-mail",
-      filter: true,
-    },
-    {
       field: "data_inativacao",
       headerName: "Data Inativação",
     },
@@ -169,6 +166,8 @@ const ListMotorista: React.FC = () => {
   const [entityId, setEntityId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const { isModalOpen, openModal, closeModal } = useModal();
+
   const gridRef = useRef<any>();
 
   const onDelete = useCallback(async (rowId: number | null) => {
@@ -193,6 +192,11 @@ const ListMotorista: React.FC = () => {
   return (
     <>
       <Loading loading={loading} />
+
+      {isModalOpen && (
+        <Create onClear={() => closeModal()} onConfirm={() => {}} />
+      )}
+
       {isRemove && (
         <ModalDelete
           onCancel={() => setIsRemove(!isRemove)}
@@ -214,6 +218,8 @@ const ListMotorista: React.FC = () => {
               setEntityId(rowId);
             }}
             status={STATUS_MOTORISTA}
+            onUpdate={() => {}}
+            onView={() => {}}
           />
         </div>
       </div>

@@ -3,16 +3,17 @@ import { CustomCellRendererProps } from "ag-grid-react";
 import { StatusType } from "../components/Status";
 
 export interface GridProps {
-  ref: any;
+  ref?: any;
   columns: ColumnDef[];
   pagination: boolean;
   rowSelection?: RowSelection;
   path: string;
   selectedRows?: any[];
   setSelectedRows?: (rows: any[]) => void;
-  onUpdate?: () => void;
+  onUpdate: (data: any) => void;
   onDelete: (id: number) => void;
   onCreate?: () => void;
+  onView:  (data: any) => void;
   // showCrudButtons: boolean;
   // customButtons?: CustomButtons[];
   filters: Filter[];

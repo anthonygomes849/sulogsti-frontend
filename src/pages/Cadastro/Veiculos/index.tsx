@@ -6,7 +6,10 @@ import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
 import { STATUS_VEICULO } from "../../../helpers/status";
+import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
+import CreateVeiculos from "./components/Create";
+import { IVeiculos } from "./types/types";
 
 // import { Container } from './styles';
 
@@ -86,6 +89,11 @@ const ListVeiculo: React.FC = () => {
   const [isRemove, setIsRemove] = useState<boolean>(false);
   const [entityId, setEntityId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [selectedRow, setSelectedRows] = useState<IVeiculos>();
+  const [isView, setIsView] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+
+  const { isModalOpen, closeModal, openModal } = useModal();
 
   const gridRef = useRef<any>();
 
@@ -110,6 +118,17 @@ const ListVeiculo: React.FC = () => {
 
   return (
     <>
+      {isModalOpen && (
+        <CreateVeiculos
+          isView={isView}
+          isEdit={isEdit}
+          selectedRow={selectedRow}
+          onClear={() => closeModal()}
+          onConfirm={() => {
+            window.location.reload();
+          }}
+        />
+      )}
       <Loading loading={loading} />
       {isRemove && (
         <ModalDelete
@@ -118,7 +137,6 @@ const ListVeiculo: React.FC = () => {
         />
       )}
       <div className="flex flex-col w-full h-screen">
-
         <div className="flex w-screen">
           <Grid
             ref={gridRef}
@@ -127,11 +145,20 @@ const ListVeiculo: React.FC = () => {
             pagination
             path="/listar/veiculos"
             onDelete={(rowId: number) => {
-              console.log(rowId);
               setIsRemove(!isRemove);
               setEntityId(rowId);
             }}
             status={STATUS_VEICULO}
+            onView={(data: any) => {
+              setSelectedRows(data);
+              setIsView(!isView);
+              openModal();
+            }}
+            onUpdate={(data: any) => {
+              setSelectedRows(data);
+              setIsEdit(!isEdit);
+              openModal();
+            }}
           />
         </div>
       </div>

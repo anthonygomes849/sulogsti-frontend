@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbItem } from "reactstrap";
-import history from "../../services/history";
 
 import { BsCaretRightFill } from "react-icons/bs";
+import { useBreadcrumb } from "../../hooks/BreadCrumbContext";
+import { useModal } from "../../hooks/ModalContext";
 import "./styles.css";
 // import { Container } from './styles';
 
@@ -13,6 +13,8 @@ interface Props {
 
 const SubNav: React.FC<Props> = (props: Props) => {
   const [paths, setPaths] = useState<any[]>([]);
+  const { breadcrumb, addBreadcrumb } = useBreadcrumb();
+  const { openModal } = useModal();
 
   function toCamelCase(str: any) {
     return str
@@ -28,9 +30,9 @@ const SubNav: React.FC<Props> = (props: Props) => {
       .split("/")
       .slice(1, 3);
 
-      console.log(paths);
+    console.log(paths);
 
-    const removePathsList = paths.filter((item: any) => item !== "listar"); 
+    const removePathsList = paths.filter((item: any) => item !== "listar");
 
     setPaths(removePathsList);
   }, []);
@@ -46,7 +48,31 @@ const SubNav: React.FC<Props> = (props: Props) => {
     >
       <div className="mr-4 ml-5 flex">
         <Breadcrumb>
-          {paths.map((path, index) => {
+          {breadcrumb.map((item, index) => {
+            const isLast = index === paths.length - 1;
+            return (
+              <>
+                <BreadcrumbItem active key={index}>
+                  <span className="text-sm">{toCamelCase(item)}</span>
+                </BreadcrumbItem>
+
+                {isLast && breadcrumb.length > 1 && (
+                  <span className="breadcrumb-separator">
+                    {" "}
+                    <BsCaretRightFill
+                      style={{
+                        width: "12px",
+                        marginTop: "4px",
+                        marginRight: "10px",
+                      }}
+                      color="#abd"
+                    />{" "}
+                  </span>
+                )}
+              </>
+            );
+          })}
+          {/* {paths.map((path, index) => {
             const isLast = index === paths.length - 1;
             const linkPath = `${window.location.pathname.replace(
               `/${paths[paths.length - 1]}`,
@@ -89,16 +115,16 @@ const SubNav: React.FC<Props> = (props: Props) => {
                 )}
               </div>
             );
-          })}
+          })} */}
         </Breadcrumb>
 
         {/* <h1 className="text-sm">{}</h1> */}
       </div>
       {props.isVisibleActions && (
         <div className="flex !mr-4 items-center">
-          <h1 className="!mr-4 cursor-pointer hover:text-yellow-400 text-sm">
+          {/* <h1 className="!mr-4 cursor-pointer hover:text-yellow-400 text-sm">
             Exibir
-          </h1>
+          </h1> */}
           <h1 className="!mr-4 cursor-pointer hover:text-yellow-400 text-sm">
             Exportar
           </h1>
@@ -107,8 +133,9 @@ const SubNav: React.FC<Props> = (props: Props) => {
             <button
               className="flex items-center justify-center w-20 h-6 bg-[#fff] rounded-2xl text-xs text-[#005491] hover:bg-[#edb20e] hover:text-[#fff]"
               onClick={() => {
-                history.push(window.location.pathname.replace('/listar', '') + "/adicionar");
-                window.location.reload();
+                addBreadcrumb("Adicionar");
+                openModal();
+                
               }}
             >
               Adicionar
