@@ -166,7 +166,7 @@ const ListMotorista: React.FC = () => {
   const [entityId, setEntityId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { isModalOpen, openModal, closeModal } = useModal();
+  const { isModalOpen, closeModal } = useModal();
 
   const gridRef = useRef<any>();
 

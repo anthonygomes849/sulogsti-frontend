@@ -74,7 +74,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   ];
 
   // const [showCrudButtons] = useState(props.showCrudButtons);
-  const [gridApi, setGridApi] = useState<any>(null);
+  // const [gridApi, setGridApi] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const onGridReady = useCallback(async (params: any) => {
