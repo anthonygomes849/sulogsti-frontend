@@ -31,6 +31,7 @@ const ListVeiculo: React.FC = () => {
       field: "tipo_parte_veiculo",
       headerName: "Motorizado",
       cellStyle: { textAlign: "left" },
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return "SIM";
@@ -62,6 +63,7 @@ const ListVeiculo: React.FC = () => {
     {
       field: "livre_acesso_patio",
       headerName: "Livre Acesso ao Pátio",
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return "SIM";
@@ -87,7 +89,6 @@ const ListVeiculo: React.FC = () => {
     },
   ]);
   const [isRemove, setIsRemove] = useState<boolean>(false);
-  const [entityId, setEntityId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedRow, setSelectedRows] = useState<IVeiculos>();
   const [isView, setIsView] = useState<boolean>(false);
@@ -97,7 +98,7 @@ const ListVeiculo: React.FC = () => {
 
   const gridRef = useRef<any>();
 
-  const onDelete = useCallback(async (rowId: number | null) => {
+  const onDelete = useCallback(async (rowId?: number) => {
     try {
       setLoading(true);
       const body = {
@@ -133,7 +134,7 @@ const ListVeiculo: React.FC = () => {
       {isRemove && (
         <ModalDelete
           onCancel={() => setIsRemove(!isRemove)}
-          onConfirm={() => onDelete(entityId)}
+          onConfirm={() => onDelete(selectedRow?.id_veiculo)}
         />
       )}
       <div className="flex flex-col w-full h-screen">
@@ -144,9 +145,9 @@ const ListVeiculo: React.FC = () => {
             filters={[]}
             pagination
             path="/listar/veiculos"
-            onDelete={(rowId: number) => {
+            onDelete={(data: any) => {
               setIsRemove(!isRemove);
-              setEntityId(rowId);
+              setSelectedRows(data);
             }}
             status={STATUS_VEICULO}
             onView={(data: any) => {
