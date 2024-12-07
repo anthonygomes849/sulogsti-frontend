@@ -1,9 +1,12 @@
 import { ValueFormatterParams } from 'ag-grid-community';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Grid from '../../../components/Grid';
 import { ColumnDef } from '../../../components/Grid/model/Grid';
+import ModalDelete from '../../../components/ModalDelete';
+import Loading from '../../../core/common/Loading';
 import { formatDateTimeBR, maskedPlate } from '../../../helpers/format';
 import { useModal } from '../../../hooks/ModalContext';
+import api from '../../../services/api';
 import CreateMensalista from './Create';
 import { IMensalista } from './types/types';
 
@@ -49,19 +52,52 @@ const ListMensalista: React.FC = () => {
     }
   ]);
   const [selectedRow, setSelectedRow] = useState<IMensalista>();
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [isView, setIsView] = useState<boolean>(false);
+  const [isRemove, setIsRemove] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
   const { isModalOpen, closeModal, openModal } = useModal();
+
+
+  const onDelete = useCallback(async (entityId?: number) => {
+    try {
+      setLoading(true);
+
+      const body = {
+        id_mensalista: entityId,
+      };
+
+      await api.post('/deletar/mensalistas', body);
+
+      setLoading(false);
+
+      setIsRemove(false);
+
+      window.location.reload();
+    }catch{
+      setLoading(false);
+    }
+  }, [])
 
   return (
     <>
+    <Loading loading={loading} />
     {isModalOpen && (
         <CreateMensalista
-          isView={false}
-          isEdit={false}
+          isView={isView}
+          isEdit={isEdit}
           selectedRow={selectedRow}
           onClear={() => closeModal()}
           onConfirm={() => {
             window.location.reload();
           }}
+        />
+      )}
+      {isRemove && (
+        <ModalDelete
+          onCancel={() => setIsRemove(!isRemove)}
+          onConfirm={() => onDelete(selectedRow?.id_mensalista)}
         />
       )}
     <div className='flex flex-col w-full h-screen'>
@@ -71,9 +107,20 @@ const ListMensalista: React.FC = () => {
           filters={[]}
           pagination
           path='/listar/mensalistas'
-          onUpdate={() => {}}
-          onDelete={() => {}}
-          onView={() => {}}
+          onUpdate={(data: any) => {
+            setSelectedRow(data);
+            setIsEdit(!isEdit);
+            openModal();
+          }}
+          onDelete={(data: any) => {
+            setIsRemove(!isRemove);
+            setSelectedRow(data);
+          }}
+          onView={(data: any) => {
+            setSelectedRow(data);
+            setIsView(!isView);
+            openModal();
+          }}
           status={[]}
           />
       </div>

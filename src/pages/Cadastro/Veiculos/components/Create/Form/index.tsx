@@ -103,8 +103,6 @@ const Form: React.FC<Props> = (props: Props) => {
       formik.setFieldValue("livreAcessoPatio", data.livre_acesso_patio);
       formik.setFieldValue("ativo", data.ativo);
     }
-
-    console.log(data);
   }, []);
 
   const initialValues: FormValues = {

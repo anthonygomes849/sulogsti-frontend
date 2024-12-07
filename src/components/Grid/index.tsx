@@ -59,7 +59,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
             </button>
             <button
               onClick={() => {
-                props.onDelete(params.data.id_veiculo);
+                props.onDelete(params.data);
               }}
             >
               <BsX color="#FF0000" style={{ width: 24, height: 24 }} />

@@ -11,7 +11,7 @@ export interface GridProps {
   selectedRows?: any[];
   setSelectedRows?: (rows: any[]) => void;
   onUpdate: (data: any) => void;
-  onDelete: (id: number) => void;
+  onDelete: (data: any) => void;
   onCreate?: () => void;
   onView:  (data: any) => void;
   // showCrudButtons: boolean;
