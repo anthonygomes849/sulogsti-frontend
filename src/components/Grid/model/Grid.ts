@@ -36,7 +36,7 @@ export type ColumnDef = {
   cellStyle?: any;
   pinned?: string;
   cellDataType?: string;
-
+  flex?: number;
 }
 
 export enum RowSelection {
