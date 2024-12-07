@@ -4,7 +4,7 @@ import Grid from '../../../components/Grid';
 import { ColumnDef } from '../../../components/Grid/model/Grid';
 import ModalDelete from '../../../components/ModalDelete';
 import Loading from '../../../core/common/Loading';
-import { formatDateTimeBR, maskedPlate } from '../../../helpers/format';
+import { formatDateTimeBR } from '../../../helpers/format';
 import { useModal } from '../../../hooks/ModalContext';
 import api from '../../../services/api';
 import CreateMensalista from './Create';
@@ -18,11 +18,6 @@ const ListMensalista: React.FC = () => {
       field: 'placa',
       headerName: 'Placa',
       filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
-          return maskedPlate(params.value);
-        }
-      }
     },
     {
       field: 'mensalista_transportadora.razao_social_transportadora',
