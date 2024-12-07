@@ -39,6 +39,7 @@ const ListMensalista: React.FC = () => {
     {
       field: 'data_historico',
       headerName: "Data Modificação",
+      flex: 1,
       valueFormatter: (params: ValueFormatterParams) => {
         if(params.value) {
           return formatDateTimeBR(params.value);
