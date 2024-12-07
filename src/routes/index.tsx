@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
-import CreateVeiculos from "../pages/Cadastro/Veiculos/View/Create/CreateVeiculo";
-import InfoVeiculo from "../pages/Cadastro/Veiculos/View/Info";
-import ListVeiculo from "../pages/Cadastro/Veiculos/View/List/ListVeiculo";
+import ListMensalista from "../pages/Cadastro/Mensalista";
+import ListMotorista from "../pages/Cadastro/Motoristas";
+import ListVeiculo from "../pages/Cadastro/Veiculos";
 import Route from "./route";
 
 const router = createBrowserRouter([
@@ -14,21 +14,29 @@ const router = createBrowserRouter([
     )
   },
   {
-    path: '/cadastro/veiculos/adicionar',
+    path: '/cadastro/motoristas',
     element: (
       <Route>
-        <CreateVeiculos />
+        <ListMotorista />
       </Route>
     )
   },
   {
-    path: '/cadastro/veiculos/conhecer',
+    path: '/cadastro/motoristas/adicionar',
     element: (
       <Route>
-        <InfoVeiculo />
+        <ListMotorista />
       </Route>
     )
   },
+  {
+    path: '/cadastro/mensalista',
+    element: (
+      <Route>
+        <ListMensalista />
+      </Route>
+    )
+  }
 ]);
 
 export default router;

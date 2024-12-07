@@ -8,19 +8,24 @@ interface Props {
   title: string;
   touched?: any;
   error?: any;
+  value?: any;
+  disabled?: boolean;
 }
 
 const SelectCustom: React.FC<Props> = (props: Props) => {
   const colourStyles: StylesConfig = {
+    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
     control: (styles: any, { isFocused }) => ({
       ...styles,
       backgroundColor: "white",
       border: isFocused && "1px solid #edb20e",
+      zIndex: '99999999'
     }),
     option: (styles: any, { isFocused }) => {
       // const color = chroma(data.color);
       return {
         ...styles,
+        zIndex: '9999999',
         backgroundColor: isFocused ? "#f9c100" : "#fff",
         color: "#000",
         ":active": {
@@ -34,16 +39,21 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
     // singleValue: (styles, { data }) => ({ ...styles, ...dot(data.color) }),
   };
 
+  const defaultValue = props.data.find((value: any) => value.id == props.value);
+
+  console.log(props.data);
+
   return (
     <>
       <div>
-        <h1 className="text-[15px] text-[#000] mb-3">{props.title}</h1>
+        <h1 className="text-[15px] text-[#000] mb-4">{props.title}</h1>
 
         <Select
           className="basic-single"
           classNamePrefix="select"
-          // defaultValue={props.data[0]}
-          // isDisabled={isDisabled}
+          menuPortalTarget={document.body}
+          // defaultValue={defaultValue.id}
+          isDisabled={props.disabled}
           // isLoading={isLoading}
           // isClearable={isClearable}
           // isRtl={isRtl}
@@ -52,6 +62,7 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
           name="color"
           options={props.data}
           onChange={props.onChange}
+          value={defaultValue}
         />
       </div>
 

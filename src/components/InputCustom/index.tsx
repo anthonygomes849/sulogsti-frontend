@@ -68,6 +68,8 @@ const InputCustom: React.FC<InputProps> = (
           id={id}
           onBlur={onBlur}
           disabled={disabled}
+          formatChars={{ '9': '[0-9]', 'a': '[A-Za-z]', '*': '[0-9A-Za-z]' }} // Aceita letras e números após a terceira letra
+
           {...rest}
         />
       </div>

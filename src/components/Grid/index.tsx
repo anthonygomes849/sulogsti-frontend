@@ -1,12 +1,12 @@
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { AgGridReact, CustomCellRendererProps } from "ag-grid-react";
+import { format } from "date-fns";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { BsCheck, BsInfo, BsSlash, BsX } from "react-icons/bs";
-import { Link } from "react-router-dom";
+import { BsInfo, BsSlash, BsX } from "react-icons/bs";
 import LoadingIndicator from "../../core/common/Loading";
+import { useBreadcrumb } from "../../hooks/BreadCrumbContext";
 import api from "../../services/api";
-import Badge from "../Badge";
 import Loading from "./components/Loading";
 import { GridProps } from "./model/Grid";
 
@@ -20,18 +20,20 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   const [rowSelection] = useState(props.rowSelection);
   const [path] = useState(props.path);
   const [rowData, setRowData] = useState<any[]>();
+  const { addBreadcrumb } = useBreadcrumb();
+
   const defaultColumns = [
-    {
-      field: "status",
-      headerName: "Status",
-      cellStyle: { textAlign: "center" },
-      // pinned: "left",
-      cellRenderer: (params: CustomCellRendererProps) => {
-        if (params.value) {
-          return <Badge content="Ativo" color="#008000" />;
-        }
-      },
-    },
+    // {
+    //   field: "status",
+    //   headerName: "Status",
+    //   cellStyle: { textAlign: "center" },
+    //   // pinned: "left",
+    //   cellRenderer: (params: CustomCellRendererProps) => {
+    //     if (params.value) {
+    //       return <Status data={props.status} status={params.value} />;
+    //     }
+    //   },
+    // },
     {
       field: "",
       headerName: "",
@@ -39,30 +41,32 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cellRenderer: (params: CustomCellRendererProps) => {
         return (
           <div className="flex w-full h-full items-center justify-center">
-            <Link
-              to={window.location.pathname + "/conhecer"}
+            <button
               onClick={() => {
-                setTimeout(() => {
-                  window.location.reload();
-                }, 500);
+                addBreadcrumb("Conhecer");
+                props.onView(params.data);
               }}
-              state={{ data: params.data }}
             >
               <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
-            </Link>
-            <button>
+            </button>
+            <button
+              onClick={() => {
+               addBreadcrumb("Editar");
+               props.onUpdate(params.data);
+              }}
+            >
               <BsSlash color="#FFA500" style={{ width: 24, height: 24 }} />
             </button>
             <button
               onClick={() => {
-                props.onDelete(params.data.id_veiculo);
+                props.onDelete(params.data);
               }}
             >
               <BsX color="#FF0000" style={{ width: 24, height: 24 }} />
             </button>
-            <button>
+            {/* <button>
               <BsCheck color="#808080" style={{ width: 24, height: 24 }} />
-            </button>
+            </button> */}
           </div>
         );
       },
@@ -70,7 +74,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   ];
 
   // const [showCrudButtons] = useState(props.showCrudButtons);
-  // const [gridApi, setGridApi] = useState<any>(null);
+  const [gridApi, setGridApi] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const onGridReady = useCallback(async (params: any) => {
@@ -90,7 +94,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
     });
 
     setColDefs(cols);
-    // setGridApi(params.api);
 
     const dataSource = {
       getRows: async (params: any) => {
@@ -100,19 +103,40 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
         let filters: any = {};
 
+        console.log("Params", params);
+
         // Adiciona os filtros de colunas customizados.
         if (params.filterModel != null) {
           for (const customFilter in params.filterModel) {
+            console.log("Params2", params.filterModel[customFilter]);
             // Tem que fazer o teste se é um array, pois caso o receba
             // será um filtro por período.
 
             let newFilter: any = params.filterModel[customFilter];
 
-            filters[`${customFilter}`] = newFilter.filter;
+            if (customFilter === "data_historico") {
+              if (newFilter.dateFrom.length > 0) {
+                filters["data_inicial"] = newFilter.dateFrom;
+              }
+
+              if (newFilter.dateTo !== null && newFilter.dateTo.length > 0) {
+                filters["data_final"] = newFilter.dateTo.replace(
+                  "00:00:00",
+                  "23:59:59"
+                );
+              } else {
+                filters["data_final"] = `${format(
+                  new Date(),
+                  "yyyy-MM-dd"
+                )} 23:59:59`;
+              }
+            } else {
+              filters[`${customFilter}`] = newFilter.filter;
+            }
           }
         }
 
-        console.log(filters);
+        console.log("Filters", filters);
 
         const reqDTO = {
           qtd_por_pagina: 100,
@@ -135,24 +159,14 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
     };
 
     params.api.setDatasource(dataSource);
+
+    // setGridApi(params.api);
   }, []);
 
   const loadingOverlayComponent = useMemo(() => {
     return Loading;
   }, []);
 
-  // useEffect(() => {
-  //   console.log(gridApi);
-  //   if (gridApi) {
-  //     console.log("entrou1");
-  //     const datasource = {
-  //       getRows: async (params: any) => {
-
-  //       }
-  //     };
-  //       // gridRef.current.setDatasource(dataSource);
-  //   }
-  // }, [gridApi]);
   return (
     <div
       className="ag-theme-quartz"
