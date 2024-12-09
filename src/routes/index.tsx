@@ -6,7 +6,7 @@ import Route from "./route";
 
 const router = createBrowserRouter([
   {
-    path: '/cadastro/veiculos',
+    path: '/cadastros/veiculos',
     element: (
       <Route>
         <ListVeiculo />
@@ -14,7 +14,7 @@ const router = createBrowserRouter([
     )
   },
   {
-    path: '/cadastro/motoristas',
+    path: '/cadastros/motoristas',
     element: (
       <Route>
         <ListMotorista />
@@ -22,7 +22,7 @@ const router = createBrowserRouter([
     )
   },
   {
-    path: '/cadastro/motoristas/adicionar',
+    path: '/cadastros/motoristas/adicionar',
     element: (
       <Route>
         <ListMotorista />
@@ -30,7 +30,7 @@ const router = createBrowserRouter([
     )
   },
   {
-    path: '/cadastro/mensalista',
+    path: '/cadastros/mensalistas',
     element: (
       <Route>
         <ListMensalista />

@@ -13,16 +13,18 @@ const Main: React.FC<Props> = (props: Props) => {
   console.log(window.location.pathname);
   return (
     <div className="flex flex-col">
-      <ModalProvider>
-        <BreadcrumbProvider>
-          <div>
-            <SubNav
-              isVisibleActions={!window.location.pathname.includes("adicionar")}
-            />
-          </div>
-          {props.children}
-        </BreadcrumbProvider>
-      </ModalProvider>
+        <ModalProvider>
+          <BreadcrumbProvider>
+            <div>
+              <SubNav
+                isVisibleActions={
+                  !window.location.pathname.includes("adicionar")
+                }
+              />
+            </div>
+            {props.children}
+          </BreadcrumbProvider>
+        </ModalProvider>
     </div>
   );
 };

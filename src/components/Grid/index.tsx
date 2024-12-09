@@ -3,9 +3,10 @@ import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { AgGridReact, CustomCellRendererProps } from "ag-grid-react";
 import { format } from "date-fns";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { BsInfo, BsSlash, BsX } from "react-icons/bs";
+import { BsSlash, BsX } from "react-icons/bs";
 import LoadingIndicator from "../../core/common/Loading";
 import { useBreadcrumb } from "../../hooks/BreadCrumbContext";
+import { usePermissions } from "../../hooks/PermissionContext";
 import api from "../../services/api";
 import Loading from "./components/Loading";
 import { GridProps } from "./model/Grid";
@@ -21,6 +22,9 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   const [path] = useState(props.path);
   const [rowData, setRowData] = useState<any[]>();
   const { addBreadcrumb } = useBreadcrumb();
+  const { hasPermission } = usePermissions();
+
+  const canAccess = hasPermission('CONHECER');
 
   const defaultColumns = [
     // {
@@ -41,18 +45,20 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cellRenderer: (params: CustomCellRendererProps) => {
         return (
           <div className="flex w-full h-full items-center justify-center">
+            {/* {hasPermissions("CONHECER") && (
+              <button
+                onClick={() => {
+                  addBreadcrumb("Conhecer");
+                  props.onView(params.data);
+                }}
+              >
+                <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
+              </button>
+            )} */}
             <button
               onClick={() => {
-                addBreadcrumb("Conhecer");
-                props.onView(params.data);
-              }}
-            >
-              <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
-            </button>
-            <button
-              onClick={() => {
-               addBreadcrumb("Editar");
-               props.onUpdate(params.data);
+                addBreadcrumb("Editar");
+                props.onUpdate(params.data);
               }}
             >
               <BsSlash color="#FFA500" style={{ width: 24, height: 24 }} />
@@ -93,74 +99,77 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cols.push(column);
     });
 
+
     setColDefs(cols);
 
     const dataSource = {
       getRows: async (params: any) => {
         try {
+          setLoading(true);
+          // Fazer uma requisição ao servidor passando os parâmetros da página
+          const page = params.endRow / 100 - 1;
 
-        setLoading(true);
-        // Fazer uma requisição ao servidor passando os parâmetros da página
-        const page = params.endRow / 100 - 1;
+          let filters: any = {};
 
-        let filters: any = {};
+          console.log("Params", params);
 
-        console.log("Params", params);
+          // Adiciona os filtros de colunas customizados.
+          if (params.filterModel != null) {
+            for (const customFilter in params.filterModel) {
+              console.log("Params2", params.filterModel[customFilter]);
+              // Tem que fazer o teste se é um array, pois caso o receba
+              // será um filtro por período.
 
-        // Adiciona os filtros de colunas customizados.
-        if (params.filterModel != null) {
-          for (const customFilter in params.filterModel) {
-            console.log("Params2", params.filterModel[customFilter]);
-            // Tem que fazer o teste se é um array, pois caso o receba
-            // será um filtro por período.
+              let newFilter: any = params.filterModel[customFilter];
 
-            let newFilter: any = params.filterModel[customFilter];
+              if (customFilter === "data_historico") {
+                if (newFilter.dateFrom.length > 0) {
+                  filters["data_inicial"] = newFilter.dateFrom;
+                }
 
-            if (customFilter === "data_historico") {
-              if (newFilter.dateFrom.length > 0) {
-                filters["data_inicial"] = newFilter.dateFrom;
-              }
-
-              if (newFilter.dateTo !== null && newFilter.dateTo.length > 0) {
-                filters["data_final"] = newFilter.dateTo.replace(
-                  "00:00:00",
-                  "23:59:59"
-                );
+                if (newFilter.dateTo !== null && newFilter.dateTo.length > 0) {
+                  filters["data_final"] = newFilter.dateTo.replace(
+                    "00:00:00",
+                    "23:59:59"
+                  );
+                } else {
+                  filters["data_final"] = `${format(
+                    new Date(),
+                    "yyyy-MM-dd"
+                  )} 23:59:59`;
+                }
               } else {
-                filters["data_final"] = `${format(
-                  new Date(),
-                  "yyyy-MM-dd"
-                )} 23:59:59`;
+                filters[`${customFilter}`] = newFilter.filter;
               }
-            } else {
-              filters[`${customFilter}`] = newFilter.filter;
             }
           }
+
+          console.log("Filters", filters);
+
+          const reqDTO = {
+            qtd_por_pagina: 100,
+            order_by:
+              params.sortModel.length > 0
+                ? params.sortModel[0].colId.replace("uf_estado", "id_estado")
+                : "data_historico",
+            order_direction:
+              params.sortModel.length > 0 ? params.sortModel[0].sort : "desc",
+            ...filters,
+          };
+
+          const response = await api.post(`${path}?page=${page + 1}`, reqDTO);
+
+          params.successCallback(response.data.data, response.data.total);
+          setRowData(response.data.data);
+
+          console.log(canAccess)
+
+
+
+          setLoading(false);
+        } catch {
+          setLoading(false);
         }
-
-        console.log("Filters", filters);
-
-        const reqDTO = {
-          qtd_por_pagina: 100,
-          order_by:
-            params.sortModel.length > 0
-              ? params.sortModel[0].colId.replace("uf_estado", "id_estado")
-              : "data_historico",
-          order_direction:
-            params.sortModel.length > 0 ? params.sortModel[0].sort : "desc",
-          ...filters,
-        };
-
-        const response = await api.post(`${path}?page=${page + 1}`, reqDTO);
-
-        params.successCallback(response.data.data, response.data.total);
-        setRowData(response.data.data);
-
-        setLoading(false);
-      }catch {
-        setLoading(false);
-      }
-
       },
     };
 

@@ -3,7 +3,9 @@ import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react({
+    fastRefresh: false
+  })],
   build: {
     outDir: 'dist', // Saída do build será na pasta dist
   },
