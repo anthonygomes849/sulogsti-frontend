@@ -160,7 +160,6 @@ const ListMotorista: React.FC = () => {
     },
   ]);
   const [isRemove, setIsRemove] = useState<boolean>(false);
-  const [entityId, setEntityId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<IMotorista>();
   const [isView, setIsView] = useState<boolean>(false);
