@@ -1,6 +1,6 @@
 import React from 'react';
-import CustomModal from '../../../../../components/CustomModal';
-import { useBreadcrumb } from '../../../../../hooks/BreadCrumbContext';
+import CustomModal from '../../../../components/CustomModal';
+import { useBreadcrumb } from '../../../../hooks/BreadCrumbContext';
 import Form from './Form';
 import { IMotorista } from './types/types';
 

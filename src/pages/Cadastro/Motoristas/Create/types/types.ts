@@ -19,13 +19,17 @@ export interface IMotorista {
   complemento: string;
   numero: string;
   bairro: string;
+  id_bairro: string;
   cidade: string;
+  id_cidade: string;
   uf_estado: string;
+  id_estado: string;
   cep: string;
   data_inativacao: string;
   dias_inativacao: string;
   motivo_inativacao: string;
   data_historico: string;
+  ativo: boolean;
 }
 
 export interface States {

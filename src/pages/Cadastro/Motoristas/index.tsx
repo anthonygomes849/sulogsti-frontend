@@ -9,7 +9,8 @@ import { formatDateBR, maskedCPF, maskedPhone } from "../../../helpers/format";
 import { STATUS_MOTORISTA } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
-import Create from "./components/Create";
+import Create from "./Create";
+import { IMotorista } from "./Create/types/types";
 
 // import { Container } from './styles';
 
@@ -18,23 +19,22 @@ const ListMotorista: React.FC = () => {
     {
       field: "cpf",
       headerName: "CPF",
-      // cellStyle: { textAlign: "left", marginLeft: "1rem" },
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
-          return maskedCPF(params.value)
+        if (params.value) {
+          return maskedCPF(params.value);
         }
-      }
+      },
     },
     {
       field: "nome",
       headerName: "Nome",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
+        if (params.value) {
           return params.value.toUpperCase();
         }
-      }
+      },
     },
     {
       field: "celular",
@@ -50,10 +50,10 @@ const ListMotorista: React.FC = () => {
       headerName: "Número da CNH",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
-          return maskedCPF(params.value)
+        if (params.value) {
+          return maskedCPF(params.value);
         }
-      }
+      },
     },
     {
       field: "categoria_cnh",
@@ -65,70 +65,70 @@ const ListMotorista: React.FC = () => {
       headerName: "Data de Expiraçao da CNH",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
+        if (params.value) {
           return formatDateBR(params.value);
         }
-      }
+      },
     },
     {
       field: "endereco",
       headerName: "Endereço",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
+        if (params.value) {
           return params.value;
         }
-      }
+      },
     },
     {
       field: "complemento",
       headerName: "Complemento",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
+        if (params.value) {
           return params.value;
         }
-      }
+      },
     },
     {
       field: "numero",
       headerName: "Número",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
+        if (params.value) {
           return params.value;
         }
-      }
+      },
     },
     {
       field: "bairro",
       headerName: "Bairro",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
+        if (params.value) {
           return params.value;
         }
-      }
+      },
     },
     {
       field: "cidade",
       headerName: "Cidade",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
+        if (params.value) {
           return params.value;
         }
-      }
+      },
     },
     {
       field: "uf_estado",
       headerName: "Estado",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
+        if (params.value) {
           return params.value;
         }
-      }
+      },
     },
     {
       field: "cep",
@@ -152,32 +152,32 @@ const ListMotorista: React.FC = () => {
       headerName: "Data de Modificação",
       filter: true,
       cellDataType: "date",
-      filterParams: {
-        filterOptions: ['inRange'],  // Enables filtering between two dates
-      },
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
+        if (params.value) {
           return formatDateBR(params.value);
         }
-      }
+      },
     },
   ]);
   const [isRemove, setIsRemove] = useState<boolean>(false);
   const [entityId, setEntityId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [selectedRow, setSelectedRow] = useState<IMotorista>();
+  const [isView, setIsView] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
 
-  const { isModalOpen, closeModal } = useModal();
+  const { isModalOpen, openModal, closeModal } = useModal();
 
   const gridRef = useRef<any>();
 
-  const onDelete = useCallback(async (rowId: number | null) => {
+  const onDelete = useCallback(async (rowId?: number) => {
     try {
       setLoading(true);
       const body = {
-        id_veiculo: rowId,
+        id_motorista: rowId,
       };
 
-      await api.post("/deletar/veiculos", body);
+      await api.post("/deletar/motoristas", body);
 
       setLoading(false);
 
@@ -194,17 +194,24 @@ const ListMotorista: React.FC = () => {
       <Loading loading={loading} />
 
       {isModalOpen && (
-        <Create onClear={() => closeModal()} onConfirm={() => {}} />
+        <Create
+          isEdit={isEdit}
+          isView={isView}
+          selectedRow={selectedRow}
+          onClear={() => closeModal()}
+          onConfirm={() => {
+            window.location.reload();
+          }}
+        />
       )}
 
       {isRemove && (
         <ModalDelete
           onCancel={() => setIsRemove(!isRemove)}
-          onConfirm={() => onDelete(entityId)}
+          onConfirm={() => onDelete(selectedRow?.id_motorista)}
         />
       )}
       <div className="flex flex-col w-full h-screen">
-
         <div className="flex w-screen">
           <Grid
             ref={gridRef}
@@ -212,14 +219,21 @@ const ListMotorista: React.FC = () => {
             filters={[]}
             pagination
             path="/listar/motoristas"
-            onDelete={(rowId: number) => {
-              console.log(rowId);
+            onDelete={(data: any) => {
               setIsRemove(!isRemove);
-              setEntityId(rowId);
+              setSelectedRow(data);
             }}
             status={STATUS_MOTORISTA}
-            onUpdate={() => {}}
-            onView={() => {}}
+            onView={(data: any) => {
+              setSelectedRow(data);
+              setIsView(!isView);
+              openModal();
+            }}
+            onUpdate={(data: any) => {
+              setSelectedRow(data);
+              setIsEdit(!isEdit);
+              openModal();
+            }}
           />
         </div>
       </div>
