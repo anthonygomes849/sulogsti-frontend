@@ -97,6 +97,8 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
     const dataSource = {
       getRows: async (params: any) => {
+        try {
+
         setLoading(true);
         // Fazer uma requisição ao servidor passando os parâmetros da página
         const page = params.endRow / 100 - 1;
@@ -155,6 +157,10 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         setRowData(response.data.data);
 
         setLoading(false);
+      }catch {
+        setLoading(false);
+      }
+
       },
     };
 
