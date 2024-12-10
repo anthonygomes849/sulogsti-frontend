@@ -3,7 +3,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { AgGridReact, CustomCellRendererProps } from "ag-grid-react";
 import { format } from "date-fns";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { BsSlash, BsX } from "react-icons/bs";
+import { BsInfo, BsSlash, BsX } from "react-icons/bs";
 import LoadingIndicator from "../../core/common/Loading";
 import { useBreadcrumb } from "../../hooks/BreadCrumbContext";
 import { usePermissions } from "../../hooks/PermissionContext";
@@ -45,15 +45,15 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cellRenderer: (params: CustomCellRendererProps) => {
         return (
           <div className="flex w-full h-full items-center justify-center">
+            <button
+              onClick={() => {
+                addBreadcrumb("Conhecer");
+                props.onView(params.data);
+              }}
+            >
+              <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
+            </button>
             {/* {hasPermissions("CONHECER") && (
-              <button
-                onClick={() => {
-                  addBreadcrumb("Conhecer");
-                  props.onView(params.data);
-                }}
-              >
-                <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
-              </button>
             )} */}
             <button
               onClick={() => {

@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import ListMensalista from "../pages/Cadastro/Mensalista";
 import ListMotorista from "../pages/Cadastro/Motoristas";
 import ListVeiculo from "../pages/Cadastro/Veiculos";
+import ListTipoServico from "../pages/Configuracoes/TipoServico";
 import Route from "./route";
 
 const router = createBrowserRouter([
@@ -34,6 +35,14 @@ const router = createBrowserRouter([
     element: (
       <Route>
         <ListMensalista />
+      </Route>
+    )
+  },
+  {
+    path: '/configuracoes/tipoServicos',
+    element: (
+      <Route>
+        <ListTipoServico />
       </Route>
     )
   }
