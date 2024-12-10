@@ -16,8 +16,16 @@ const SubNav: React.FC<Props> = (props: Props) => {
   const { breadcrumb, addBreadcrumb } = useBreadcrumb();
   const { openModal } = useModal();
 
+  function convertCamelCase(input: string) {
+    return input
+        .replace(/([A-Z])/g, ' $1') // Adiciona espaço antes de maiúsculas
+        .replace(/^./, (str: string) => str.toUpperCase()) // Primeira letra maiúscula
+        .trim(); // Remove espaços extras
+}
+
   function toCamelCase(str: any) {
-    return str
+    const value = convertCamelCase(str);
+    return value
       .toLowerCase() // Converte tudo para minúsculo primeiro
       .split(" ") // Separa a string em palavras
       .map((word: any) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitaliza a primeira letra de cada palavra
