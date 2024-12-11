@@ -22,9 +22,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   const [path] = useState(props.path);
   const [rowData, setRowData] = useState<any[]>();
   const { addBreadcrumb } = useBreadcrumb();
-  const { hasPermission } = usePermissions();
-
-  const canAccess = hasPermission('CONHECER');
 
   const defaultColumns = [
     // {
@@ -45,31 +42,41 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cellRenderer: (params: CustomCellRendererProps) => {
         return (
           <div className="flex w-full h-full items-center justify-center">
-            <button
+            {usePermissions('CONHECER') && (
+
+              <button
               onClick={() => {
                 addBreadcrumb("Conhecer");
                 props.onView(params.data);
               }}
-            >
+              >
               <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
             </button>
+            )}
             {/* {hasPermissions("CONHECER") && (
             )} */}
-            <button
+            {usePermissions('SALVAR') && (
+<>
+              <button
               onClick={() => {
                 addBreadcrumb("Editar");
                 props.onUpdate(params.data);
               }}
-            >
+              >
               <BsSlash color="#FFA500" style={{ width: 24, height: 24 }} />
             </button>
-            <button
-              onClick={() => {
-                props.onDelete(params.data);
-              }}
+              </>
+            )}
+            {usePermissions('REMOVER') && (
+
+              <button
+            onClick={() => {
+              props.onDelete(params.data);
+            }}
             >
               <BsX color="#FF0000" style={{ width: 24, height: 24 }} />
             </button>
+            )}
             {/* <button>
               <BsCheck color="#808080" style={{ width: 24, height: 24 }} />
             </button> */}
@@ -85,6 +92,8 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
   const onGridReady = useCallback(async (params: any) => {
     let cols: any[] = [];
+
+
 
     defaultColumns.forEach((defaultColumn: any) => {
       cols.unshift(defaultColumn);
@@ -161,9 +170,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
           params.successCallback(response.data.data, response.data.total);
           setRowData(response.data.data);
-
-          console.log(canAccess)
-
 
 
           setLoading(false);

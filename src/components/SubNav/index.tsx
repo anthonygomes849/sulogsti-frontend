@@ -4,6 +4,7 @@ import { Breadcrumb, BreadcrumbItem } from "reactstrap";
 import { BsCaretRightFill } from "react-icons/bs";
 import { useBreadcrumb } from "../../hooks/BreadCrumbContext";
 import { useModal } from "../../hooks/ModalContext";
+import { usePermissions } from "../../hooks/PermissionContext";
 import "./styles.css";
 // import { Container } from './styles';
 
@@ -18,10 +19,10 @@ const SubNav: React.FC<Props> = (props: Props) => {
 
   function convertCamelCase(input: string) {
     return input
-        .replace(/([A-Z])/g, ' $1') // Adiciona espaço antes de maiúsculas
-        .replace(/^./, (str: string) => str.toUpperCase()) // Primeira letra maiúscula
-        .trim(); // Remove espaços extras
-}
+      .replace(/([A-Z])/g, " $1") // Adiciona espaço antes de maiúsculas
+      .replace(/^./, (str: string) => str.toUpperCase()) // Primeira letra maiúscula
+      .trim(); // Remove espaços extras
+  }
 
   function toCamelCase(str: any) {
     const value = convertCamelCase(str);
@@ -137,18 +138,19 @@ const SubNav: React.FC<Props> = (props: Props) => {
             Exportar
           </h1>
 
-          <div className="w-32 h-6 !ml-2">
-            <button
-              className="flex items-center justify-center w-20 h-6 bg-[#fff] rounded-2xl text-xs text-[#005491] hover:bg-[#edb20e] hover:text-[#fff]"
-              onClick={() => {
-                addBreadcrumb("Adicionar");
-                openModal();
-                
-              }}
-            >
-              Adicionar
-            </button>
-          </div>
+          {usePermissions("SALVAR") && (
+            <div className="w-32 h-6 !ml-2">
+              <button
+                className="flex items-center justify-center w-20 h-6 bg-[#fff] rounded-2xl text-xs text-[#005491] hover:bg-[#edb20e] hover:text-[#fff]"
+                onClick={() => {
+                  addBreadcrumb("Adicionar");
+                  openModal();
+                }}
+              >
+                Adicionar
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
