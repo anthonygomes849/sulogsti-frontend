@@ -2,6 +2,7 @@ import React from "react";
 import SubNav from "../../components/SubNav";
 import { BreadcrumbProvider } from "../../hooks/BreadCrumbContext";
 import { ModalProvider } from "../../hooks/ModalContext";
+import { PermissionProvider } from "../../hooks/PermissionContext";
 
 // import { Container } from './styles';
 
@@ -13,6 +14,7 @@ const Main: React.FC<Props> = (props: Props) => {
   console.log(window.location.pathname);
   return (
     <div className="flex flex-col">
+      <PermissionProvider>
         <ModalProvider>
           <BreadcrumbProvider>
             <div>
@@ -25,6 +27,7 @@ const Main: React.FC<Props> = (props: Props) => {
             {props.children}
           </BreadcrumbProvider>
         </ModalProvider>
+      </PermissionProvider>
     </div>
   );
 };
