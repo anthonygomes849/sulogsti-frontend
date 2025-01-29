@@ -21,6 +21,7 @@ export interface GridProps {
   perPage?: number;
   orders?: Order[];
   status: StatusType[];
+  isShowStatus?: boolean;
 }
 
 export type ColumnDef = {

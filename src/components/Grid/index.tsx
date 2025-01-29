@@ -9,6 +9,7 @@ import { useBreadcrumb } from "../../hooks/BreadCrumbContext";
 import { usePermissions } from "../../hooks/PermissionContext";
 import api from "../../services/api";
 import Loading from "./components/Loading";
+import Status from "./components/Status";
 import { GridProps } from "./model/Grid";
 
 // import { Container } from './styles';
@@ -24,17 +25,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   const { addBreadcrumb } = useBreadcrumb();
 
   const defaultColumns = [
-    // {
-    //   field: "status",
-    //   headerName: "Status",
-    //   cellStyle: { textAlign: "center" },
-    //   // pinned: "left",
-    //   cellRenderer: (params: CustomCellRendererProps) => {
-    //     if (params.value) {
-    //       return <Status data={props.status} status={params.value} />;
-    //     }
-    //   },
-    // },
     {
       field: "",
       headerName: "",
@@ -42,40 +32,38 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cellRenderer: (params: CustomCellRendererProps) => {
         return (
           <div className="flex w-full h-full items-center justify-center">
-            {usePermissions('CONHECER') && (
-
+            {usePermissions("CONHECER") && (
               <button
-              onClick={() => {
-                addBreadcrumb("Conhecer");
-                props.onView(params.data);
-              }}
+                onClick={() => {
+                  addBreadcrumb("Conhecer");
+                  props.onView(params.data);
+                }}
               >
-              <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
-            </button>
+                <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
+              </button>
             )}
             {/* {hasPermissions("CONHECER") && (
             )} */}
-            {usePermissions('SALVAR') && (
-<>
-              <button
-              onClick={() => {
-                addBreadcrumb("Editar");
-                props.onUpdate(params.data);
-              }}
-              >
-              <BsSlash color="#FFA500" style={{ width: 24, height: 24 }} />
-            </button>
+            {usePermissions("SALVAR") && (
+              <>
+                <button
+                  onClick={() => {
+                    addBreadcrumb("Editar");
+                    props.onUpdate(params.data);
+                  }}
+                >
+                  <BsSlash color="#FFA500" style={{ width: 24, height: 24 }} />
+                </button>
               </>
             )}
-            {usePermissions('REMOVER') && (
-
+            {usePermissions("REMOVER") && (
               <button
-            onClick={() => {
-              props.onDelete(params.data);
-            }}
-            >
-              <BsX color="#FF0000" style={{ width: 24, height: 24 }} />
-            </button>
+                onClick={() => {
+                  props.onDelete(params.data);
+                }}
+              >
+                <BsX color="#FF0000" style={{ width: 24, height: 24 }} />
+              </button>
             )}
             {/* <button>
               <BsCheck color="#808080" style={{ width: 24, height: 24 }} />
@@ -93,11 +81,23 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   const onGridReady = useCallback(async (params: any) => {
     let cols: any[] = [];
 
-
-
     defaultColumns.forEach((defaultColumn: any) => {
       cols.unshift(defaultColumn);
     });
+
+    if (props.isShowStatus) {
+      cols.unshift({
+        field: "status",
+        headerName: "Status",
+        cellStyle: { textAlign: "center" },
+        // pinned: "left",
+        cellRenderer: (params: CustomCellRendererProps) => {
+          if (params.value) {
+            return <Status data={props.status} status={params.value} />;
+          }
+        },
+      });
+    }
 
     columns.forEach((column) => {
       // Realiza a tradução da key.
@@ -107,7 +107,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
       cols.push(column);
     });
-
 
     setColDefs(cols);
 
@@ -170,7 +169,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
           params.successCallback(response.data.data, response.data.total);
           setRowData(response.data.data);
-
 
           setLoading(false);
         } catch {

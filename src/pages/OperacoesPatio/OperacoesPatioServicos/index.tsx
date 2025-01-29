@@ -5,6 +5,7 @@ import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
 import { formatDateTimeBR } from "../../../helpers/format";
+import { STATUS_OPERACAO_PATIO_SERVICOS } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
 import CreateOperacaoPatioServico from "./Create";
@@ -126,7 +127,8 @@ const ListOperacoesPatioServicos: React.FC = () => {
               setIsView(!isView);
               openModal();
             }}
-            status={[]}
+            isShowStatus
+            status={STATUS_OPERACAO_PATIO_SERVICOS}
           />
         </div>
       </div>
