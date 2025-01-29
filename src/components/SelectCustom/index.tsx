@@ -10,28 +10,23 @@ interface Props {
   error?: any;
   value?: any;
   disabled?: boolean;
+  isMulti?: boolean;
 }
 
 const SelectCustom: React.FC<Props> = (props: Props) => {
   const colourStyles: StylesConfig = {
     menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-    control: (styles: any, { isFocused }) => ({
+    control: (styles: any) => ({
       ...styles,
       backgroundColor: "white",
-      border: isFocused && "1px solid #edb20e",
-      zIndex: '99999999'
+      zIndex: "99999999",
     }),
-    option: (styles: any, { isFocused }) => {
+    option: (styles: any) => {
       // const color = chroma(data.color);
       return {
         ...styles,
-        zIndex: '9999999',
-        backgroundColor: isFocused ? "#f9c100" : "#fff",
+        backgroundColor: "#FFF",
         color: "#000",
-        ":active": {
-          ...styles["active"],
-          backgroundColor: "#edb20e",
-        },
       };
     },
     // input: (styles) => ({ ...styles, ...dot() }),
@@ -41,7 +36,7 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
 
   const defaultValue = props.data.find((value: any) => value.id == props.value);
 
-  console.log(props.data);
+  console.log("Value", props.value);
 
   return (
     <>
@@ -49,15 +44,17 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
         <h1 className="text-[15px] text-[#000] mb-4">{props.title}</h1>
 
         <Select
-          className="basic-single"
+          className="basic-multi-select"
           classNamePrefix="select"
           menuPortalTarget={document.body}
-          // defaultValue={defaultValue.id}
+          isMulti={props.isMulti}
+          defaultValue={props.value}
           isDisabled={props.disabled}
           // isLoading={isLoading}
           // isClearable={isClearable}
           // isRtl={isRtl}
           // isSearchable={isSearchable}
+          placeholder="Selecione"
           styles={colourStyles}
           name="color"
           options={props.data}

@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  sti-frontend-react:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" # Mapeia a porta 3000 no host para a porta 80 no container
+      - "80:80" # Mapeia a porta 3000 no host para a porta 80 no container
+      - "5173:5173" # Mapeia a porta 3000 no host para a porta 80 no container
+    restart: always

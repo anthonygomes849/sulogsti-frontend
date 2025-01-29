@@ -6,7 +6,6 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { BsInfo, BsSlash, BsX } from "react-icons/bs";
 import LoadingIndicator from "../../core/common/Loading";
 import { useBreadcrumb } from "../../hooks/BreadCrumbContext";
-import { usePermissions } from "../../hooks/PermissionContext";
 import api from "../../services/api";
 import Loading from "./components/Loading";
 import { GridProps } from "./model/Grid";
@@ -42,7 +41,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cellRenderer: (params: CustomCellRendererProps) => {
         return (
           <div className="flex w-full h-full items-center justify-center">
-            {usePermissions('CONHECER') && (
+            {/* {usePermissions('CONHECER') && ( */}
 
               <button
               onClick={() => {
@@ -52,10 +51,10 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
               >
               <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
             </button>
-            )}
+            {/* )} */}
             {/* {hasPermissions("CONHECER") && (
             )} */}
-            {usePermissions('SALVAR') && (
+            {/* {usePermissions('SALVAR') && ( */}
 <>
               <button
               onClick={() => {
@@ -66,8 +65,8 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
               <BsSlash color="#FFA500" style={{ width: 24, height: 24 }} />
             </button>
               </>
-            )}
-            {usePermissions('REMOVER') && (
+            {/* )} */}
+            {/* {usePermissions('REMOVER') && ( */}
 
               <button
             onClick={() => {
@@ -76,7 +75,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
             >
               <BsX color="#FF0000" style={{ width: 24, height: 24 }} />
             </button>
-            )}
+            {/* )} */}
             {/* <button>
               <BsCheck color="#808080" style={{ width: 24, height: 24 }} />
             </button> */}

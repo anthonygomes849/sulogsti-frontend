@@ -6,5 +6,4 @@ export default object().shape({
   tipoParteVeiculo: string().required('Este campo é obrigatório!'),
   anoExercicioCRLV: string().required('Este campo é obrigatório!'),
   livreAcessoPatio: bool().required('Este campo é obrigatório!'),
-  ativo: bool().required('Este campo é obrigatório!'),
 })

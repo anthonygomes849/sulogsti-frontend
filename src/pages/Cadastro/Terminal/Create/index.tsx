@@ -19,7 +19,7 @@ const Create: React.FC<Props> = (props: Props) => {
   const { breadcrumb } = useBreadcrumb();
 
   return (
-   <CustomModal title={`${breadcrumb[breadcrumb.length - 1]} Motorista`} onClose={props.onClear} isScreenLg>
+   <CustomModal title={`${breadcrumb[breadcrumb.length - 1]} Terminal`} onClose={props.onClear}>
       <Form isView={props.isView} selectedRow={props.selectedRow} onConfirm={props.onConfirm} isEdit={props.isEdit} />
     </CustomModal>
   );

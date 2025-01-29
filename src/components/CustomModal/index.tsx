@@ -8,15 +8,19 @@ import React from 'react';
 interface Props {
   title: string;
   children: JSX.Element;
+  isScreenLg?: boolean;
   onClose: () => void;
 }
 
 const CustomModal: React.FC<Props> = (props: Props) => {
 
   const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiPaper-root" : {
+      minWidth: props.isScreenLg ? '800px' : '500px',
+    },
     "& .MuiDialogContent-root": {
       minWidth: '500px',
-      maxWidth: '800px',
+      maxWidth: '1000px',
       overflow: 'hidden',
       padding: theme.spacing(2),
      
@@ -57,7 +61,7 @@ const CustomModal: React.FC<Props> = (props: Props) => {
       >
         <CloseIcon className="w-10 h-10" style={{ width: 30, height: 30 }} />
       </IconButton>
-      <DialogContent style={{ maxWidth: '120px' }}>
+      <DialogContent style={{ maxWidth: '100%' }}>
         {props.children}
       </DialogContent>
       

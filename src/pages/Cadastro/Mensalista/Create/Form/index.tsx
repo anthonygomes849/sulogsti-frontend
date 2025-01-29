@@ -1,7 +1,6 @@
 import { useFormik } from "formik";
 import React, { useCallback, useEffect, useState } from "react";
 import InputCustom from "../../../../../components/InputCustom";
-import RadioGroupCustom from "../../../../../components/RadioGroup";
 import SelectCustom from "../../../../../components/SelectCustom";
 import Loading from "../../../../../core/common/Loading";
 import api from "../../../../../services/api";
@@ -57,12 +56,16 @@ const Form: React.FC<Props> = (props: Props) => {
       try {
         setLoading(true);
 
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const userId = urlParams.get("userId");
+
         const body = {
           id_mensalista: row?.id_mensalista,
           placa: values.placa.replace("-", ""),
           id_transportadora: values.id_transportadora,
-          ativo: values.ativo,
-          id_usuario_historico: 1,
+          ativo: true,
+          id_usuario_historico: userId,
           status: 1,
         };
 
@@ -144,30 +147,20 @@ const Form: React.FC<Props> = (props: Props) => {
             disabled={props.isView}
           />
         </div>
-        <div>
-          <RadioGroupCustom
-            title="Ativo"
-            onChange={(value: string) =>
-              formik.setFieldValue("ativo", value === "true")
-            }
-            value={formik.values.ativo}
-            disabled={props.isView}
-          />
-        </div>
       </div>
 
       {!props.isView && (
         <div className="flex items-center mt-6">
           <button
             type="button"
-            className="w-full h-14 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
+            className="w-full h-10 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
             onClick={() => formik.handleSubmit()}
           >
             Salvar
           </button>
           <button
             type="button"
-            className="w-full h-14 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
+            className="w-full h-10 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
           >
             Cancelar
           </button>
