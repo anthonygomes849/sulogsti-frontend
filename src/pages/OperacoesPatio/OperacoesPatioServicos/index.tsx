@@ -11,18 +11,31 @@ import api from "../../../services/api";
 import CreateOperacaoPatioServico from "./Create";
 import { IOperacoesPatioServicos } from "./types/types";
 
-// import { Container } from './styles';
-
 const ListOperacoesPatioServicos: React.FC = () => {
   const [columns] = useState<ColumnDef[]>([
     {
       field: "entrada_veiculo.placa_dianteira",
-      headerName: "Placa",
+      headerName: "Placa Dianteira Entrada",
+      filter: true,
+    },
+    {
+      field: "saida_veiculo.placa_dianteira",
+      headerName: "Placa Dianteira Saída",
       filter: true,
     },
     {
       field: "entrada_veiculo.data_hora",
       headerName: "Data/Hora Entrada",
+      filter: true,
+      valueFormatter: (params: ValueFormatterParams) => {
+        if(params.value) {
+          return formatDateTimeBR(params.value);
+        }
+      }
+    },
+    {
+      field: "saida_veiculo.data_hora",
+      headerName: "Data/Hora Saída",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if(params.value) {
