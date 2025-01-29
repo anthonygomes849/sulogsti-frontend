@@ -41,7 +41,7 @@ const router = createBrowserRouter([
     )
   },
   {
-    path: '/operacaoPatio/servicos',
+    path: '/operacoes_patio/servicos',
     element: (
       <Route>
         <ListOperacoesPatioServicos />
@@ -49,7 +49,7 @@ const router = createBrowserRouter([
     )
   },
   {
-    path: '/configuracoes/tipoServicos',
+    path: '/configuracoes/tipos_servicos',
     element: (
       <Route>
         <ListTipoServico />

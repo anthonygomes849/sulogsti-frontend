@@ -2,7 +2,7 @@ import React from 'react';
 import CustomModal from '../../../../components/CustomModal';
 import { useBreadcrumb } from '../../../../hooks/BreadCrumbContext';
 import Form from './Form';
-import { IMotorista } from './types/types';
+import { ITerminal } from './types/types';
 
 // import { Container } from './styles';
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
   isEdit?: boolean;
   onClear: () => void;
   onConfirm: () => void;
-  selectedRow?: IMotorista;
+  selectedRow?: ITerminal;
 }
 
 

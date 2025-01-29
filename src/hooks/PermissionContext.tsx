@@ -31,7 +31,7 @@ export const usePermissions = (action: string) => {
   }
 
   // console.log(permissionsData.some((perm: any) => perm.action === "CONHECER" && perm.module === paths[0].toUpperCase()));
-  console.log(permissionsData);
+  console.log(paths[1].toUpperCase());
 
   const hasPermission = permissionsData.some(
     (perm: any) =>
