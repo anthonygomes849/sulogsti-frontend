@@ -1,5 +1,4 @@
 import React from "react";
-import { AuthenticateProvider } from "../hooks/AuthenticateContext";
 import Main from "../pages/Main";
 
 // import { Container } from './styles';
@@ -12,7 +11,8 @@ const Route: React.FC<Props> = (props: Props) => {
   return (
 
     <Main>
-      <AuthenticateProvider>{props.children}</AuthenticateProvider>
+      {props.children}
+      {/* <AuthenticateProvider>{props.children}</AuthenticateProvider> */}
     </Main>
   );
 };

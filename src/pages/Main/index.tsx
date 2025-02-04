@@ -11,7 +11,6 @@ interface Props {
 }
 
 const Main: React.FC<Props> = (props: Props) => {
-  console.log(window.location.pathname);
   return (
     <div className="flex flex-col">
       <PermissionProvider>
