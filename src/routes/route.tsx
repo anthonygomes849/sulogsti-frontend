@@ -1,5 +1,4 @@
 import React from "react";
-import Main from "../pages/Main";
 
 // import { Container } from './styles';
 
@@ -8,13 +7,7 @@ interface Props {
 }
 
 const Route: React.FC<Props> = (props: Props) => {
-  return (
-
-    <Main>
-      {props.children}
-      {/* <AuthenticateProvider>{props.children}</AuthenticateProvider> */}
-    </Main>
-  );
+  return <>{props.children}</>;
 };
 
 export default Route;

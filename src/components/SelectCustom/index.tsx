@@ -29,14 +29,9 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
         color: "#000",
       };
     },
-    // input: (styles) => ({ ...styles, ...dot() }),
-    // placeholder: (styles) => ({ ...styles, ...dot('#ccc') }),
-    // singleValue: (styles, { data }) => ({ ...styles, ...dot(data.color) }),
   };
 
   const defaultValue = props.data.find((value: any) => value.id == props.value);
-
-  console.log("Value", props.value);
 
   return (
     <>
@@ -50,10 +45,6 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
           isMulti={props.isMulti}
           defaultValue={props.value}
           isDisabled={props.disabled}
-          // isLoading={isLoading}
-          // isClearable={isClearable}
-          // isRtl={isRtl}
-          // isSearchable={isSearchable}
           placeholder="Selecione"
           styles={colourStyles}
           name="color"

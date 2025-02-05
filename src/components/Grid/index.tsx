@@ -65,17 +65,12 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
                 <BsX color="#FF0000" style={{ width: 24, height: 24 }} />
               </button>
             )}
-            {/* <button>
-              <BsCheck color="#808080" style={{ width: 24, height: 24 }} />
-            </button> */}
           </div>
         );
       },
     },
   ];
 
-  // const [showCrudButtons] = useState(props.showCrudButtons);
-  // const [gridApi, setGridApi] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const onGridReady = useCallback(async (params: any) => {
@@ -203,9 +198,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         loadingOverlayComponent={loadingOverlayComponent}
         loadingCellRenderer={loadingOverlayComponent}
         onGridReady={onGridReady}
-        // onCellValueChanged={onCellValueChanged}
-        // onSelectionChanged={onSelectionChanged}
-        // onCellClicked={onCellClicked}
       />
     </div>
   );

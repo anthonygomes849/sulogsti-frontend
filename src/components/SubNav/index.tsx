@@ -4,6 +4,7 @@ import { Breadcrumb, BreadcrumbItem } from "reactstrap";
 import { BsCaretRightFill } from "react-icons/bs";
 import { useBreadcrumb } from "../../hooks/BreadCrumbContext";
 import { useModal } from "../../hooks/ModalContext";
+import { usePermissions } from "../../hooks/PermissionContext";
 import "./styles.css";
 // import { Container } from './styles';
 
@@ -126,18 +127,14 @@ const SubNav: React.FC<Props> = (props: Props) => {
           })} */}
         </Breadcrumb>
 
-        {/* <h1 className="text-sm">{}</h1> */}
       </div>
       {props.isVisibleActions && (
         <div className="flex !mr-4 items-center">
-          {/* <h1 className="!mr-4 cursor-pointer hover:text-yellow-400 text-sm">
-            Exibir
-          </h1> */}
           <h1 className="!mr-4 cursor-pointer hover:text-yellow-400 text-sm">
             Exportar
           </h1>
 
-          {/* {usePermissions("SALVAR") && (
+          {usePermissions("SALVAR") && (
             <div className="w-32 h-6 !ml-2">
               <button
                 className="flex items-center justify-center w-20 h-6 bg-[#fff] rounded-2xl text-xs text-[#005491] hover:bg-[#edb20e] hover:text-[#fff]"
@@ -149,7 +146,7 @@ const SubNav: React.FC<Props> = (props: Props) => {
                 Adicionar
               </button>
             </div>
-          )} */}
+          )}
         </div>
       )}
     </div>

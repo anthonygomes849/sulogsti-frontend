@@ -4,8 +4,6 @@ import { BreadcrumbProvider } from "../../hooks/BreadCrumbContext";
 import { ModalProvider } from "../../hooks/ModalContext";
 import { PermissionProvider } from "../../hooks/PermissionContext";
 
-// import { Container } from './styles';
-
 interface Props {
   children: JSX.Element;
 }
