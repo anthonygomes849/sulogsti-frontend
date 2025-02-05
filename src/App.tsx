@@ -23,7 +23,7 @@ function App() {
 
   useEffect(() => {
     fetchPermissions();
-  }, [fetchPermissions])
+  }, [fetchPermissions]);
 
   return (
     <div className='flex w-full h-screen'>

@@ -1,7 +1,6 @@
 import { useFormik } from "formik";
 import React, { useCallback, useEffect, useState } from "react";
 import InputCustom from "../../../../../components/InputCustom";
-import RadioGroupCustom from "../../../../../components/RadioGroup";
 import SelectCustom from "../../../../../components/SelectCustom";
 import Loading from "../../../../../core/common/Loading";
 import api from "../../../../../services/api";
@@ -53,6 +52,10 @@ const Form: React.FC<Props> = (props: Props) => {
       try {
         setLoading(true);
 
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const userId = urlParams.get("userId");
+
         const body = {
           id_motorista: row?.id_motorista,
           cpf: values.cpf,
@@ -69,14 +72,10 @@ const Form: React.FC<Props> = (props: Props) => {
           numero_cnh: values.numero_cnh,
           categoria_cnh: values.categoria_cnh,
           data_expiracao_cnh: values.data_expiracao_cnh,
-          ativo: values.ativo,
+          ativo: true,
           tipo_parte_veiculo: true,
-          data_inativacao: null,
-          motivo_inativacao: null,
-          dias_inativacao: null,
-          id_piramide: null,
           status: 1,
-          id_usuario_historico: 1,
+          id_usuario_historico: userId,
         };
 
         if(props.isEdit) {
@@ -227,8 +226,8 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
-      <div className="overflow-y-scroll max-h-[550px]">
-        <div className="grid grid-cols-2 gap-3 mb-2">
+      <div className="overflow-y-scroll max-w-full max-h-[550px]">
+        <div className="grid grid-cols-3 gap-3 mb-2">
           <div>
             <InputCustom
               title="CPF"
@@ -318,7 +317,7 @@ const Form: React.FC<Props> = (props: Props) => {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div>
             <SelectCustom
               data={states}
@@ -353,7 +352,7 @@ const Form: React.FC<Props> = (props: Props) => {
               onChange={(selectedOption: any) => {
                 formik.setFieldValue("id_bairro", selectedOption.id);
               }}
-              title="Cidade"
+              title="Bairro"
               touched={formik.touched.id_bairro}
               error={formik.errors.id_bairro}
               disabled={props.isView}
@@ -398,16 +397,6 @@ const Form: React.FC<Props> = (props: Props) => {
             />
           </div>
 
-          <div>
-            <RadioGroupCustom
-              title="Ativo"
-              onChange={(value: string) =>
-                formik.setFieldValue("ativo", value === "true")
-              }
-              value={formik.values.ativo}
-              disabled={props.isView}
-            />
-          </div>
         </div>
       </div>
 
@@ -415,14 +404,14 @@ const Form: React.FC<Props> = (props: Props) => {
         <div className="flex items-center mt-6">
           <button
             type="button"
-            className="w-full h-14 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
+            className="w-full h-10 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
             onClick={() => formik.handleSubmit()}
           >
             Salvar
           </button>
           <button
             type="button"
-            className="w-full h-14 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
+            className="w-full h-10 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
           >
             Cancelar
           </button>

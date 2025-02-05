@@ -53,3 +53,16 @@ export const STATUS_MOTORISTA = [
     color: '#C0C0C0'
   }
 ];
+
+export const STATUS_OPERACAO_PATIO_SERVICOS = [
+  {
+    id: 1,
+    label: 'Entrou no Pátio',
+    color: '#EA004C'
+  },
+  {
+    id: 2,
+    label: 'Saiu do Pátio',
+    color: '#808080'
+  },
+];

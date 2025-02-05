@@ -32,45 +32,56 @@ const Form: React.FC<Props> = (props: Props) => {
   const [states, setStates] = useState([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = useCallback(async (values: FormValues, row?: IVeiculos) => {
-    try {
-      setLoading(true);
-      
-      const body = {
-        id_veiculo: row?.id_veiculo,
-        placa: values.placa.replace("-", ""),
-        id_estado: values.id_estado,
-        renavam:
-          String(values.renavam).replaceAll(".", "").replaceAll("-", "")
-            .length > 0
-            ? String(values.renavam).replaceAll(".", "").replaceAll("-", "")
-            : null,
-        tipo_parte_veiculo: values.tipoParteVeiculo,
-        rntrc: values.rntrc !== null && values.rntrc.length > 0 ? values.rntrc : null,
-        data_expiracao_rntrc:
-          values.dataExpiracaoRNTRC !== null && values.dataExpiracaoRNTRC.length > 0
-            ? values.dataExpiracaoRNTRC
-            : null,
-        ano_exercicio_crlv: values.anoExercicioCRLV,
-        livre_acesso_patio: values.livreAcessoPatio,
-        ativo: values.ativo,
-        id_usuario_historico: 1,
-        status: 1,
-      };
+  const handleSubmit = useCallback(
+    async (values: FormValues, row?: IVeiculos) => {
+      try {
+        setLoading(true);
 
-      if (props.isEdit) {
-        await api.post("/editar/veiculos", body);
-      } else {
-        await api.post("/cadastrar/veiculos", body);
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const userId = urlParams.get("userId");
+
+        const body = {
+          id_veiculo: row?.id_veiculo,
+          placa: values.placa.replace("-", ""),
+          id_estado: values.id_estado,
+          renavam:
+            String(values.renavam).replaceAll(".", "").replaceAll("-", "")
+              .length > 0
+              ? String(values.renavam).replaceAll(".", "").replaceAll("-", "")
+              : null,
+          tipo_parte_veiculo: values.tipoParteVeiculo,
+          rntrc:
+            values.rntrc !== null && values.rntrc.length > 0
+              ? values.rntrc
+              : null,
+          data_expiracao_rntrc:
+            values.dataExpiracaoRNTRC !== null &&
+            values.dataExpiracaoRNTRC.length > 0
+              ? values.dataExpiracaoRNTRC
+              : null,
+          ano_exercicio_crlv: values.anoExercicioCRLV,
+          livre_acesso_patio: values.livreAcessoPatio,
+          ativo: true,
+          id_usuario_historico: userId,
+          status: 1,
+        };
+
+        if (props.isEdit) {
+          await api.post("/editar/veiculos", body);
+        } else {
+          await api.post("/cadastrar/veiculos", body);
+        }
+
+        setLoading(false);
+
+        props.onConfirm();
+      } catch {
+        setLoading(false);
       }
-
-      setLoading(false);
-
-      props.onConfirm();
-    } catch {
-      setLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   const getStates = useCallback(async () => {
     try {
@@ -230,29 +241,19 @@ const Form: React.FC<Props> = (props: Props) => {
             disabled={props.isView}
           />
         </div>
-        <div>
-          <RadioGroupCustom
-            title="Ativo"
-            onChange={(value: string) =>
-              formik.setFieldValue("ativo", value === "true")
-            }
-            value={formik.values.ativo}
-            disabled={props.isView}
-          />
-        </div>
       </div>
       {!props.isView && (
-        <div className="flex items-center mt-4">
+        <div className="flex items-center mt-6">
           <button
             type="button"
-            className="w-full h-14 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
+            className="w-full h-10 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
             onClick={() => formik.handleSubmit()}
           >
             Salvar
           </button>
           <button
             type="button"
-            className="w-full h-14 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
+            className="w-full h-10 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
           >
             Cancelar
           </button>

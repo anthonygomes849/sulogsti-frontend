@@ -127,13 +127,9 @@ const SubNav: React.FC<Props> = (props: Props) => {
           })} */}
         </Breadcrumb>
 
-        {/* <h1 className="text-sm">{}</h1> */}
       </div>
       {props.isVisibleActions && (
         <div className="flex !mr-4 items-center">
-          {/* <h1 className="!mr-4 cursor-pointer hover:text-yellow-400 text-sm">
-            Exibir
-          </h1> */}
           <h1 className="!mr-4 cursor-pointer hover:text-yellow-400 text-sm">
             Exportar
           </h1>

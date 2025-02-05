@@ -4,14 +4,11 @@ import { BreadcrumbProvider } from "../../hooks/BreadCrumbContext";
 import { ModalProvider } from "../../hooks/ModalContext";
 import { PermissionProvider } from "../../hooks/PermissionContext";
 
-// import { Container } from './styles';
-
 interface Props {
   children: JSX.Element;
 }
 
 const Main: React.FC<Props> = (props: Props) => {
-  console.log(window.location.pathname);
   return (
     <div className="flex flex-col">
       <PermissionProvider>
