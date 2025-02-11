@@ -228,7 +228,7 @@ const OperacoesPortoAgendada: React.FC = () => {
 
   const gridRef: any = useRef();
 
-  const { isModalOpen, openModal, closeModal } = useModal();
+  const { openModal } = useModal();
 
   const onDelete = useCallback(async (rowId?: number) => {
     try {

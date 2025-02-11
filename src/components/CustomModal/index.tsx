@@ -22,7 +22,7 @@ interface Props {
 }
 
 const CustomModal: React.FC<Props> = (props: Props) => {
-  const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  const BootstrapDialog = styled(Dialog)(() => ({
     "& .MuiPaper-root": {
       minWidth: props.isScreenLg ? "800px" : "500px",
       borderRadius: '10px'
