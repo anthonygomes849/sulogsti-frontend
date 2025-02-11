@@ -116,7 +116,7 @@ const OperacoesPortoAgendada: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full h-screen bg-[#F5F5F5] p-5">
-      <Loading />
+      <Loading loading={loading} />
       {isModalOpen && (
         <Create
           isEdit={isEdit}
