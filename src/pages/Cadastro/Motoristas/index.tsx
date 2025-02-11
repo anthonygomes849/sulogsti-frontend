@@ -1,5 +1,6 @@
 import { ValueFormatterParams } from "ag-grid-community";
 import React, { useCallback, useRef, useState } from "react";
+import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
 
 import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
@@ -11,6 +12,7 @@ import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
 import Create from "./Create";
 import { IMotorista } from "./Create/types/types";
+import Info from "./Info";
 
 // import { Container } from './styles';
 
@@ -24,6 +26,7 @@ const ListMotorista: React.FC = () => {
         if (params.value) {
           return maskedCPF(params.value);
         }
+        return "---";
       },
     },
     {
@@ -34,6 +37,7 @@ const ListMotorista: React.FC = () => {
         if (params.value) {
           return params.value.toUpperCase();
         }
+        return "---";
       },
     },
     {
@@ -43,6 +47,8 @@ const ListMotorista: React.FC = () => {
         if (params.value) {
           return maskedPhone(params.value);
         }
+
+        return "---";
       },
     },
     {
@@ -53,6 +59,7 @@ const ListMotorista: React.FC = () => {
         if (params.value) {
           return maskedCPF(params.value);
         }
+        return "---";
       },
     },
     {
@@ -68,6 +75,7 @@ const ListMotorista: React.FC = () => {
         if (params.value) {
           return formatDateBR(params.value);
         }
+        return "---";
       },
     },
     {
@@ -75,9 +83,10 @@ const ListMotorista: React.FC = () => {
       headerName: "Endereço",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
+        if (params.value && params.value !== "NULL") {
           return params.value;
         }
+        return "---";
       },
     },
     {
@@ -88,6 +97,7 @@ const ListMotorista: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return '---'
       },
     },
     {
@@ -98,6 +108,7 @@ const ListMotorista: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return '---'
       },
     },
     {
@@ -108,6 +119,7 @@ const ListMotorista: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return '---';
       },
     },
     {
@@ -118,6 +130,7 @@ const ListMotorista: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return '---';
       },
     },
     {
@@ -128,24 +141,49 @@ const ListMotorista: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return '---'
       },
     },
     {
       field: "cep",
       headerName: "CEP",
       filter: true,
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return '---'
+      },
     },
     {
       field: "data_inativacao",
       headerName: "Data Inativação",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return '---'
+      },
     },
     {
       field: "dias_inativacao",
       headerName: "Dias de Inativação",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return '---'
+      },
     },
     {
       field: "motivo_inativacao",
       headerName: "Motivo da Inativação",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return '---'
+      },
     },
     {
       field: "data_historico",
@@ -197,7 +235,10 @@ const ListMotorista: React.FC = () => {
           isEdit={isEdit}
           isView={isView}
           selectedRow={selectedRow}
-          onClear={() => closeModal()}
+          onClear={() => {
+            setIsEdit(!isEdit);
+            closeModal()
+          }}
           onConfirm={() => {
             window.location.reload();
           }}
@@ -208,9 +249,32 @@ const ListMotorista: React.FC = () => {
         <ModalDelete
           onCancel={() => setIsRemove(!isRemove)}
           onConfirm={() => onDelete(selectedRow?.id_motorista)}
+          row={selectedRow?.nome}
         />
       )}
-      <div className="flex flex-col w-full h-screen">
+
+      {isView && (
+        <Info
+          data={selectedRow}
+          title="Conhecer - Motoristas"
+          onClose={() => setIsView(!isView)}
+        />
+      )}
+
+      <div className="flex flex-col w-full h-screen bg-[#F5F5F5] p-5">
+        <div className="flex items-center justify-between w-full mb-7">
+          <div>
+            <h1 className="text-2xl text-[#000000] font-bold">Motoristas</h1>
+          </div>
+          <div className="mr-14">
+            <button
+              className="flex items-center justify-center h-12 w-36 bg-[#062D4E] text-[#FFFFFF] text-sm font-light border-none rounded-full"
+              onClick={() => openModal()}
+            >
+              Adicionar <img src={PlusButtonIcon} alt="" className="ml-2" />
+            </button>
+          </div>
+        </div>
         <div className="flex w-screen">
           <Grid
             ref={gridRef}
@@ -226,7 +290,6 @@ const ListMotorista: React.FC = () => {
             onView={(data: any) => {
               setSelectedRow(data);
               setIsView(!isView);
-              openModal();
             }}
             onUpdate={(data: any) => {
               setSelectedRow(data);

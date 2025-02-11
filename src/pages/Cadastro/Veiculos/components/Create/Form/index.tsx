@@ -26,6 +26,7 @@ interface Props {
   isEdit?: boolean;
   selectedRow?: IVeiculos;
   onConfirm: () => void;
+  onClose: () => void;
 }
 
 const Form: React.FC<Props> = (props: Props) => {
@@ -89,7 +90,7 @@ const Form: React.FC<Props> = (props: Props) => {
 
       const mappingData = response.data.map((rows: any) => {
         return {
-          id: rows.id_estado,
+          value: rows.id_estado,
           label: rows.nome,
         };
       });
@@ -147,7 +148,7 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-4 p-5">
         <div>
           <InputCustom
             title="Placa"
@@ -165,7 +166,7 @@ const Form: React.FC<Props> = (props: Props) => {
           <SelectCustom
             data={states}
             onChange={(selectedOption: any) =>
-              formik.setFieldValue("id_estado", selectedOption.id)
+              formik.setFieldValue("id_estado", selectedOption.value)
             }
             title="Estado"
             touched={formik.touched.id_estado}
@@ -242,23 +243,23 @@ const Form: React.FC<Props> = (props: Props) => {
           />
         </div>
       </div>
-      {!props.isView && (
-        <div className="flex items-center mt-6">
-          <button
-            type="button"
-            className="w-full h-10 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
-            onClick={() => formik.handleSubmit()}
-          >
-            Salvar
-          </button>
-          <button
-            type="button"
-            className="w-full h-10 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
-          >
-            Cancelar
-          </button>
-        </div>
-      )}
+      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000000] font-bold rounded-full mr-2"
+          style={{ border: "1px solid #DBDEDF" }}
+          onClick={props.onClose}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+          onClick={() => formik.handleSubmit()}
+        >
+          Salvar
+        </button>
+      </div>
     </>
   );
 };

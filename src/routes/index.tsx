@@ -5,7 +5,9 @@ import Terminal from "../pages/Cadastro/Terminal";
 import ListVeiculo from "../pages/Cadastro/Veiculos";
 import ListTipoServico from "../pages/Configuracoes/TipoServico";
 import Login from "../pages/Login";
+import OperacoesPatioEntradaVeiculos from "../pages/OperacoesPatio/OperacoesPatioEntradaVeiculos";
 import ListOperacoesPatioServicos from "../pages/OperacoesPatio/OperacoesPatioServicos";
+import OperacoesPortoAgendada from "../pages/OperacoesPorto/OperacoesPortoAgendada";
 import PrivateRoute from "./privateRoute";
 import Route from "./route";
 
@@ -71,6 +73,22 @@ const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <Terminal />
+      </PrivateRoute>
+    )
+  },
+  {
+    path: '/operacoes_patio/entrada_saida_veiculos',
+    element: (
+      <PrivateRoute>
+        <OperacoesPatioEntradaVeiculos />
+      </PrivateRoute>
+    )
+  },
+  {
+    path: '/operacoes_porto/agendada',
+    element: (
+      <PrivateRoute>
+        <OperacoesPortoAgendada />
       </PrivateRoute>
     )
   }

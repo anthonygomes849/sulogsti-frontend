@@ -1,0 +1,18 @@
+.ag-header-cell-text {
+    font-family: "Poppins";
+    font-weight: bold;
+    font-size: 0.875rem;
+    color: #000000;
+}
+
+.ag-root-wrapper {
+  border-radius: 2px;
+  height: 90% !important;
+}
+
+.ag-cell-value {
+  font-family: "Poppins";
+  font-size: 0.775rem;
+  font-weight: normal;
+  color: #000000;
+}

@@ -16,6 +16,7 @@ interface Props {
   isEdit?: boolean;
   selectedRow?: ITipoServico;
   onConfirm: () => void;
+  onClose: () => void;
 }
 
 const Form: React.FC<Props> = (props: Props) => {
@@ -36,6 +37,7 @@ const Form: React.FC<Props> = (props: Props) => {
         id_usuario_historico: userId,
         status: 1,
       };
+
 
       if (props.isEdit) {
         await api.post("/editar/tipoServicos", body);
@@ -81,7 +83,7 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
-      <div className="grid grid-cols-1 gap-3 mb-4">
+      <div className="grid grid-cols-1 gap-3 mb-4 p-5">
         <div>
           <InputCustom
             title="Tipo do Serviço"
@@ -94,23 +96,23 @@ const Form: React.FC<Props> = (props: Props) => {
           />
         </div>
       </div>
-      {!props.isView && (
-        <div className="flex items-center mt-6">
-          <button
-            type="button"
-            className="w-full h-10 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
-            onClick={() => formik.handleSubmit()}
-          >
-            Salvar
-          </button>
-          <button
-            type="button"
-            className="w-full h-10 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
-          >
-            Cancelar
-          </button>
-        </div>
-      )}
+      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000000] font-bold rounded-full mr-2"
+          style={{ border: "1px solid #DBDEDF" }}
+          onClick={props.onClose}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+          onClick={() => formik.handleSubmit()}
+        >
+          Salvar
+        </button>
+      </div>
     </>
   );
 };

@@ -20,6 +20,7 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
       ...styles,
       backgroundColor: "white",
       zIndex: "99999999",
+      borderRadius: "2.313rem"
     }),
     option: (styles: any) => {
       // const color = chroma(data.color);
@@ -31,12 +32,12 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
     },
   };
 
-  const defaultValue = props.data.find((value: any) => value.id == props.value);
+  const defaultValue = props.data.find((item: any) => item.value == props.value);
 
   return (
     <>
       <div>
-        <h1 className="text-[15px] text-[#000] mb-4">{props.title}</h1>
+        <h1 className="text-sm font-semibold text-[#000] mb-2">{props.title}</h1>
 
         <Select
           className="basic-multi-select"

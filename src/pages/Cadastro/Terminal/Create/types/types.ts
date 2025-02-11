@@ -11,6 +11,8 @@ export interface ITerminal {
   endereco: string;
   complemento: string;
   numero: string;
+  bairro: string;
+  cidade: string;
   id_bairro: string;
   id_cidade: string;
   uf_estado: string;
@@ -58,4 +60,9 @@ export enum BillingPeriod {
   QUINZENAL = "QUINZENAL",
   MENSAL = "MENSAL",
   BIMESTRAL = "BIMESTRAL"
+}
+
+export interface PeriodPayment {
+  id_przpgto: number;
+  descricao: string;
 }

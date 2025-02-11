@@ -1,12 +1,17 @@
 import { useFormik } from "formik";
 import React, { useCallback, useEffect, useState } from "react";
 import InputCustom from "../../../../../components/InputCustom";
-import RadioGroupCustom from "../../../../../components/RadioGroup";
 import SelectCustom from "../../../../../components/SelectCustom";
 import Loading from "../../../../../core/common/Loading";
 import api from "../../../../../services/api";
 import { City, States } from "../../../Motoristas/Create/types/types";
-import { BillingPeriod, CargaType, ITerminal, Neighborhood } from "../types/types";
+import {
+  BillingPeriod,
+  CargaType,
+  ITerminal,
+  Neighborhood,
+  PeriodPayment,
+} from "../types/types";
 
 interface FormValues {
   cnpj: string;
@@ -34,6 +39,7 @@ interface Props {
   isEdit?: boolean;
   selectedRow?: ITerminal;
   onConfirm: () => void;
+  onClose: () => void;
 }
 
 const Form: React.FC<Props> = (props: Props) => {
@@ -43,54 +49,9 @@ const Form: React.FC<Props> = (props: Props) => {
   const [cargoTypes, setCargoTypes] = useState<any[]>([]);
   const [billingPeriod, setBillingPeriod] = useState<any[]>([]);
   const [valueCargoTypes, setValueCargoTypes] = useState<any[]>([]);
+  const [periodPayment, setPeriodPayment] = useState<any[]>([]);
+
   const [loading] = useState<boolean>(false);
-
-  // const handleSubmit = useCallback(
-  //   async (values: FormValues, row?: IMotorista) => {
-  //     try {
-  //       setLoading(true);
-
-  //       const body = {
-  //         id_motorista: row?.id_terminal,
-  //         cpf: values.cpf,
-  //         nome: values.nome,
-  //         endereco: values.endereco.length > 0 ? values.endereco : null,
-  //         complemento:
-  //           values.complemento.length > 0 ? values.complemento : null,
-  //         numero: values.numero.length > 0 ? values.numero : null,
-  //         cep: values.cep.length > 0 ? values.cep : null,
-  //         id_bairro: values.id_bairro.length > 0 ? values.id_bairro : null,
-  //         id_cidade: values.id_cidade.length > 0 ? values.id_cidade : null,
-  //         id_estado: values.id_estado,
-  //         celular: values.celular,
-  //         numero_cnh: values.numero_cnh,
-  //         categoria_cnh: values.categoria_cnh,
-  //         data_expiracao_cnh: values.data_expiracao_cnh,
-  //         ativo: values.ativo,
-  //         tipo_parte_veiculo: true,
-  //         data_inativacao: null,
-  //         motivo_inativacao: null,
-  //         dias_inativacao: null,
-  //         id_piramide: null,
-  //         status: 1,
-  //         id_usuario_historico: 1,
-  //       };
-
-  //       if(props.isEdit) {
-  //         await api.post("/editar/terminais", body);
-  //       } else {
-  //         await api.post('/cadastrar/terminais', body);
-  //       }
-
-  //       setLoading(false);
-
-  //       props.onConfirm();
-  //     } catch {
-  //       setLoading(false);
-  //     }
-  //   },
-  //   []
-  // );
 
   const initialValues: FormValues = {
     cnpj: "",
@@ -124,23 +85,27 @@ const Form: React.FC<Props> = (props: Props) => {
   const onLoadFormValues = useCallback((row?: ITerminal) => {
     const data = row;
 
-
     if (data) {
       formik.setFieldValue("cnpj", data.cnpj);
       formik.setFieldValue("razaoSocial", data.razao_social);
       formik.setFieldValue("nomeFantasia", data.nome_fantasia);
-      formik.setFieldValue("periodo_faturamento", data.periodo_faturamento);
+      formik.setFieldValue("periodo_faturamento", data.periodo_faturamento - 1);
       formik.setFieldValue("id_przpgto", data.id_przpgto);
-      if(data.tipos_carga) {
-        console.log(data.tipos_carga.split(','));
-        const cargaType: any[] = data.tipos_carga.replace("{", "").replace("}", "").split(",");
+      if (data.tipos_carga) {
+        console.log(data.tipos_carga.split(","));
+        const cargaType: any[] = data.tipos_carga
+          .replace("{", "")
+          .replace("}", "")
+          .split(",");
 
         const getCargoType = cargaType.map((item: any) => {
           return {
-            value: item,
-            label: Object.values(CargaType)[Number(item - 1)]
-          }
+            value: Number(item),
+            label: Object.values(CargaType)[Number(item - 1)],
+          };
         });
+
+        console.log(getCargoType);
 
         setValueCargoTypes(getCargoType);
         formik.setFieldValue("tipos_carga", data.tipos_carga);
@@ -163,7 +128,7 @@ const Form: React.FC<Props> = (props: Props) => {
 
       const mappingResponse = response.data.map((item: States) => {
         return {
-          id: item.id_estado,
+          value: item.id_estado,
           label: item.nome,
         };
       });
@@ -183,7 +148,7 @@ const Form: React.FC<Props> = (props: Props) => {
 
         const mappingResponse = response.data.map((item: City) => {
           return {
-            id: item.id_cidade,
+            value: item.id_cidade,
             label: item.nome,
           };
         });
@@ -205,7 +170,7 @@ const Form: React.FC<Props> = (props: Props) => {
 
         const mappingResponse = response.data.map((item: Neighborhood) => {
           return {
-            id: item.id_bairro,
+            value: item.id_bairro,
             label: item.nome,
           };
         });
@@ -227,13 +192,35 @@ const Form: React.FC<Props> = (props: Props) => {
     setCargoTypes(data);
   }, []);
 
+  const getPeriodPayment = useCallback(async () => {
+    try {
+      const response = await api.post('/listar/faturasPrazoPagamento');
+
+      if(response.status === 200) {
+
+        
+        const mappingResponse = response.data.map((item: PeriodPayment) => {
+          return {
+            label: item.descricao,
+            value: item.id_przpgto,
+          }
+        });
+        
+        setPeriodPayment(mappingResponse);
+        
+      }
+    }catch{}
+  }, [])
+
   const getBillingPeriod = useCallback(() => {
-    const data = Object.values(BillingPeriod).map((value: any, index: number) => {
-      return {
-        value: index + 1,
-        label: value,
-      };
-    });
+    const data = Object.values(BillingPeriod).map(
+      (value: any, index: number) => {
+        return {
+          value: index + 1,
+          label: value,
+        };
+      }
+    );
 
     setBillingPeriod(data);
   }, []);
@@ -241,10 +228,11 @@ const Form: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     getStates();
   }, [getStates]);
-  
+
   useEffect(() => {
     getCargoTypes();
     getBillingPeriod();
+    getPeriodPayment();
     if (props.isView || props.isEdit) {
       onLoadFormValues(props.selectedRow);
     }
@@ -253,7 +241,7 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
-      <div className="overflow-y-scroll max-h-[550px]">
+      <div className="overflow-y-scroll max-h-[550px] p-5">
         <div className="grid grid-cols-2 gap-3 mb-2">
           <div>
             <InputCustom
@@ -295,9 +283,9 @@ const Form: React.FC<Props> = (props: Props) => {
               data={cargoTypes}
               isMulti
               onChange={(selectedOption: any) => {
-               setValueCargoTypes(selectedOption);
+                setValueCargoTypes(selectedOption);
 
-               let dataCargoTypes = "{";
+                let dataCargoTypes = "{";
 
                 selectedOption.map((item: any) => {
                   dataCargoTypes = dataCargoTypes.concat(item.value) + ",";
@@ -317,28 +305,37 @@ const Form: React.FC<Props> = (props: Props) => {
             />
           </div>
           <div>
-          <SelectCustom
+            <SelectCustom
               data={billingPeriod}
               onChange={(selectedOption: any) => {
-                formik.setFieldValue("periodo_faturamento", selectedOption.value);
+                formik.setFieldValue(
+                  "periodo_faturamento",
+                  selectedOption.value
+                );
               }}
               title="Período de Faturamento"
               touched={formik.touched.periodo_faturamento}
               error={formik.errors.periodo_faturamento}
               disabled={props.isView}
-              value={valueCargoTypes}
+              value={formik.values.periodo_faturamento}
             />
           </div>
           <div>
-          <InputCustom
+          <SelectCustom
+              data={periodPayment}
+              onChange={(selectedOption: any) => {
+                formik.setFieldValue(
+                  "id_przpgto",
+                  selectedOption.value
+                );
+              }}
               title="Prazo de Pagamento"
-              placeholder=""
-              onChange={formik.handleChange("id_przpgto")}
-              value={formik.values.id_przpgto}
               touched={formik.touched.id_przpgto}
               error={formik.errors.id_przpgto}
               disabled={props.isView}
+              value={formik.values.id_przpgto}
             />
+            
           </div>
         </div>
         <div className="grid grid-cols-1 gap-3 mb-2">
@@ -484,36 +481,25 @@ const Form: React.FC<Props> = (props: Props) => {
             />
           </div>
 
-          <div>
-            <RadioGroupCustom
-              title="Ativo"
-              onChange={(value: string) =>
-                formik.setFieldValue("ativo", value === "true")
-              }
-              value={formik.values.ativo}
-              disabled={props.isView}
-            />
-          </div>
         </div>
       </div>
-
-      {!props.isView && (
-        <div className="flex items-center mt-6">
-          <button
-            type="button"
-            className="w-full h-14 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
-            onClick={() => formik.handleSubmit()}
-          >
-            Salvar
-          </button>
-          <button
-            type="button"
-            className="w-full h-14 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
-          >
-            Cancelar
-          </button>
-        </div>
-      )}
+      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000000] font-bold rounded-full mr-2"
+          style={{ border: "1px solid #DBDEDF" }}
+          onClick={props.onClose}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+          onClick={() => formik.handleSubmit()}
+        >
+          Salvar
+        </button>
+      </div>
     </>
   );
 };

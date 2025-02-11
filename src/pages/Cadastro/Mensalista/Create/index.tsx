@@ -17,8 +17,8 @@ const CreateMensalista: React.FC<Props> = (props: Props) => {
   const { breadcrumb } = useBreadcrumb();
 
   return (
-    <CustomModal title={`${breadcrumb[breadcrumb.length - 1]} Mensalista`} onClose={props.onClear}>
-      <Form isView={props.isView} selectedRow={props.selectedRow} onConfirm={props.onConfirm} isEdit={props.isEdit} />
+    <CustomModal title={props.isEdit ? "Editar" : "Cadastrar"} onClose={props.onClear}>
+      <Form isView={props.isView} selectedRow={props.selectedRow} onConfirm={props.onConfirm} isEdit={props.isEdit} onClose={props.onClear} />
     </CustomModal>
   );
 }

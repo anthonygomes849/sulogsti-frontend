@@ -43,6 +43,11 @@ export const maskedPlate = (value: string) => {
   return value
 }
 
+export const maskedZipcode = (value: string) => {
+  value = value.replace(/(\d{5})(\d)/, "$1-$2")       //Coloca um ponto entre o terceiro e o quarto dígitos
+  return value
+}
+
 export const renderCargoTypes = (data: any) => {
   let s = "";
 

@@ -6,6 +6,7 @@ export interface StatusType {
   id: number;
   label: string;
   color: string;
+  icon: string;
 }
 
 interface Props {
@@ -14,9 +15,9 @@ interface Props {
 }
 
 const Status: React.FC<Props> = ({ data, status }: Props) => {
-
+  console.log(data);
   return (
-    <Badge content={data.find((item: StatusType) => item.id === status)?.label} color={data.find((item: StatusType) => item.id === status)?.color} />
+    <Badge content={data.find((item: StatusType) => item.id === status)?.label} color={data.find((item: StatusType) => item.id === status)?.color} icon={data.find((item: StatusType) => item.id === status)?.icon} />
   );
 }
 
