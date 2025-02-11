@@ -1,15 +1,16 @@
 import { ValueFormatterParams } from "ag-grid-community";
 import React, { useCallback, useRef, useState } from "react";
+import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
 import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
 import { formatDateBR } from "../../../helpers/format";
-import { STATUS_VEICULO } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
 import Create from "./Create";
 import { ITipoServico } from "./Create/types/types";
+import Info from "./Info";
 
 // import { Continer } from './styles';
 
@@ -19,6 +20,12 @@ const ListTipoServico: React.FC = () => {
       field: "tipo_servico",
       headerName: "Tipo Serviço",
       flex: 2,
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
     },
     {
       field: "data_historico",
@@ -68,7 +75,10 @@ const ListTipoServico: React.FC = () => {
           isView={isView}
           isEdit={isEdit}
           selectedRow={selectedRow}
-          onClear={() => closeModal()}
+          onClear={() => {
+            closeModal();
+            setIsEdit(false);
+          }}
           onConfirm={() => {
             window.location.reload();
           }}
@@ -81,10 +91,33 @@ const ListTipoServico: React.FC = () => {
         <ModalDelete
           onCancel={() => setIsRemove(!isRemove)}
           onConfirm={() => onDelete(selectedRow?.id_tipo_servico)}
+          row={selectedRow?.tipo_servico}
+        />
+      )}
+      {isView && (
+        <Info
+          data={selectedRow}
+          title="Conhecer - Tipo do Serviço"
+          onClose={() => setIsView(!isView)}
         />
       )}
 
-      <div className="flex flex-col w-full h-screen">
+      <div className="flex flex-col w-full h-screen bg-[#F5F5F5] p-5">
+        <div className="flex items-center justify-between w-full mb-7">
+          <div>
+            <h1 className="text-2xl text-[#000000] font-bold">
+              Tipo de Serviços
+            </h1>
+          </div>
+          <div className="mr-14">
+            <button
+              className="flex items-center justify-center h-12 w-36 bg-[#062D4E] text-[#FFFFFF] text-sm font-light border-none rounded-full"
+              onClick={() => openModal()}
+            >
+              Adicionar <img src={PlusButtonIcon} alt="" className="ml-2" />
+            </button>
+          </div>
+        </div>
         <div className="flex w-screen">
           <Grid
             ref={gridRef}
@@ -92,7 +125,7 @@ const ListTipoServico: React.FC = () => {
             filters={[]}
             pagination
             path="/listar/tipoServicos"
-            status={STATUS_VEICULO}
+            status={[]}
             onDelete={(data: any) => {
               setIsRemove(!isRemove);
               setSelectedRows(data);
@@ -100,7 +133,6 @@ const ListTipoServico: React.FC = () => {
             onView={(data: any) => {
               setSelectedRows(data);
               setIsView(!isView);
-              openModal();
             }}
             onUpdate={(data: any) => {
               setSelectedRows(data);

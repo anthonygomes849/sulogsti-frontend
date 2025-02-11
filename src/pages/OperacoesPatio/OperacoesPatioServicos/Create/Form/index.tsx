@@ -17,6 +17,7 @@ interface Props {
   isEdit?: boolean;
   selectedRow?: IOperacoesPatioServicos;
   onConfirm: () => void;
+  onClose: () => void;
 }
 
 const Form: React.FC<Props> = (props: Props) => {
@@ -89,7 +90,7 @@ const Form: React.FC<Props> = (props: Props) => {
 
       const mappingData = response.data.data.map((rows: any) => {
         return {
-          id: rows.id_operacao_patio_entrada_veiculo,
+          value: rows.id_operacao_patio_entrada_veiculo,
           label: `${rows.placa_dianteira} | ${formatDateTimeBR(rows.data_hora)}`,
         };
       });
@@ -116,7 +117,7 @@ const Form: React.FC<Props> = (props: Props) => {
 
       const mappingData = response.data.data.map((rows: any) => {
         return {
-          id: rows.id_tipo_servico,
+          value: rows.id_tipo_servico,
           label: rows.tipo_servico,
         };
       });
@@ -150,13 +151,13 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-4 p-5">
         <div>
         <SelectCustom
             title="Tipo Serviço"
             data={tipoServico}
             onChange={(selectedOption: any) =>
-              formik.setFieldValue("id_tipo_servico", selectedOption.id)
+              formik.setFieldValue("id_tipo_servico", selectedOption.value)
             }
             touched={formik.touched.id_tipo_servico}
             error={formik.errors.id_tipo_servico}
@@ -169,7 +170,7 @@ const Form: React.FC<Props> = (props: Props) => {
             title="Entrada Veiculo"
             data={operacoesPatioEntradaVeiculos}
             onChange={(selectedOption: any) =>
-              formik.setFieldValue("id_operacao_patio_entrada_veiculo", selectedOption.id)
+              formik.setFieldValue("id_operacao_patio_entrada_veiculo", selectedOption.value)
             }
             touched={formik.touched.id_operacao_patio_entrada_veiculo}
             error={formik.errors.id_operacao_patio_entrada_veiculo}
@@ -179,23 +180,23 @@ const Form: React.FC<Props> = (props: Props) => {
         </div>
       </div>
 
-      {!props.isView && (
-        <div className="flex items-center mt-6">
-          <button
-            type="button"
-            className="w-full h-10 bg-[#003459] text-sm text-[#fff] rounded-md mr-2"
-            onClick={() => formik.handleSubmit()}
-          >
-            Salvar
-          </button>
-          <button
-            type="button"
-            className="w-full h-10 bg-[#9D9FA1] text-sm text-[#fff] rounded-md"
-          >
-            Cancelar
-          </button>
-        </div>
-      )}
+      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000000] font-bold rounded-full mr-2"
+          style={{ border: "1px solid #DBDEDF" }}
+          onClick={props.onClose}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+          onClick={() => formik.handleSubmit()}
+        >
+          Salvar
+        </button>
+      </div>
     </>
   );
 };

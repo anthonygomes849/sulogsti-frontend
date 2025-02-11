@@ -3,7 +3,9 @@ import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { AgGridReact, CustomCellRendererProps } from "ag-grid-react";
 import { format } from "date-fns";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { BsInfo, BsSlash, BsX } from "react-icons/bs";
+import DeleteIcon from "../../assets/images/deleteIcon.svg";
+import EditIcon from "../../assets/images/editIcon.svg";
+import InfoIcon from "../../assets/images/infoIcon.svg";
 import LoadingIndicator from "../../core/common/Loading";
 import { useBreadcrumb } from "../../hooks/BreadCrumbContext";
 import { usePermissions } from "../../hooks/PermissionContext";
@@ -12,7 +14,7 @@ import Loading from "./components/Loading";
 import Status from "./components/Status";
 import { GridProps } from "./model/Grid";
 
-// import { Container } from './styles';
+import "./styles.css";
 
 const Grid: React.FC<GridProps> = (props: GridProps) => {
   const gridRef = useRef<any>(null);
@@ -34,12 +36,13 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
           <div className="flex w-full h-full items-center justify-center">
             {usePermissions("CONHECER") && (
               <button
+                className="mr-4"
                 onClick={() => {
                   addBreadcrumb("Conhecer");
                   props.onView(params.data);
                 }}
               >
-                <BsInfo color="#1eb10d" style={{ width: 24, height: 24 }} />
+                <img src={InfoIcon} style={{ width: 16, height: 16 }} />
               </button>
             )}
             {/* {hasPermissions("CONHECER") && (
@@ -47,12 +50,13 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
             {usePermissions("SALVAR") && (
               <>
                 <button
+                  className="mr-4"
                   onClick={() => {
                     addBreadcrumb("Editar");
                     props.onUpdate(params.data);
                   }}
                 >
-                  <BsSlash color="#FFA500" style={{ width: 24, height: 24 }} />
+                  <img src={EditIcon} style={{ width: 16, height: 16 }} />
                 </button>
               </>
             )}
@@ -62,7 +66,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
                   props.onDelete(params.data);
                 }}
               >
-                <BsX color="#FF0000" style={{ width: 24, height: 24 }} />
+                <img src={DeleteIcon} style={{ width: 16, height: 16 }} />
               </button>
             )}
           </div>
@@ -183,8 +187,8 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
   return (
     <div
-      className="ag-theme-quartz"
-      style={{ width: "100%", height: "calc(100vh - 50px)" }}
+      className="ag-theme-quartz bg-[#FFFFFF] max-w-[96%] rounded-lg p-5 mr-5 shadow-md"
+      style={{ width: "100%", height: "calc(100vh - 150px)" }}
     >
       <LoadingIndicator loading={loading} />
 

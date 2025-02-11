@@ -1,5 +1,6 @@
 import { ValueFormatterParams } from "ag-grid-community";
 import React, { useCallback, useRef, useState } from "react";
+import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
 import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
@@ -10,11 +11,11 @@ import {
   maskedPhone,
   renderCargoTypes,
 } from "../../../helpers/format";
-import { STATUS_MOTORISTA } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
 import Create from "./Create";
 import { ITerminal } from "./Create/types/types";
+import Info from "./Info";
 
 const Terminal: React.FC = () => {
   const [columns] = useState<ColumnDef[]>([
@@ -26,6 +27,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return maskCnpj(params.value);
         }
+        return "---";
       },
     },
     {
@@ -36,6 +38,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return params.value.toUpperCase();
         }
+        return "---";
       },
     },
     {
@@ -46,6 +49,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return params.value.toUpperCase();
         }
+        return "---";
       },
     },
     {
@@ -56,6 +60,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return renderCargoTypes(params.value);
         }
+        return "---";
       },
     },
     {
@@ -65,6 +70,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return maskedPhone(params.value);
         }
+        return "---";
       },
     },
     {
@@ -74,6 +80,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return maskedPhone(params.value);
         }
+        return "---";
       },
     },
     {
@@ -84,6 +91,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return "---";
       },
     },
     {
@@ -94,6 +102,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return "---";
       },
     },
     {
@@ -104,6 +113,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return "---";
       },
     },
     {
@@ -114,6 +124,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return "---";
       },
     },
     {
@@ -124,6 +135,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return "---";
       },
     },
     {
@@ -134,34 +146,71 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return params.value;
         }
+        return "---";
       },
     },
     {
       field: "cep",
       headerName: "CEP",
       filter: true,
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
     },
     {
       field: "email",
       headerName: "E-mail",
       filter: true,
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
     },
     {
       field: "contato",
       headerName: "Contato",
       filter: true,
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
     },
     {
       field: "data_inativacao",
       headerName: "Data Inativação",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
     },
     {
       field: "dias_inativacao",
       headerName: "Dias de Inativação",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
     },
     {
       field: "motivo_inativacao",
       headerName: "Motivo da Inativação",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
     },
     {
       field: "data_historico",
@@ -172,6 +221,7 @@ const Terminal: React.FC = () => {
         if (params.value) {
           return formatDateBR(params.value);
         }
+        return '----';
       },
     },
   ]);
@@ -224,9 +274,24 @@ const Terminal: React.FC = () => {
         <ModalDelete
           onCancel={() => setIsRemove(!isRemove)}
           onConfirm={() => onDelete(selectedRow?.id_terminal)}
+          row={selectedRow?.razao_social}
         />
       )}
-      <div className="flex flex-col w-full h-screen">
+
+      {isView && (
+        <Info data={selectedRow} title="Conhecer - Terminais" onClose={() => setIsView(!isView)} />
+      )}
+      <div className="flex flex-col w-full h-screen bg-[#F5F5F5] p-5">
+        <div className="flex items-center justify-between w-full mb-7">
+          <div>
+            <h1 className="text-2xl text-[#000000] font-bold">Terminais</h1>
+          </div>
+          <div className="mr-14">
+            <button className="flex items-center justify-center h-12 w-36 bg-[#062D4E] text-[#FFFFFF] text-sm font-light border-none rounded-full" onClick={() => openModal()}>
+              Adicionar <img src={PlusButtonIcon} alt="" className="ml-2" />
+            </button>
+          </div>
+        </div>
         <div className="flex w-screen">
           <Grid
             ref={gridRef}
@@ -238,11 +303,11 @@ const Terminal: React.FC = () => {
               setIsRemove(!isRemove);
               setSelectedRow(data);
             }}
-            status={STATUS_MOTORISTA}
+            status={[]}
             onView={(data: any) => {
               setSelectedRow(data);
               setIsView(!isView);
-              openModal();
+              // openModal();
             }}
             onUpdate={(data: any) => {
               setSelectedRow(data);

@@ -18,6 +18,7 @@ interface Props {
   isEdit?: boolean;
   selectedRow?: IMensalista;
   onConfirm: () => void;
+  onClose: () => void;
 }
 
 const Form: React.FC<Props> = (props: Props) => {
@@ -40,7 +41,7 @@ const Form: React.FC<Props> = (props: Props) => {
 
       const mappingData = response.data.data.map((rows: any) => {
         return {
-          id: rows.id_transportadora,
+          value: rows.id_transportadora,
           label: rows.razao_social,
         };
       });
@@ -88,12 +89,15 @@ const Form: React.FC<Props> = (props: Props) => {
   const onLoadFormValues = useCallback((row: any) => {
     const data = row;
 
-    if(data) {
-      formik.setFieldValue('placa', data.placa);
-      formik.setFieldValue('id_transportadora', data.mensalista_transportadora.id_transportadora);
-      formik.setFieldValue('ativo', data.ativo);
+    if (data) {
+      formik.setFieldValue("placa", data.placa);
+      formik.setFieldValue(
+        "id_transportadora",
+        data.mensalista_transportadora.id_transportadora
+      );
+      formik.setFieldValue("ativo", data.ativo);
     }
-  }, [])
+  }, []);
 
   const initialValues: FormValues = {
     placa: "",
@@ -112,15 +116,15 @@ const Form: React.FC<Props> = (props: Props) => {
   }, [getTransportadoras]);
 
   useEffect(() => {
-    if(props.isView || props.isEdit) {
+    if (props.isView || props.isEdit) {
       onLoadFormValues(props.selectedRow);
     }
-  }, [])
+  }, []);
 
   return (
     <>
       <Loading loading={loading} />
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-4 p-5">
         <div>
           <InputCustom
             title="Placa"
@@ -139,7 +143,7 @@ const Form: React.FC<Props> = (props: Props) => {
             title="Transportadora"
             data={transportadoras}
             onChange={(selectedOption: any) =>
-              formik.setFieldValue("id_transportadora", selectedOption.id)
+              formik.setFieldValue("id_transportadora", selectedOption.value)
             }
             touched={formik.touched.id_transportadora}
             error={formik.errors.id_transportadora}
@@ -149,23 +153,23 @@ const Form: React.FC<Props> = (props: Props) => {
         </div>
       </div>
 
-      {!props.isView && (
-        <div className="flex items-center mt-6">
-          <button
-            type="button"
-            className="w-full h-10 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
-            onClick={() => formik.handleSubmit()}
-          >
-            Salvar
-          </button>
-          <button
-            type="button"
-            className="w-full h-10 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
-          >
-            Cancelar
-          </button>
-        </div>
-      )}
+      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000000] font-bold rounded-full mr-2"
+          style={{ border: "1px solid #DBDEDF" }}
+          onClick={props.onClose}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+          onClick={() => formik.handleSubmit()}
+        >
+          Salvar
+        </button>
+      </div>
     </>
   );
 };

@@ -38,6 +38,7 @@ interface Props {
   isEdit?: boolean;
   selectedRow?: IMotorista;
   onConfirm: () => void;
+  onClose: () => void;
 }
 
 const Form: React.FC<Props> = (props: Props) => {
@@ -63,10 +64,10 @@ const Form: React.FC<Props> = (props: Props) => {
           endereco: values.endereco.length > 0 ? values.endereco : null,
           complemento:
             values.complemento.length > 0 ? values.complemento : null,
-          numero: values.numero.length > 0 ? values.numero : null,
+          numero: values.numero ? values.numero : "",
           cep: values.cep.length > 0 ? values.cep : null,
-          id_bairro: values.id_bairro.length > 0 ? values.id_bairro : null,
-          id_cidade: values.id_cidade.length > 0 ? values.id_cidade : null,
+          id_bairro: values.id_bairro ? values.id_bairro : null,
+          id_cidade: values.id_cidade ? values.id_cidade : null,
           id_estado: values.id_estado,
           celular: values.celular,
           numero_cnh: values.numero_cnh,
@@ -78,10 +79,10 @@ const Form: React.FC<Props> = (props: Props) => {
           id_usuario_historico: userId,
         };
 
-        if(props.isEdit) {
+        if (props.isEdit) {
           await api.post("/editar/motoristas", body);
         } else {
-          await api.post('/cadastrar/motoristas', body);
+          await api.post("/cadastrar/motoristas", body);
         }
 
         setLoading(false);
@@ -121,22 +122,24 @@ const Form: React.FC<Props> = (props: Props) => {
   const onLoadFormValues = useCallback((row?: IMotorista) => {
     const data = row;
 
-    if(data) {
-      formik.setFieldValue('cpf', data.cpf);
-      formik.setFieldValue('nome', data.nome);
-      formik.setFieldValue('numero_cnh', data.numero_cnh);
-      formik.setFieldValue('categoria_cnh', data.categoria_cnh);
-      formik.setFieldValue('data_expiracao_cnh', data.data_expiracao_cnh);
-      formik.setFieldValue('celular', data.celular);
-      formik.setFieldValue('endereco', data.endereco);
-      formik.setFieldValue('id_estado', data.id_estado);
-      formik.setFieldValue('id_bairro', data.id_bairro);
-      formik.setFieldValue('id_cidade', data.id_cidade);
-      formik.setFieldValue('numero', data.numero);
-      formik.setFieldValue('cep', data.cep);
-      formik.setFieldValue('ativo', data.ativo);
+    if (data) {
+      formik.setFieldValue("cpf", data.cpf);
+      formik.setFieldValue("nome", data.nome);
+      formik.setFieldValue("numero_cnh", data.numero_cnh);
+      formik.setFieldValue("categoria_cnh", data.categoria_cnh);
+      formik.setFieldValue("data_expiracao_cnh", data.data_expiracao_cnh);
+      formik.setFieldValue("celular", data.celular);
+      formik.setFieldValue("endereco", data.endereco);
+      formik.setFieldValue("id_estado", data.id_estado);
+      console.log(data.id_estado);
+      getCities(data.id_estado);
+      getNeighborhood(data.id_cidade);
+      formik.setFieldValue("id_cidade", data.id_cidade);
+      formik.setFieldValue("numero", data.numero);
+      formik.setFieldValue("cep", data.cep);
+      formik.setFieldValue("ativo", data.ativo);
     }
-  }, [])
+  }, []);
 
   const onLoadCategoryCNH = useCallback(() => {
     const mappingCategory = Object.values(CategoriaCNH).map((category: any) => {
@@ -155,7 +158,7 @@ const Form: React.FC<Props> = (props: Props) => {
 
       const mappingResponse = response.data.map((item: States) => {
         return {
-          id: item.id_estado,
+          value: item.id_estado,
           label: item.nome,
         };
       });
@@ -175,12 +178,15 @@ const Form: React.FC<Props> = (props: Props) => {
 
         const mappingResponse = response.data.map((item: City) => {
           return {
-            id: item.id_cidade,
+            value: item.id_cidade,
             label: item.nome,
           };
         });
 
         setCities(mappingResponse);
+
+        formik.setFieldValue("id_cidade", props.selectedRow?.id_cidade);
+
       } catch {}
     },
     [formik.values.id_estado]
@@ -197,12 +203,14 @@ const Form: React.FC<Props> = (props: Props) => {
 
         const mappingResponse = response.data.map((item: Neighborhood) => {
           return {
-            id: item.id_bairro,
+            value: item.id_bairro,
             label: item.nome,
           };
         });
 
         setNeighborhood(mappingResponse);
+
+        formik.setFieldValue("id_bairro", props.selectedRow?.id_bairro);
       } catch {}
     },
     [formik.values.id_cidade]
@@ -217,8 +225,7 @@ const Form: React.FC<Props> = (props: Props) => {
   }, [getStates]);
 
   useEffect(() => {
-    if(props.isView || props.isEdit) {
-
+    if (props.isView || props.isEdit) {
       onLoadFormValues(props.selectedRow);
     }
   }, []);
@@ -226,7 +233,7 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
-      <div className="overflow-y-scroll max-w-full max-h-[550px]">
+      <div className="overflow-y-scroll max-w-full max-h-[550px] p-5">
         <div className="grid grid-cols-3 gap-3 mb-2">
           <div>
             <InputCustom
@@ -322,8 +329,8 @@ const Form: React.FC<Props> = (props: Props) => {
             <SelectCustom
               data={states}
               onChange={(selectedOption: any) => {
-                formik.setFieldValue("id_estado", selectedOption.id);
-                getCities(selectedOption.id);
+                formik.setFieldValue("id_estado", selectedOption.value);
+                getCities(selectedOption.value);
               }}
               title="Estado"
               touched={formik.touched.id_estado}
@@ -336,8 +343,8 @@ const Form: React.FC<Props> = (props: Props) => {
             <SelectCustom
               data={cities}
               onChange={(selectedOption: any) => {
-                formik.setFieldValue("id_cidade", selectedOption.id);
-                getNeighborhood(selectedOption.id);
+                formik.setFieldValue("id_cidade", selectedOption.value);
+                getNeighborhood(selectedOption.value);
               }}
               title="Cidade"
               touched={formik.touched.id_cidade}
@@ -350,7 +357,7 @@ const Form: React.FC<Props> = (props: Props) => {
             <SelectCustom
               data={neighborhood}
               onChange={(selectedOption: any) => {
-                formik.setFieldValue("id_bairro", selectedOption.id);
+                formik.setFieldValue("id_bairro", selectedOption.value);
               }}
               title="Bairro"
               touched={formik.touched.id_bairro}
@@ -396,27 +403,26 @@ const Form: React.FC<Props> = (props: Props) => {
               disabled={props.isView}
             />
           </div>
-
         </div>
       </div>
 
-      {!props.isView && (
-        <div className="flex items-center mt-6">
-          <button
-            type="button"
-            className="w-full h-10 bg-[#003459] text-base text-[#fff] rounded-md mr-2"
-            onClick={() => formik.handleSubmit()}
-          >
-            Salvar
-          </button>
-          <button
-            type="button"
-            className="w-full h-10 bg-[#9D9FA1] text-base text-[#fff] rounded-md"
-          >
-            Cancelar
-          </button>
-        </div>
-      )}
+      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000000] font-bold rounded-full mr-2"
+          style={{ border: "1px solid #DBDEDF" }}
+          onClick={props.onClose}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+          onClick={() => formik.handleSubmit()}
+        >
+          Salvar
+        </button>
+      </div>
     </>
   );
 };
