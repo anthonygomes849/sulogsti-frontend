@@ -166,6 +166,8 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
           const response = await api.post(`${path}?page=${page + 1}`, reqDTO);
 
+          console.log(response.data);
+
           params.successCallback(response.data.data, response.data.total);
           setRowData(response.data.data);
 
@@ -175,6 +177,8 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         }
       },
     };
+
+    // params.api.setGridOption('datasource', dataSource)
 
     params.api.setDatasource(dataSource);
 

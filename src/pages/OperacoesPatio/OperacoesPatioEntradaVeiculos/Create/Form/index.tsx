@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useFormik } from "formik";
 import React, { useCallback, useEffect, useState } from "react";
 import { Label } from "reactstrap";
@@ -6,6 +8,7 @@ import SelectCustom from "../../../../../components/SelectCustom";
 import Loading from "../../../../../core/common/Loading";
 import api from "../../../../../services/api";
 import { IOperacoesPatioEntradaVeiculos } from "../types/types";
+import formValidator from "../validators/formValidator";
 
 interface Props {
   isView?: boolean;
@@ -19,7 +22,7 @@ interface FormValues {
   data_hora: string;
   placa_dianteira: string;
   placa_traseira: string;
-  numero_partes_nao_motorizada: number;
+  numero_partes_nao_motorizada: string;
   identificadores_conteineres: string;
   id_operacao_patio_cancela: string;
   id_operacao_patio_cancela_saida: string;
@@ -62,9 +65,11 @@ const Form: React.FC<Props> = (props: Props) => {
 
         const body = {
           id_operacao_patio_entrada_veiculo: row?.id_operacao_patio_entrada_veiculo,
-          data_hora: values.data_hora,
-          placa_dianteira: values.placa_dianteira,
-          placa_traseira: values.placa_traseira.length > 0 ? values.placa_traseira : null,
+          data_hora: format(new Date(values.data_hora), 'yyyy-MM-dd HH:mm:ss', {
+            locale: ptBR
+          }),
+          placa_dianteira: values.placa_dianteira.replace('-', ''),
+          placa_traseira: values.placa_traseira.length > 0 ? values.placa_traseira.replace('-', '') : null,
           numero_partes_nao_motorizada: values.numero_partes_nao_motorizada,
           identificadores_conteineres: getIndentificadorConteiner.length > 2 ? getIndentificadorConteiner : null,
           id_operacao_patio_cancela: values.id_operacao_patio_cancela, 
@@ -144,6 +149,20 @@ const Form: React.FC<Props> = (props: Props) => {
         formik.setFieldValue("placa_traseira", data.placa_traseira);
         formik.setFieldValue("numero_partes_nao_motorizada", data.numero_partes_nao_motorizada);
         formik.setFieldValue("id_operacao_patio_cancela", data.id_operacao_patio_cancela);
+
+        if(data.identificadores_conteineres !== null && data.identificadores_conteineres.length > 0) {
+          const getConteineres = data.identificadores_conteineres.replace('{', '').replace('}', '');
+  
+          const mappingConteiners = getConteineres.split(',');
+  
+          setConteiners({
+            conteiners1: mappingConteiners[0] ? mappingConteiners[0] : '',
+            conteiners2: mappingConteiners[1] ? mappingConteiners[1] : '',
+            conteiners3: mappingConteiners[2] ? mappingConteiners[2] : '',
+            conteiners4: mappingConteiners[3] ? mappingConteiners[3] : '',
+          });
+  
+        }
         // formik.setFieldValue("id_operacao_patio_cancela_saida", data.id);
         // formik.setFieldValue("anoExercicioCRLV", data.ano_exercicio_crlv);
         // formik.setFieldValue("livreAcessoPatio", data.livre_acesso_patio);
@@ -155,7 +174,7 @@ const Form: React.FC<Props> = (props: Props) => {
     data_hora: "",
     placa_dianteira: "",
     placa_traseira: "",
-    numero_partes_nao_motorizada: 0,
+    numero_partes_nao_motorizada: "",
     identificadores_conteineres: "",
     id_operacao_patio_cancela: "",
     id_operacao_patio_cancela_saida: "",
@@ -164,6 +183,7 @@ const Form: React.FC<Props> = (props: Props) => {
 
   const formik = useFormik({
     initialValues,
+    validationSchema: formValidator,
     onSubmit: (values: FormValues) => handleSubmit(values, props.selectedRow, conteiners)
   });
 
