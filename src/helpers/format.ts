@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { domainTiposCarga } from './renderer';
+import { domainTiposCarga, domainTypesOperation } from './renderer';
 
 export const maskedCPF = (value: string) => {
   value = value.replace(/\D/g, "")                    //Remove tudo o que não é dígito
@@ -76,4 +76,8 @@ export const renderCargoTypes = (data: any) => {
   // s = s.slice(0, -7);
 
   return s;
+}
+
+export const renderOperationTypes = (data: any) => {
+  return domainTypesOperation[parseInt(data) - 1];
 }

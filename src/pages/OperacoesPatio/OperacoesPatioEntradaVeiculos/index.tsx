@@ -39,7 +39,7 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
       },
     },
     {
-      field: "id_operacao_patio_cancela",
+      field: "cancela.numero_cancela",
       headerName: "Cancela Entrada",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
@@ -109,7 +109,7 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
         id_motorista: rowId,
       };
 
-      await api.post("/deletar/operacaoPortoAgendada", body);
+      await api.post("/deletar/entradaSaidaVeiculos", body);
 
       setLoading(false);
 

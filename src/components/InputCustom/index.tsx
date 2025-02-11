@@ -60,6 +60,7 @@ const InputCustom: React.FC<InputProps> = (
 
         <Input
           {...rest}
+          className="uppercase"
           type={type || "text"}
           placeholder={placeholder}
           autoComplete={autoComplete}
