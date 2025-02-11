@@ -13,7 +13,7 @@ interface Props {
 }
 
 const ModalDelete: React.FC<Props> = ({ onConfirm, onCancel, row }: Props) => {
-  const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  const BootstrapDialog = styled(Dialog)(() => ({
     "& .MuiPaper-root": {
       borderRadius: "10px",
     },

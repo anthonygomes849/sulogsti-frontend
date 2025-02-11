@@ -24,6 +24,7 @@ interface InputProps {
   touched?: any;
   error?: any;
   value?: any;
+  isRequired?: boolean;
 }
 
 const InputCustom: React.FC<InputProps> = (
@@ -43,6 +44,7 @@ const InputCustom: React.FC<InputProps> = (
     value,
     id,
     disabled,
+    isRequired
   }: InputProps,
   ...rest
 ) => {
@@ -73,6 +75,10 @@ const InputCustom: React.FC<InputProps> = (
           {...rest}
         />
       </div>
+
+      {isRequired === false && (
+        <span className='text-xs text-[#6E7880] font-normal'>Opcional</span>
+      )}
 
       {touched && error && <Error>{error}</Error>}
     </>

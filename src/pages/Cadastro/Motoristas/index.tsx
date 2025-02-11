@@ -7,7 +7,6 @@ import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
 import { formatDateBR, maskedCPF, maskedPhone } from "../../../helpers/format";
-import { STATUS_MOTORISTA } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
 import Create from "./Create";
@@ -286,7 +285,7 @@ const ListMotorista: React.FC = () => {
               setIsRemove(!isRemove);
               setSelectedRow(data);
             }}
-            status={STATUS_MOTORISTA}
+            status={[]}
             onView={(data: any) => {
               setSelectedRow(data);
               setIsView(!isView);

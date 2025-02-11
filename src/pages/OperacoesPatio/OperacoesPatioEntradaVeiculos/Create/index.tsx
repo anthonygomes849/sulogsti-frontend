@@ -1,23 +1,24 @@
 import React from 'react';
 import CustomModal from '../../../../components/CustomModal';
-import { IMensalista } from '../types/types';
 import Form from './Form';
+import { IOperacoesPatioEntradaVeiculos } from './types/types';
 
+// import { Container } from './styles';
 
 interface Props {
   isView?: boolean;
   isEdit?: boolean;
   onClear: () => void;
   onConfirm: () => void;
-  selectedRow?: IMensalista;
+  selectedRow?: IOperacoesPatioEntradaVeiculos;
 }
 
-const CreateMensalista: React.FC<Props> = (props: Props) => {
+const Create: React.FC<Props> = (props: Props) => {
   return (
     <CustomModal title={props.isEdit ? "Editar" : "Cadastrar"} onClose={props.onClear}>
       <Form isView={props.isView} selectedRow={props.selectedRow} onConfirm={props.onConfirm} isEdit={props.isEdit} onClose={props.onClear} />
     </CustomModal>
-  );
+  )
 }
 
-export default CreateMensalista;
+export default Create;

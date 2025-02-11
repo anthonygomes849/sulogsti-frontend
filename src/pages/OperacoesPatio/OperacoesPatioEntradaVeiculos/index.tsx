@@ -8,7 +8,9 @@ import Loading from "../../../core/common/Loading";
 import { formatDateBR, formatDateTimeBR } from "../../../helpers/format";
 import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
-import { ITerminal } from "../../Cadastro/Terminal/Create/types/types";
+import Create from "./Create";
+import { IOperacoesPatioEntradaVeiculos } from "./Create/types/types";
+import Info from "./Info";
 
 // import { Container } from './styles';
 
@@ -92,13 +94,13 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
   ]);
   const [isRemove, setIsRemove] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedRow, setSelectedRow] = useState<ITerminal>();
+  const [selectedRow, setSelectedRow] = useState<IOperacoesPatioEntradaVeiculos>();
   const [isView, setIsView] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
 
   const gridRef: any = useRef();
 
-  const { isModalOpen, openModal, closeModal } = useModal();
+  const { openModal, closeModal, isModalOpen } = useModal();
 
   const onDelete = useCallback(async (rowId?: number) => {
     try {
@@ -122,7 +124,7 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
   return (
     <>
       <Loading loading={loading} />
-{/* 
+
       {isModalOpen && (
         <Create
           isEdit={isEdit}
@@ -133,27 +135,27 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
             window.location.reload();
           }}
         />
-      )} */}
+      )}
 
       {isRemove && (
         <ModalDelete
           onCancel={() => setIsRemove(!isRemove)}
-          onConfirm={() => onDelete(selectedRow?.id_terminal)}
-          row={selectedRow?.razao_social}
+          onConfirm={() => onDelete(selectedRow?.id_operacao_patio_entrada_veiculo)}
+          row={selectedRow?.placa_dianteira}
         />
       )}
 
-      {/* {isView && (
+      {isView && (
         <Info
           data={selectedRow}
-          title="Conhecer - Terminais"
+          title="Conhecer - Entrada e Saída de Veiculos"
           onClose={() => setIsView(!isView)}
         />
-      )} */}
+      )}
       <div className="flex flex-col w-full h-screen bg-[#F5F5F5] p-5">
         <div className="flex items-center justify-between w-full mb-7">
           <div>
-            <h1 className="text-2xl text-[#000000] font-bold">Entrada e saída de veículos</h1>
+            <h1 className="text-2xl text-[#000000] font-bold">Entrada e Saída de Veículos</h1>
           </div>
           <div className="mr-14">
             <button
@@ -179,7 +181,6 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
             onView={(data: any) => {
               setSelectedRow(data);
               setIsView(!isView);
-              // openModal();
             }}
             onUpdate={(data: any) => {
               setSelectedRow(data);
