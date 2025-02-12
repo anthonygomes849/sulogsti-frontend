@@ -6,11 +6,9 @@ import React, {
   useEffect,
 } from "react";
 import api from "../services/api";
-import { useError } from "./ErrorContext";
 
 // Defina o tipo para o contexto
 interface AuthenticateContextType {
-  onRefreshToken: () => void;
   // breadcrumb: string[];
   // addBreadcrumb: (item: string) => void;
   // removeBreadcrumb: () => void;
@@ -30,9 +28,6 @@ export const AuthenticateProvider: React.FC<AuthenticateProviderProps> = ({
   children,
 }) => {
 
-  const { error } = useError();
-
-
   const onAuthenticate = useCallback(() => {
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -41,34 +36,12 @@ export const AuthenticateProvider: React.FC<AuthenticateProviderProps> = ({
     api.defaults.headers.common = { Authorization: `Bearer ${token}` };
   }, []);
 
-  const onRefreshToken = useCallback(async () => {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-
-      const token = urlParams.get("token");
-
-      const body = {
-        token: token,
-      };
-
-      const response = await api.post('/autenticar/refreshToken', body);
-
-
-    } catch {}
-  }, []);
-
   useEffect(() => {
     onAuthenticate();
   }, [onAuthenticate]);
 
-  // useEffect(() => {
-  //   if(error) {
-  //     onRefreshToken();
-  //   }
-  // }, [error])
-
   return (
-    <AuthenticateContext.Provider value={{ onRefreshToken }}>
+    <AuthenticateContext.Provider value={{  }}>
       {children}
     </AuthenticateContext.Provider>
   );
