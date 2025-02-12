@@ -73,17 +73,6 @@ const ListOperacoesPatioServicos: React.FC = () => {
       },
     },
     {
-      field: "ativo",
-      headerName: "Ativo",
-      filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return "SIM";
-        }
-        return "NÃO";
-      },
-    },
-    {
       field: "data_historico",
       headerName: "Data Modificação",
       valueFormatter: (params: ValueFormatterParams) => {

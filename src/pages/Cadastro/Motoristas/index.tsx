@@ -155,36 +155,6 @@ const ListMotorista: React.FC = () => {
       },
     },
     {
-      field: "data_inativacao",
-      headerName: "Data Inativação",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return '---'
-      },
-    },
-    {
-      field: "dias_inativacao",
-      headerName: "Dias de Inativação",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return '---'
-      },
-    },
-    {
-      field: "motivo_inativacao",
-      headerName: "Motivo da Inativação",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return '---'
-      },
-    },
-    {
       field: "data_historico",
       headerName: "Data de Modificação",
       filter: true,
