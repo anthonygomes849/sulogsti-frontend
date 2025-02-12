@@ -191,8 +191,8 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
   return (
     <div
-      className="ag-theme-quartz bg-[#FFFFFF] max-w-[96%] rounded-lg p-5 mr-5 shadow-md"
-      style={{ width: "100%", height: "calc(100vh - 150px)" }}
+      className="ag-theme-quartz bg-[#FFFFFF] max-w-[96%] rounded-lg p-3 mr-5 shadow-md"
+      style={{ width: "100%", height: "calc(100vh - 90px)" }}
     >
       <LoadingIndicator loading={loading} />
 

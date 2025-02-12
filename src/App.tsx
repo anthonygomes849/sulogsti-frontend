@@ -1,23 +1,27 @@
-import { useCallback, useEffect } from 'react';
-import { RouterProvider } from 'react-router-dom';
-import router from './routes';
-import api from './services/api';
+import { useCallback, useEffect } from "react";
+import { RouterProvider } from "react-router-dom";
+import { AuthenticateProvider } from "./hooks/AuthenticateContext";
+import router from "./routes";
+import api from "./services/api";
+import { useAxiosInterceptor } from "./services/interceptors";
 
 function App() {
+  useAxiosInterceptor();
 
   const fetchPermissions = useCallback(async () => {
     try {
-      const response = await api.post('/listar/gruposPermissoes', { id_usuario: 1 }); // Ajuste conforme necessário
+      const response = await api.post("/listar/gruposPermissoes", {
+        id_usuario: 1,
+      }); // Ajuste conforme necessário
       const fetchedPermissions = response.data.map((item: any) => ({
         action: item.permissoes.acao,
         module: item.permissoes.modulo,
         submodule: item.permissoes.submodulo,
       }));
-      
-      sessionStorage.setItem('permissions', JSON.stringify(fetchedPermissions));
 
+      sessionStorage.setItem("permissions", JSON.stringify(fetchedPermissions));
     } catch (error) {
-      console.error('Error fetching permissions:', error);
+      console.error("Error fetching permissions:", error);
     }
   }, []);
 
@@ -26,13 +30,12 @@ function App() {
   }, [fetchPermissions]);
 
   return (
-    <div className='flex w-full h-screen'>
-
-      <RouterProvider router={router} />
-
-
+    <div className="flex w-full h-screen">
+      <AuthenticateProvider>
+          <RouterProvider router={router} />
+      </AuthenticateProvider>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

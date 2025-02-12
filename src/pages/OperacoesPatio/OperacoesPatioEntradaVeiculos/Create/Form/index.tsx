@@ -202,11 +202,11 @@ const Form: React.FC<Props> = (props: Props) => {
     <>
       <Loading loading={loading} />
       <div className="overflow-y-scroll max-h-[550px] p-5">
-        <div className="mb-4">
+        <div className="mb-3">
           <span className="text-sm font-bold">Entrada</span>
           <div className="w-full h-[1px] bg-[#ccc] mt-2" />
         </div>
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-3 gap-3 mb-4">
           <div>
             <InputCustom
               title="Data Hora da Entrada"
@@ -219,8 +219,6 @@ const Form: React.FC<Props> = (props: Props) => {
               disabled={props.isView}
             />
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3 mb-2">
           <div>
             <InputCustom
               title="Placa Dianteira"
@@ -244,6 +242,9 @@ const Form: React.FC<Props> = (props: Props) => {
               isRequired={false}
             />
           </div>
+        </div>
+        <div className="grid grid-cols-3 gap-3 mb-2">
+          
           <div>
             <InputCustom
               title="Número das Partes Não Motorizadas"
@@ -341,8 +342,28 @@ const Form: React.FC<Props> = (props: Props) => {
               </div>
             </div>
           </div>
+          <div>
+              <SelectCustom
+                data={cancelasEntrada}
+                onChange={(selectedOption: any) => {
+                  formik.setFieldValue(
+                    "id_operacao_patio_cancela",
+                    selectedOption.value
+                  );
+                }}
+                title="Cancela Entrada"
+                touched={formik.touched.id_operacao_patio_cancela}
+                error={formik.errors.id_operacao_patio_cancela}
+                disabled={props.isView}
+                value={formik.values.id_operacao_patio_cancela}
+              />
+            </div>
+          
         </div>
-        <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="grid grid-cols-3 gap-1">
+        
+        </div>
+        {/* <div className="grid grid-cols-2 gap-2 mb-3">
           <div className="">
             <div>
               <SelectCustom
@@ -361,7 +382,7 @@ const Form: React.FC<Props> = (props: Props) => {
               />
             </div>
           </div>
-        </div>
+        </div> */}
         <div className="mb-4">
           <span className="text-sm font-bold">Saída</span>
           <div className="w-full h-[1px] bg-[#ccc] mt-2" />

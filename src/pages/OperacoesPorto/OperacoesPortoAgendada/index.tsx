@@ -4,6 +4,7 @@ import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
 import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
+import Loading from "../../../core/common/Loading";
 import {
   renderCargoTypes,
   renderOperationTypes,
@@ -115,6 +116,7 @@ const OperacoesPortoAgendada: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full h-screen bg-[#F5F5F5] p-5">
+      <Loading loading={loading} />
       {isModalOpen && (
         <Create
           isEdit={isEdit}
@@ -143,7 +145,7 @@ const OperacoesPortoAgendada: React.FC = () => {
         />
       )}
 
-      <div className="flex items-center justify-between w-full mb-7">
+      <div className="flex items-center justify-between w-full mb-3">
         <div>
           <h1 className="text-2xl text-[#000000] font-bold">Operações Porto Agendada</h1>
         </div>
