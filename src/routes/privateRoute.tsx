@@ -1,5 +1,4 @@
 import { Navigate } from "react-router-dom";
-import { AuthenticateProvider } from "../hooks/AuthenticateContext";
 import Main from "../pages/Main";
 
 interface Props {
@@ -13,7 +12,7 @@ const PrivateRoute = (props: Props) => {
 
   return token ? (
     <Main>
-      <AuthenticateProvider>{props.children}</AuthenticateProvider>
+      {props.children}
     </Main>
   ) : (
     <Navigate to="/" />

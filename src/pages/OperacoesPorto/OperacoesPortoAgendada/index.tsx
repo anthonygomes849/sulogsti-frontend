@@ -145,7 +145,7 @@ const OperacoesPortoAgendada: React.FC = () => {
         />
       )}
 
-      <div className="flex items-center justify-between w-full mb-7">
+      <div className="flex items-center justify-between w-full mb-3">
         <div>
           <h1 className="text-2xl text-[#000000] font-bold">Operações Porto Agendada</h1>
         </div>

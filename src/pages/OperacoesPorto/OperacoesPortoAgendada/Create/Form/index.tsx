@@ -235,7 +235,7 @@ const Form: React.FC<Props> = (props: Props) => {
     <>
       <Loading loading={loading} />
       <div className="overflow-y-scroll max-h-[550px] p-5">
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-3 gap-3 mb-4">
           <div>
             <InputCustom
               title="Data Hora"
@@ -248,8 +248,7 @@ const Form: React.FC<Props> = (props: Props) => {
               disabled={props.isView}
             />
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3 mb-2">
+
           <div>
             <InputCustom
               title="Tolerância Inicial"
@@ -274,6 +273,9 @@ const Form: React.FC<Props> = (props: Props) => {
               disabled={props.isView}
             />
           </div>
+        </div>
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          
 
           <div>
             <SelectCustom
@@ -288,8 +290,6 @@ const Form: React.FC<Props> = (props: Props) => {
               value={formik.values.id_terminal}
             />
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
             <SelectCustom
               data={cargoTypes}
@@ -316,6 +316,9 @@ const Form: React.FC<Props> = (props: Props) => {
               value={formik.values.tipo_operacao}
             />
           </div>
+        </div>
+        <div className="grid grid-cols-3 gap-3 mb-2">
+          
           <div>
             <InputCustom
               title="CPF Motorista"
@@ -327,8 +330,6 @@ const Form: React.FC<Props> = (props: Props) => {
               disabled={props.isView}
             />
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
             <InputCustom
               title="Placa Dianteira Veículo"
@@ -356,6 +357,9 @@ const Form: React.FC<Props> = (props: Props) => {
               isRequired={false}
             />
           </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 mb-2">
+          
           <div>
             <Label
               style={{

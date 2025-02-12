@@ -282,7 +282,7 @@ const Terminal: React.FC = () => {
         <Info data={selectedRow} title="Conhecer - Terminais" onClose={() => setIsView(!isView)} />
       )}
       <div className="flex flex-col w-full h-screen bg-[#F5F5F5] p-5">
-        <div className="flex items-center justify-between w-full mb-7">
+        <div className="flex items-center justify-between w-full mb-3">
           <div>
             <h1 className="text-2xl text-[#000000] font-bold">Terminais</h1>
           </div>

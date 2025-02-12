@@ -29,7 +29,7 @@ const CustomModal: React.FC<Props> = (props: Props) => {
     },
     "& .MuiDialogContent-root": {
       minWidth: "500px",
-      maxWidth: "1000px",
+      maxWidth: "1400px",
       overflow: "hidden",
       // padding: theme.spacing(2),
       padding: 0,

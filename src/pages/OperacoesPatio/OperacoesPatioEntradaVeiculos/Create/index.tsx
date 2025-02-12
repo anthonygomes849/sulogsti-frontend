@@ -15,7 +15,7 @@ interface Props {
 
 const Create: React.FC<Props> = (props: Props) => {
   return (
-    <CustomModal title={props.isEdit ? "Editar" : "Cadastrar"} onClose={props.onClear}>
+    <CustomModal isScreenLg title={props.isEdit ? "Editar" : "Cadastrar"} onClose={props.onClear}>
       <Form isView={props.isView} selectedRow={props.selectedRow} onConfirm={props.onConfirm} isEdit={props.isEdit} onClose={props.onClear} />
     </CustomModal>
   )
