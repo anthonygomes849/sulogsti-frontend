@@ -1,0 +1,470 @@
+.login-container {
+    display: flex;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    flex-direction: row;
+  }
+  .logoMobile{
+    display:none;
+  }
+  .checkbox{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+  
+  .login-left {
+    flex: 0 0 60%;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+  
+  .logo-container {
+    text-align: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .logo {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: cover;
+  }
+  
+  .login-right {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 50px;
+  }
+  
+  .welcome-text {
+    text-align: left;
+    margin-bottom: 20px;
+    width: 60%;
+    align-self: center;
+  }
+  
+  .ola {
+    font-size: 50px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .bem-vindo {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+    width: 60%;
+  }
+  
+  .form-inline {
+    gap:10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  label {
+    margin-bottom: 5px;
+    display: block;
+  }
+  
+  .input-icon {
+    position: relative;
+  }
+  
+  .input-icon .icon {
+    position: absolute;
+    left: 15px;
+    top: 40%;
+    transform: translateY(-50%);
+    color: #585858;
+  }
+  
+  .input-icon input {
+    padding-left: 35px;
+    text-indent: 25px;
+  }
+  
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 11px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+  }
+  
+  input[type="checkbox"] {
+    margin-right: 10px;
+  }
+  
+  .login-button {
+    width: 100%;
+    height: 100%;
+    background-color: #003366;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+  }
+  
+  .login-button:hover {
+    background-color: #002244;
+  }
+  
+  .forgot-password-link {
+    color: #003366;
+    text-align: left;
+    font-weight: bold;
+    margin-top: 10px;
+    display: block;
+    width: 60%;
+    padding-left: 10px;
+  }
+  
+  .terms-link {
+    color: #333333;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+  }
+  
+  footer {
+    margin-top: 150px;
+    margin-left: 130px;
+  }
+
+  @media (max-width: 1100px) {
+    .login-container {
+      flex-direction: column;
+      background: url('../../assets/images/sulog_login_mobile.svg');
+      background-size: cover;
+    }
+    
+    .login-left {
+      display: none;
+    }
+    
+    .logoMobile {
+      display: flex;
+      margin-bottom: 40px;
+    }
+    
+    .welcome-text {
+      text-align: center;
+      margin-bottom: 20px;
+      width: 80%;
+      align-self: center;
+    }
+    
+    .ola {
+      font-size: 50px;
+      color: white;
+    }
+    
+    .bem-vindo {
+      font-size: 18px;
+      color: white;
+    }
+    
+    .form-group {
+      width: 80%;
+      color: white;
+    }
+    
+    .form-inline {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      width: 80%;
+    }
+    
+    .login-button {
+      width: 80%;
+      height: 50px;
+      margin-top: 10px;
+      background-color: #F5B000;
+    }
+    
+    .forgot-password-link {
+      text-align: center;
+      width: 100%;
+      color: white;
+      margin-top: 10px;
+      font-size: 20px;
+    }
+    
+    .terms-link {
+      margin-top: 20px;
+      color: white;
+    }
+    
+    .form-group {
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .form-inline {
+      align-items: center;
+    }
+    
+    .checkbox {
+      display: flex;
+      flex-direction: row;
+      margin-left: 100px;
+    }
+    
+    footer {
+      margin-top: 100px;
+      margin-left: 30px;
+    }
+    
+    p {
+      color: gray;
+      font-size: 14px;
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .login-container {
+      flex-direction: column;
+      background: url('../../assets/images/sulog_login_mobile.svg');
+      background-size: cover;
+    }
+    
+    .login-left {
+      display: none;
+    }
+    
+    .logoMobile {
+      display: flex;
+      margin-bottom: 40px;
+    }
+    
+    .welcome-text {
+      text-align: center;
+      margin-bottom: 20px;
+      width: 80%;
+      align-self: center;
+    }
+    
+    .ola {
+      font-size: 50px;
+      color: white;
+    }
+    
+    .bem-vindo {
+      font-size: 18px;
+      color: white;
+    }
+    
+    .form-group {
+      width: 80%;
+      color: white;
+    }
+    
+    .form-inline {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      width: 80%;
+    }
+    
+    .login-button {
+      width: 80%;
+      height: 50px;
+      margin-top: 10px;
+      background-color: #F5B000;
+    }
+    
+    .forgot-password-link {
+      text-align: center;
+      width: 100%;
+      color: white;
+      margin-top: 10px;
+      font-size: 20px;
+    }
+    
+    .terms-link {
+      margin-top: 20px;
+      color: white;
+    }
+    
+    .form-group {
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .form-inline {
+      align-items: center;
+    }
+    
+    .checkbox {
+      display: flex;
+      flex-direction: row;
+      margin-left: 100px;
+    }
+    
+    footer {
+      margin-top: 100px;
+      margin-left: 30px;
+    }
+    
+    p {
+      color: gray;
+      font-size: 14px;
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .login-container {
+      flex-direction: column;
+    }
+    
+    .login-left, .login-right {
+      flex: 1;
+      width: 100%;
+    }
+    
+    .login-right {
+      order: 2;
+      padding: 20px;
+    }
+    
+    .login-left {
+      order: 1;
+    }
+    
+    .welcome-text, .form-group, .forgot-password-link, .login-button {
+      width: 100%;
+    }
+    
+    .forgot-password-link {
+      padding-left: 0;
+    }
+    
+    footer {
+      margin-top: 20px;
+      margin-left: 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .login-container {
+      background: url('../../assets/images/sulog_login_mobile.svg');
+      background-size: cover;
+    }
+    
+    .login-left {
+      flex: 0 0 60%;
+      background-size: cover;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    .logoMobile {
+      display: flex;
+      margin-bottom: 40px;
+    }
+    
+    .welcome-text {
+      text-align: center;
+      margin-bottom: 20px;
+      width: 80%;
+      align-self: center;
+    }
+    
+    .ola {
+      font-size: 50px;
+      color: white;
+    }
+    
+    .bem-vindo {
+      font-size: 18px;
+      color: white;
+    }
+    
+    .form-group {
+      width: 80%;
+      color: white;
+    }
+    
+    .form-inline {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      width: 80%;
+    }
+    
+    .login-button {
+      width: 80%;
+      height: 50px;
+      margin-top: 10px;
+      background-color: #F5B000;
+    }
+    
+    .forgot-password-link {
+      text-align: center;
+      width: 100%;
+      color: white;
+      margin-top: 10px;
+      font-size: 20px;
+    }
+    
+    .terms-link {
+      margin-top: 20px;
+      color: white;
+    }
+    
+    .form-group {
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .form-inline {
+      align-items: center;
+    }
+    
+    .checkbox {
+      display: flex;
+      flex-direction: row;
+      margin-left: 100px;
+    }
+    
+    footer {
+      margin-top: 100px;
+      margin-left: 30px;
+    }
+    
+    p {
+      color: gray;
+      font-size: 14px;
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+  }
+
