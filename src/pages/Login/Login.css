@@ -164,6 +164,7 @@
     }
     
     .logoMobile {
+      margin-top:90px;
       display: flex;
       margin-bottom: 40px;
     }
@@ -233,8 +234,8 @@
     }
     
     footer {
-      margin-top: 100px;
-      margin-left: 30px;
+      margin-top: 140px;
+      margin-left: 100px;
     }
     
     p {
@@ -342,7 +343,11 @@
     .login-container {
       flex-direction: column;
     }
-    
+    .logoMobile {
+      margin-top:0px;
+      display: flex;
+      margin-bottom: 40px;
+    }
     .login-left, .login-right {
       flex: 1;
       width: 100%;
@@ -351,6 +356,7 @@
     .login-right {
       order: 2;
       padding: 20px;
+      margin-bottom: 70px;
     }
     
     .login-left {
@@ -366,8 +372,8 @@
     }
     
     footer {
-      margin-top: 20px;
-      margin-left: 0;
+      margin-top: 100px;
+      margin-left: 30px;
     }
   }
 
