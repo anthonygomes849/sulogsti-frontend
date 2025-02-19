@@ -61,12 +61,10 @@ export const renderCargoTypes = (data: any) => {
     let arrayData = data.split(",");
 
     for (var i = 0; i < arrayData.length; i++) {
-      console.log(arrayData.length);
       if (i < arrayData.length - 1) {
         s += domainTiposCarga[parseInt(arrayData[i]) - 1] + ",";
       } else {
         s += domainTiposCarga[parseInt(arrayData[i]) - 1]
-
       }
     }
   } else {

@@ -30,8 +30,6 @@ export const usePermissions = (action: string) => {
     permissionsData = JSON.parse(getPermissions);
   }
 
-  // console.log(permissionsData.some((perm: any) => perm.action === "CONHECER" && perm.module === paths[0].toUpperCase()));
-  
   const hasPermission = permissionsData.some(
     (perm: any) =>
       perm.action === action.toUpperCase() &&
@@ -39,7 +37,6 @@ export const usePermissions = (action: string) => {
     perm.submodule === paths[1].toUpperCase()
   );
   
-  console.log(hasPermission);
   // Função para verificar se a permissão existe
   // const hasPermission = useCallback((action: string): boolean => {
   //   console.log(

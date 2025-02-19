@@ -78,7 +78,6 @@ const Form: React.FC<Props> = (props: Props) => {
     initialValues,
     // validationSchema: formValidator,
     onSubmit: (values: FormValues) => {
-      console.log(values);
     },
   });
 
@@ -92,7 +91,6 @@ const Form: React.FC<Props> = (props: Props) => {
       formik.setFieldValue("periodo_faturamento", data.periodo_faturamento - 1);
       formik.setFieldValue("id_przpgto", data.id_przpgto);
       if (data.tipos_carga) {
-        console.log(data.tipos_carga.split(","));
         const cargaType: any[] = data.tipos_carga
           .replace("{", "")
           .replace("}", "")
@@ -104,8 +102,6 @@ const Form: React.FC<Props> = (props: Props) => {
             label: Object.values(CargaType)[Number(item - 1)],
           };
         });
-
-        console.log(getCargoType);
 
         setValueCargoTypes(getCargoType);
         formik.setFieldValue("tipos_carga", data.tipos_carga);

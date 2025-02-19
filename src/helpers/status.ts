@@ -56,6 +56,19 @@ export const STATUS_MOTORISTA = [
   }
 ];
 
+export const STATUS_OPERACOES_PORTO_AGENDADA = [
+  { id: 0, label: "Programado", color: "#9c7765", icon: "#614639" },
+  { id: 1, label: "Alerta", color: "#edbc61", icon: "#ffa500" },
+  { id: 2, label: "Incompleto", color: "#bf4b4b", icon: "#ff0000" },
+  { id: 3, label: "Entrou no Pátio", color: "#bf4b4b", icon: "#ff0000" },
+  { id: 4, label: "Associado", color: "#9c7765", icon: "#614639" },
+  { id: 5, label: "Ativo", color: "#81eb81", icon: "#00ff00" },
+  { id: 6, label: "Chamado", color: "#7272f2", icon: "#0000ff" },
+  { id: 7, label: "Saiu do Pátio", color: "#9c7765", icon: "#614639" },
+  { id: 8, label: "Finalizado", color: "#9c7765", icon: "#614639" },
+  { id: 9, label: "Inativo", color: "#c7c1c1", icon: "#736f6f" },
+]
+
 export const STATUS_OPERACAO_PATIO_SERVICOS = [
   {
     id: 1,

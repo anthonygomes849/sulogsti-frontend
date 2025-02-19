@@ -91,8 +91,9 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         cellStyle: { textAlign: "center" },
         // pinned: "left",
         cellRenderer: (params: CustomCellRendererProps) => {
-          if (params.value) {
-            return <Status data={props.status} status={params.value} />;
+          console.log("Status", params.data);
+          if(params.data) {
+            return <Status data={props.status} status={params.data.status} />;
           }
         },
       });
@@ -118,15 +119,11 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
           let filters: any = {};
 
-          console.log("Params", params);
-
           // Adiciona os filtros de colunas customizados.
           if (params.filterModel != null) {
             for (const customFilter in params.filterModel) {
-              console.log("Params2", params.filterModel[customFilter]);
               // Tem que fazer o teste se é um array, pois caso o receba
               // será um filtro por período.
-
               let newFilter: any = params.filterModel[customFilter];
 
               if (customFilter === "data_historico") {
@@ -151,8 +148,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
             }
           }
 
-          console.log("Filters", filters);
-
           const reqDTO = {
             qtd_por_pagina: 100,
             order_by:
@@ -166,7 +161,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
           const response = await api.post(`${path}?page=${page + 1}`, reqDTO);
 
-          console.log(response.data);
+          console.log(response.data.data);
 
           params.successCallback(response.data.data, response.data.total);
           setRowData(response.data.data);

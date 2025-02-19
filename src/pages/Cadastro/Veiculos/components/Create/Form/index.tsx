@@ -96,8 +96,6 @@ const Form: React.FC<Props> = (props: Props) => {
       });
 
       setStates(mappingData);
-
-      console.log(response.data);
     } catch {}
   }, []);
 
