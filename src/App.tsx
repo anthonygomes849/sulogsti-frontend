@@ -31,7 +31,9 @@ function App() {
 
   return (
     <div className="flex w-full h-screen">
-          <RouterProvider router={router} />
+      <AuthenticateProvider>
+        <RouterProvider router={router} />
+      </AuthenticateProvider>
     </div>
   );
 }
