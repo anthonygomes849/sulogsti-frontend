@@ -9,4 +9,6 @@ export interface ITriagens {
   id_operacao_porto_agendada?: number;
   id_operacao_porto_carrossel?: number;
   operacao_porto_agendada: IOperacoesPortoAgendada;
+  proprietario_carga: string;
+  data_historico: string;
 }

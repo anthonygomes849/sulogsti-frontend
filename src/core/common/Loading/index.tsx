@@ -1,4 +1,6 @@
 import React from 'react';
+import ReactLoading from "react-loading";
+
 import './styles.scss';
 interface LoadingProps {
   loading?: boolean;
@@ -19,14 +21,7 @@ const Loading: React.FC<LoadingProps> = ({
           style={{ background: backgroundColor }}
         >
           <div className="loading-bar">
-            <div
-              className="loading-circle-1"
-              style={{ background: spinnerColor }}
-            />
-            <div
-              className="loading-circle-2"
-              style={{ background: spinnerColor }}
-            />
+            <ReactLoading type='spinningBubbles' color='#0A4984' />
           </div>
         </div>
       )}

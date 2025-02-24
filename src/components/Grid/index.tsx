@@ -12,7 +12,7 @@ import { usePermissions } from "../../hooks/PermissionContext";
 import api from "../../services/api";
 import Loading from "./components/Loading";
 import Status from "./components/Status";
-import { GridProps } from "./model/Grid";
+import { CustomButtons, GridProps } from "./model/Grid";
 
 import "./styles.css";
 
@@ -34,6 +34,20 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cellRenderer: (params: CustomCellRendererProps) => {
         return (
           <div className="flex w-full h-full items-center justify-center">
+            {props.customButtons &&
+              props.customButtons.map((button: CustomButtons) => {
+                return (
+                  <>
+                      <div
+                        className="flex cursor-pointer items-center justify-center h-full mr-4"
+                        onClick={button.action}
+                        id={"btnDelete"}
+                      >
+                        <img src={button.icon} className="tw-mr-1" />
+                      </div>
+                  </>
+                );
+              })}
             {usePermissions("CONHECER") && (
               <button
                 className="mr-4"
@@ -88,11 +102,13 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cols.unshift({
         field: "status",
         headerName: "Status",
+        filter: true,
+        width: 270,
         cellStyle: { textAlign: "center" },
         // pinned: "left",
         cellRenderer: (params: CustomCellRendererProps) => {
           console.log("Status", params.data);
-          if(params.data) {
+          if (params.data) {
             return <Status data={props.status} status={params.data.status} />;
           }
         },

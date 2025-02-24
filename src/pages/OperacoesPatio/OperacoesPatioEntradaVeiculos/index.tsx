@@ -50,10 +50,31 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
       },
     },
     {
+      field: "saida.data_hora",
+      headerName: "Data/Hora Saída",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if(params.value) {
+          return params.value;
+        }
+        return "---";
+      }
+    },
+    {
+      field: "saida.placa_dianteira",
+      headerName: "Placa Dianteira Saída",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if(params.value) {
+          return params.value;
+        }
+        return "---";
+      }
+    },
+    {
       field: "data_historico",
       headerName: "Data de Modificação",
       filter: true,
       cellDataType: "date",
+      flex: 1,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return formatDateBR(params.value);

@@ -5,6 +5,7 @@ import { Error } from "../InputCustom/styles";
 interface Props {
   data: any[];
   onChange: (selectedOption: any) => void;
+  onInputChange?: (value: string) => void;
   title: string;
   touched?: any;
   error?: any;
@@ -27,6 +28,9 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
       return {
         ...styles,
         backgroundColor: "#FFF",
+        fontSize: '0.820rem',
+        fontFamily: 'Poppins',
+        fontWeight: 400,
         color: "#000",
       };
     },
@@ -51,6 +55,7 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
           name="color"
           options={props.data}
           onChange={props.onChange}
+          onInputChange={props.onInputChange}
           value={defaultValue}
         />
       </div>

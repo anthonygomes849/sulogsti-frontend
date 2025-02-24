@@ -12,8 +12,9 @@ import { DialogHeader } from "../ui/dialog";
 // import { Container } from './styles';
 
 interface Props {
-  title: string;
+  title?: string;
   children: JSX.Element;
+  header?: JSX.Element;
   // childrenFooter: JSX.Element;
   isScreenLg?: boolean;
   onClose: () => void;
@@ -24,8 +25,8 @@ interface Props {
 const CustomModal: React.FC<Props> = (props: Props) => {
   const BootstrapDialog = styled(Dialog)(() => ({
     "& .MuiPaper-root": {
-      minWidth: props.isScreenLg ? "800px" : "500px",
-      borderRadius: '10px'
+      minWidth: props.isScreenLg ? "900px" : "500px",
+      borderRadius: "10px",
     },
     "& .MuiDialogContent-root": {
       minWidth: "500px",
@@ -43,13 +44,13 @@ const CustomModal: React.FC<Props> = (props: Props) => {
       // marginLeft: '0.850rem'
     },
     "& .MuiDialogHeader-root": {
-      height: '44px'
+      height: "44px",
     },
     "& .MuiDialogFooter-root": {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '54px'
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "54px",
     },
   }));
 
@@ -63,19 +64,24 @@ const CustomModal: React.FC<Props> = (props: Props) => {
       open={true}
     >
       <DialogHeader className="">
-        <DialogTitle
-          sx={{
-            m: 0,
-            // p: 2,
-            // fontSize: "1.5rem",
-            // fontWeight: "bold",
-            // color: "#282828",
-          }}
-          className="text-xl font-semibold"
-          id="customized-dialog-title"
-        >
-          {props.title}
-        </DialogTitle>
+        {props.header ? (
+          <>{props.header}</>
+        ) : (
+          <DialogTitle
+            sx={{
+              m: 0,
+              // p: 2,
+              // fontSize: "1.5rem",
+              // fontWeight: "bold",
+              // color: "#282828",
+            }}
+            className="text-xl font-semibold"
+            id="customized-dialog-title"
+          >
+            {props.title}
+          </DialogTitle>
+        )}
+
         <IconButton
           aria-label="close"
           onClick={() => {
@@ -96,7 +102,7 @@ const CustomModal: React.FC<Props> = (props: Props) => {
       <DialogContent style={{ maxWidth: "100%" }}>
         {props.children}
       </DialogContent>
-{/* 
+      {/* 
       <DialogFooter>
         
       </DialogFooter> */}
