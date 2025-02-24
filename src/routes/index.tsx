@@ -5,6 +5,7 @@ import Terminal from "../pages/Cadastro/Terminal";
 import ListVeiculo from "../pages/Cadastro/Veiculos";
 import ListTipoServico from "../pages/Configuracoes/TipoServico";
 import Login from "../pages/Login";
+import RedefinicaoSenha from "../pages/RedefinicaoSenha";
 import OperacoesPatioEntradaVeiculos from "../pages/OperacoesPatio/OperacoesPatioEntradaVeiculos";
 import ListOperacoesPatioServicos from "../pages/OperacoesPatio/OperacoesPatioServicos";
 import Triagens from "../pages/OperacoesPatio/Triagens";
@@ -18,6 +19,14 @@ const router = createBrowserRouter([
     element: (
       <Route>
         <Login />
+      </Route>
+    )
+  },
+  {
+    path: '/redefinicaoSenha',
+    element: (
+      <Route>
+        <RedefinicaoSenha />
       </Route>
     )
   },

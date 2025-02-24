@@ -1,7 +1,10 @@
-import { useCallback, useState } from "react";
-import { FaEnvelope, FaLock } from 'react-icons/fa';
-import sulogLogo from '../../assets/images/logoMobile.svg';
+import React, { useCallback, useState } from "react";
+import './Login.css';
 import sulogLogin from '../../assets/images/sulog_login.svg';
+import sulogLogo from '../../assets/images/logoMobile.svg';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import api from "../../services/api";
+
 import Loading from "../../core/common/Loading";
 import api from "../../services/api";
 import history from "../../services/history";
@@ -10,6 +13,7 @@ import './Login.css';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const handleSubmit = useCallback(async (email:string, password:string) =>{
     try {
@@ -58,7 +62,10 @@ const Login = () => {
             <label htmlFor="password">Senha</label>
             <div className="input-icon">
               <FaLock className="icon" />
-              <input type="password" id="password" name="password" onChange={(e)=>setPassword(e.target.value)} required />
+               <input type={showPassword ? "text" : "password"} id="password" name="password" onChange={(e) => setPassword(e.target.value)} required />
+                            <span className="eye-icon" onClick={() => setShowPassword(!showPassword)}>
+                              {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            </span>
             </div>
           </div>
           <div className="form-group form-inline">
