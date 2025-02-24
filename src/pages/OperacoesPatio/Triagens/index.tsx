@@ -134,7 +134,6 @@ const Triagens: React.FC = () => {
     },
   ]);
   const [isRemove, setIsRemove] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<ITriagens>();
   const [isView, setIsView] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);

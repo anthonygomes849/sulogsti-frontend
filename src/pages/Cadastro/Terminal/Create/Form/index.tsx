@@ -77,7 +77,7 @@ const Form: React.FC<Props> = (props: Props) => {
   const formik = useFormik({
     initialValues,
     // validationSchema: formValidator,
-    onSubmit: (values: FormValues) => {
+    onSubmit: () => {
     },
   });
 

@@ -4,6 +4,7 @@ import React, { useCallback, useState } from "react";
 import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
 import { formatDateBR, maskedCPF, maskedPhone } from "../../../../../../../helpers/format";
+import { useStatus } from "../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../services/api";
 import { IMotorista } from "../../../../../../Cadastro/Motoristas/Create/types/types";
 import formValidator from "./validators/formValidator";
@@ -31,6 +32,8 @@ const IdentifyDriver: React.FC = () => {
     animate: { opacity: 1, y: 0, transition: { duration: 0.8 } },
     exit: { opacity: 0, y: 100, transition: { duration: 0.5 } },
   };
+
+  const { setStatus } = useStatus();
 
   const onSearchDetailDriver = useCallback(async (cpf: string) => {
     try {
@@ -94,7 +97,9 @@ const IdentifyDriver: React.FC = () => {
   const formik = useFormik({
     initialValues,
     validationSchema: formValidator,
-    onSubmit: () => {},
+    onSubmit: () => {
+      setStatus(2);
+    },
   });
 
   return (

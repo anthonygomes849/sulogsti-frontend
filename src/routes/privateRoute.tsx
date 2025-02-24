@@ -6,9 +6,9 @@ interface Props {
 
 const PrivateRoute = (props: Props) => {
   // const token = sessionStorage.getItem("token");
-  const urlParams = new URLSearchParams(window.location.search);
+  // const urlParams = new URLSearchParams(window.location.search);
 
-  const token = urlParams.get("token");
+  // const token = urlParams.get("token");
 
   return <Main>{props.children}</Main>;
 };
