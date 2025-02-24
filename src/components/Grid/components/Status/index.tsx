@@ -15,9 +15,11 @@ interface Props {
 }
 
 const Status: React.FC<Props> = ({ data, status }: Props) => {
-  console.log(data);
+  console.log(status);
+  console.log("FindStatus", data.find((item: StatusType) => item.id == status));
+
   return (
-    <Badge content={data.find((item: StatusType) => item.id === status)?.label} color={data.find((item: StatusType) => item.id === status)?.color} icon={data.find((item: StatusType) => item.id === status)?.icon} />
+    <Badge content={data.find((item: StatusType) => item.id == status)?.label} color={data.find((item: StatusType) => item.id == status)?.color} icon={data.find((item: StatusType) => item.id === status)?.icon} />
   );
 }
 

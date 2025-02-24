@@ -12,6 +12,9 @@ api.interceptors.response.use(function (config) {
   // Envia mensagem caso retorne 401
   window.parent.postMessage('Token Expirado', '*');
 
+  // history.push('/');
+  // window.location.reload();
+
   return Promise.reject(error);
 });
 

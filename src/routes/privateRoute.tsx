@@ -1,4 +1,3 @@
-import { Navigate } from "react-router-dom";
 import Main from "../pages/Main";
 
 interface Props {
@@ -6,17 +5,12 @@ interface Props {
 }
 
 const PrivateRoute = (props: Props) => {
-  const urlParams = new URLSearchParams(window.location.search);
+  // const token = sessionStorage.getItem("token");
+  // const urlParams = new URLSearchParams(window.location.search);
 
-  const token = urlParams.get("token");
+  // const token = urlParams.get("token");
 
-  return token ? (
-    <Main>
-      {props.children}
-    </Main>
-  ) : (
-    <Navigate to="/" />
-  );
+  return <Main>{props.children}</Main>;
 };
 
 export default PrivateRoute;

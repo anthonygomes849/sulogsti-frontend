@@ -131,7 +131,6 @@ const Form: React.FC<Props> = (props: Props) => {
       formik.setFieldValue("celular", data.celular);
       formik.setFieldValue("endereco", data.endereco);
       formik.setFieldValue("id_estado", data.id_estado);
-      console.log(data.id_estado);
       getCities(data.id_estado);
       getNeighborhood(data.id_cidade);
       formik.setFieldValue("id_cidade", data.id_cidade);

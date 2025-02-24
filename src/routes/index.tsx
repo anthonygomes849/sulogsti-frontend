@@ -7,6 +7,7 @@ import ListTipoServico from "../pages/Configuracoes/TipoServico";
 import Login from "../pages/Login";
 import OperacoesPatioEntradaVeiculos from "../pages/OperacoesPatio/OperacoesPatioEntradaVeiculos";
 import ListOperacoesPatioServicos from "../pages/OperacoesPatio/OperacoesPatioServicos";
+import Triagens from "../pages/OperacoesPatio/Triagens";
 import OperacoesPortoAgendada from "../pages/OperacoesPorto/OperacoesPortoAgendada";
 import PrivateRoute from "./privateRoute";
 import Route from "./route";
@@ -85,13 +86,21 @@ const router = createBrowserRouter([
     )
   },
   {
+    path: 'operacoes_patio/triagens',
+    element: (
+      <PrivateRoute>
+        <Triagens />
+      </PrivateRoute>
+    )
+  },
+  {
     path: '/operacoes_porto/agendada',
     element: (
       <PrivateRoute>
         <OperacoesPortoAgendada />
       </PrivateRoute>
     )
-  }
+  },
 ]);
 
 export default router;

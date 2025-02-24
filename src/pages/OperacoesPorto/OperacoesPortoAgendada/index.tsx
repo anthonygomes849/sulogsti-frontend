@@ -9,6 +9,7 @@ import {
   renderCargoTypes,
   renderOperationTypes,
 } from "../../../helpers/format";
+import { STATUS_OPERACOES_PORTO_AGENDADA } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
 import Create from "./Create";
@@ -169,7 +170,8 @@ const OperacoesPortoAgendada: React.FC = () => {
             setIsRemove(!isRemove);
             setSelectedRow(data);
           }}
-          status={[]}
+          isShowStatus
+          status={STATUS_OPERACOES_PORTO_AGENDADA}
           onView={(data: any) => {
             setSelectedRow(data);
             setIsView(!isView);

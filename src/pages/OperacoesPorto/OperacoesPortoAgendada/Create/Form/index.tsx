@@ -73,7 +73,7 @@ const Form: React.FC<Props> = (props: Props) => {
         getIndentificadorConteiner += "}";
 
         const body = {
-          id_operacao_patio_entrada_veiculo: row?.id_operacao_porto_agendada,
+          id_operacao_porto_agendada: row?.id_operacao_porto_agendada,
           data_agendamento_terminal: format(new Date(values.data_agendamento_terminal), 'yyyy-MM-dd HH:mm:ss', {
             locale: ptBR
           }),
