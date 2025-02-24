@@ -9,6 +9,7 @@ import {
   renderCargoTypes,
   renderOperationTypes,
 } from "../../../helpers/format";
+import { STATUS_OPERACOES_PORTO_AGENDADA } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import api from "../../../services/api";
 import Create from "./Create";
@@ -99,7 +100,7 @@ const OperacoesPortoAgendada: React.FC = () => {
     try {
       setLoading(true);
       const body = {
-        id_motorista: rowId,
+        id_operacao_porto_agendada: rowId,
       };
 
       await api.post("/deletar/operacaoPortoAgendada", body);
@@ -132,7 +133,7 @@ const OperacoesPortoAgendada: React.FC = () => {
       {isRemove && (
         <ModalDelete
           onCancel={() => setIsRemove(!isRemove)}
-          onConfirm={() => onDelete(selectedRow?.id_terminal)}
+          onConfirm={() => onDelete(selectedRow?.id_operacao_porto_agendada)}
           row={selectedRow?.placa_dianteira_veiculo}
         />
       )}
@@ -169,7 +170,8 @@ const OperacoesPortoAgendada: React.FC = () => {
             setIsRemove(!isRemove);
             setSelectedRow(data);
           }}
-          status={[]}
+          isShowStatus
+          status={STATUS_OPERACOES_PORTO_AGENDADA}
           onView={(data: any) => {
             setSelectedRow(data);
             setIsView(!isView);

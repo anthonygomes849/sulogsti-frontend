@@ -14,6 +14,12 @@ export interface IOperacoesPortoAgendada {
   tolerancia_fim_agendamento: number;
   cnpj_transportadora: string;
   terminal: ITerminal;
+  transportadora: {
+    id_transportadora: number;
+    razao_social: string;
+    nome_fantasia: string;
+    cnpj: string;
+  }
   data_historico: string;
 }
 

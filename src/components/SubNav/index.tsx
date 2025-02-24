@@ -39,8 +39,6 @@ const SubNav: React.FC<Props> = (props: Props) => {
       .split("/")
       .slice(1, 3);
 
-    console.log(paths);
-
     const removePathsList = paths.filter((item: any) => item !== "listar");
 
     setPaths(removePathsList);

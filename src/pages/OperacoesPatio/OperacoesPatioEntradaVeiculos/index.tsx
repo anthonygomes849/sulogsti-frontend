@@ -50,40 +50,31 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
       },
     },
     {
-      field: "data_inativacao",
-      headerName: "Data Inativação",
+      field: "saida.data_hora",
+      headerName: "Data/Hora Saída",
       valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
+        if(params.value) {
           return params.value;
         }
         return "---";
-      },
+      }
     },
     {
-      field: "dias_inativacao",
-      headerName: "Dias de Inativação",
+      field: "saida.placa_dianteira",
+      headerName: "Placa Dianteira Saída",
       valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
+        if(params.value) {
           return params.value;
         }
         return "---";
-      },
-    },
-    {
-      field: "motivo_inativacao",
-      headerName: "Motivo da Inativação",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return "---";
-      },
+      }
     },
     {
       field: "data_historico",
       headerName: "Data de Modificação",
       filter: true,
       cellDataType: "date",
+      flex: 1,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return formatDateBR(params.value);
@@ -106,7 +97,7 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
     try {
       setLoading(true);
       const body = {
-        id_motorista: rowId,
+        id_operacao_patio_entrada_veiculo: rowId,
       };
 
       await api.post("/deletar/entradaSaidaVeiculos", body);

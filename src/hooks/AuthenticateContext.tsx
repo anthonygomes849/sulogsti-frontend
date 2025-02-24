@@ -9,7 +9,6 @@ import api from "../services/api";
 
 // Defina o tipo para o contexto
 interface AuthenticateContextType {
-
 }
 
 // Crie o contexto com o tipo definido
@@ -28,9 +27,11 @@ export const AuthenticateProvider: React.FC<AuthenticateProviderProps> = ({
 
   const onAuthenticate = useCallback(() => {
 
-    const token = sessionStorage.getItem('token');
+    // const token = sessionStorage.getItem('token');
 
-    console.log(token);
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const token = urlParams.get("token");
 
     api.defaults.headers.common = { Authorization: `Bearer ${token}` };
   }, []);

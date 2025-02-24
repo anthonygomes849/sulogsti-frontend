@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import { AuthenticateProvider } from "./hooks/AuthenticateContext";
+import { StatusProvider } from "./hooks/StatusContext";
 import router from "./routes";
 import api from "./services/api";
 import { useAxiosInterceptor } from "./services/interceptors";
@@ -32,7 +33,10 @@ function App() {
   return (
     <div className="flex w-full h-screen">
       <AuthenticateProvider>
+        <StatusProvider>
+
         <RouterProvider router={router} />
+        </StatusProvider>
       </AuthenticateProvider>
     </div>
   );

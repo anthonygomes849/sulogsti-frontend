@@ -7,12 +7,13 @@ const api = axios.create({
 // const { onRefreshToken } = useBreadcrumb();
 
 api.interceptors.response.use(function (config) {
-  // Do something before request is sent
   return config;
 }, function (error) {
-  console.log("Entrou");
-  // Do something with request error
+  // Envia mensagem caso retorne 401
   window.parent.postMessage('Token Expirado', '*');
+
+  // history.push('/');
+  // window.location.reload();
 
   return Promise.reject(error);
 });

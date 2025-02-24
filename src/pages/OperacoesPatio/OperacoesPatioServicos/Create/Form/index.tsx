@@ -65,7 +65,6 @@ const Form: React.FC<Props> = (props: Props) => {
     const data = row;
 
     if (data) {
-      console.log(data);
       formik.setFieldValue("id_tipo_servico", data.id_tipo_servico);
       formik.setFieldValue(
         "id_operacao_patio_entrada_veiculo",
@@ -85,8 +84,6 @@ const Form: React.FC<Props> = (props: Props) => {
       };
 
       const response = await api.post("/listar/entradaSaidaVeiculos", body);
-
-      console.log(response.data.data);
 
       const mappingData = response.data.data.map((rows: any) => {
         return {
@@ -112,8 +109,6 @@ const Form: React.FC<Props> = (props: Props) => {
       };
 
       const response = await api.post("/listar/tipoServicos", body);
-
-      console.log(response.data.data);
 
       const mappingData = response.data.data.map((rows: any) => {
         return {

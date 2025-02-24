@@ -37,8 +37,6 @@ const Form: React.FC<Props> = (props: Props) => {
 
       const response = await api.post("/listar/transportadoras", body);
 
-      console.log(response.data.data);
-
       const mappingData = response.data.data.map((rows: any) => {
         return {
           value: rows.id_transportadora,

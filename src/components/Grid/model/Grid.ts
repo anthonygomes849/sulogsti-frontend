@@ -22,6 +22,7 @@ export interface GridProps {
   orders?: Order[];
   status: StatusType[];
   isShowStatus?: boolean;
+  customButtons?: CustomButtons[];
 }
 
 export type ColumnDef = {
@@ -38,6 +39,13 @@ export type ColumnDef = {
   pinned?: string;
   cellDataType?: string;
   flex?: number;
+}
+
+export type CustomButtons = {
+  label: string;
+  icon: string;
+  status: number[];
+  action: () => void;
 }
 
 export enum RowSelection {
