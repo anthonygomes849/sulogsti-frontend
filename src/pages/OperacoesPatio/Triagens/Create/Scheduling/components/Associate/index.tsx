@@ -1,6 +1,7 @@
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
 import CalendarIcon from "../../../../../../../assets/images/calendarIcon.svg";
 import CalendarIconActive from "../../../../../../../assets/images/calendarIconActive.svg";
 import CarrosselIcon from "../../../../../../../assets/images/carrosselIcon.svg";
@@ -14,6 +15,7 @@ import {
 } from "../../../../../../../helpers/format";
 import { useStatus } from "../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../services/api";
+import { FrontendNotification } from "../../../../../../../shared/Notification";
 import { IOperacoesPortoAgendada } from "../../../../../../OperacoesPorto/OperacoesPortoAgendada/types/types";
 import { IOperacoesPatioEntradaVeiculos } from "../../../../../OperacoesPatioEntradaVeiculos/Create/types/types";
 import ChoiceBox from "../shared/ChoiceBox";
@@ -25,7 +27,6 @@ interface FormValues {
   id_operacao_porto_carrossel: string;
   tipo_operacao_porto: string;
 }
-
 
 const Associate: React.FC = () => {
   const [entradaVeiculo, setEntradaVeiculo] = useState([]);
@@ -54,6 +55,47 @@ const Associate: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const { setStatus } = useStatus();
+
+  const onSubmit = useCallback(async (values: FormValues) => {
+    try {
+      setLoading(true);
+
+      let body;
+      if (String(values.id_operacao_porto_agendada).length > 0) {
+        body = {
+          id_operacao_patio_entrada_veiculo: values.id_operacao_entrada_veiculo,
+          id_operacao_porto_agendada: values.id_operacao_porto_agendada,
+          status: 6,
+        };
+      } else {
+        body = {
+          id_operacao_patio_entrada_veiculo: values.id_operacao_entrada_veiculo,
+          id_operacao_porto_carrossel: values.id_operacao_porto_carrossel,
+          status: 6,
+        };
+      }
+
+      const response = await api.post("/editar/operacaoPatioTriagem", body);
+
+      if (response.status === 200) {
+        sessionStorage.setItem(
+          "id_operacao_patio",
+          response.data.id_operacao_patio
+        );
+
+        setStatus(1);
+      } else {
+        setLoading(false);
+        FrontendNotification('Erro ao associar a entrada a triagem', "error");
+      }
+      setLoading(false);
+      
+      
+    } catch {
+      setLoading(false);
+      FrontendNotification('Erro ao associar a entrada a triagem', "error");
+    }
+  }, []);
 
   const getOperacoesPatioEntradaVeiculo = useCallback(async () => {
     try {
@@ -169,7 +211,9 @@ const Associate: React.FC = () => {
   const formik = useFormik({
     initialValues,
     validationSchema: formValidator,
-    onSubmit: () => setStatus(1),
+    onSubmit: (values: FormValues) => {
+      onSubmit(values);
+    },
   });
 
   useEffect(() => {
@@ -181,6 +225,7 @@ const Associate: React.FC = () => {
   return (
     <>
       <Loading loading={loading} />
+      <ToastContainer />
       <motion.div
         initial="initial"
         animate="animate"

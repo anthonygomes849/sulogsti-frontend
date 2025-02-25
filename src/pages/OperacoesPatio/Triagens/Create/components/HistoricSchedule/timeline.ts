@@ -9,7 +9,7 @@ export const listTimeline = [
   },
   {
     id: 2,
-    label: "Identificar veículo"
+    label: "Identificar veículo e Autorização"
   },
   {
     id: 3,

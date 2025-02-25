@@ -26,6 +26,7 @@ const CustomModal: React.FC<Props> = (props: Props) => {
   const BootstrapDialog = styled(Dialog)(() => ({
     "& .MuiPaper-root": {
       minWidth: props.isScreenLg ? "900px" : "500px",
+      // minHeight: '90%',
       borderRadius: "10px",
     },
     "& .MuiDialogContent-root": {

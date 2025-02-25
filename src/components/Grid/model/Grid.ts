@@ -45,7 +45,7 @@ export type CustomButtons = {
   label: string;
   icon: string;
   status: number[];
-  action: () => void;
+  action: (data: any) => void;
 }
 
 export enum RowSelection {

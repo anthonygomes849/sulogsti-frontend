@@ -20,7 +20,7 @@ interface StatusProviderProps {
 }
 
 export const StatusProvider: React.FC<StatusProviderProps> = ({ children }) => {
-  const [status, setStatusValue] = useState(2);
+  const [status, setStatusValue] = useState(0);
 
   const setStatus = (value: number) => setStatusValue(value);
 

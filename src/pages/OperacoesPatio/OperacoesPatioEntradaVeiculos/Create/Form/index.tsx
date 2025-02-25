@@ -40,8 +40,34 @@ const Form: React.FC<Props> = (props: Props) => {
     conteiners4: "",
   });
 
+  const onCreateTriagens = useCallback(async (idEntradaVeiculo: number) => {
+    try {
+      setLoading(true);
+      const urlParams = new URLSearchParams(window.location.search);
+
+        const userId = urlParams.get("userId");
+
+      const body = {
+        id_operacao_patio_entrada_veiculo: idEntradaVeiculo,
+        status: 0,
+        id_usuario_historico: userId,
+        ativo: true
+      };
+
+      const response = await api.post("/cadastrar/operacaoPatioTriagem", body);
+
+      setLoading(false);
+
+      return;
+    } catch {}
+  }, []);
+
   const handleSubmit = useCallback(
-    async (values: FormValues, row?: IOperacoesPatioEntradaVeiculos, listConteiners?: any) => {
+    async (
+      values: FormValues,
+      row?: IOperacoesPatioEntradaVeiculos,
+      listConteiners?: any
+    ) => {
       try {
         setLoading(true);
 
@@ -64,31 +90,49 @@ const Form: React.FC<Props> = (props: Props) => {
         getIndentificadorConteiner += "}";
 
         const body = {
-          id_operacao_patio_entrada_veiculo: row?.id_operacao_patio_entrada_veiculo,
-          data_hora: format(new Date(values.data_hora), 'yyyy-MM-dd HH:mm:ss', {
-            locale: ptBR
+          id_operacao_patio_entrada_veiculo:
+            row?.id_operacao_patio_entrada_veiculo,
+          data_hora: format(new Date(values.data_hora), "yyyy-MM-dd HH:mm:ss", {
+            locale: ptBR,
           }),
-          placa_dianteira: values.placa_dianteira.replace('-', ''),
-          placa_traseira: values.placa_traseira.length > 0 ? values.placa_traseira.replace('-', '') : null,
+          placa_dianteira: values.placa_dianteira.replace("-", ""),
+          placa_traseira:
+            values.placa_traseira.length > 0
+              ? values.placa_traseira.replace("-", "")
+              : null,
           numero_partes_nao_motorizada: values.numero_partes_nao_motorizada,
-          identificadores_conteineres: getIndentificadorConteiner.length > 2 ? getIndentificadorConteiner : null,
-          id_operacao_patio_cancela: values.id_operacao_patio_cancela, 
-          id_operacao_patio_cancela_saida: values.id_operacao_patio_cancela_saida.length > 0 ? values.id_operacao_patio_cancela_saida : null,
-          data_hora_saida: values.data_hora_saida.length > 0 ? values.data_hora_saida : null,
+          identificadores_conteineres:
+            getIndentificadorConteiner.length > 2
+              ? getIndentificadorConteiner
+              : null,
+          id_operacao_patio_cancela: values.id_operacao_patio_cancela,
+          id_operacao_patio_cancela_saida:
+            values.id_operacao_patio_cancela_saida.length > 0
+              ? values.id_operacao_patio_cancela_saida
+              : null,
+          data_hora_saida:
+            values.data_hora_saida.length > 0 ? values.data_hora_saida : null,
           ativo: true,
           id_usuario_historico: userId,
           status: 1,
         };
 
-        if(props.isEdit) {
+        if (props.isEdit) {
           await api.post("/editar/entradaSaidaVeiculos", body);
         } else {
-          await api.post("/cadastrar/entradaSaidaVeiculos", body);
+          const response = await api.post(
+            "/cadastrar/entradaSaidaVeiculos",
+            body
+          );
+
+          if (response.status === 200) {
+            onCreateTriagens(response.data.id_operacao_patio_entrada_veiculo);
+          }
         }
 
         setLoading(false);
 
-        props.onConfirm();
+        // props.onConfirm();
       } catch {
         setLoading(false);
       }
@@ -140,35 +184,48 @@ const Form: React.FC<Props> = (props: Props) => {
     }
   }, []);
 
-  const onLoadFormValues = useCallback((row?: IOperacoesPatioEntradaVeiculos) => {
+  const onLoadFormValues = useCallback(
+    (row?: IOperacoesPatioEntradaVeiculos) => {
       const data = row;
-  
+
       if (data) {
         formik.setFieldValue("data_hora", data.data_hora);
         formik.setFieldValue("placa_dianteira", data.placa_dianteira);
         formik.setFieldValue("placa_traseira", data.placa_traseira);
-        formik.setFieldValue("numero_partes_nao_motorizada", data.numero_partes_nao_motorizada);
-        formik.setFieldValue("id_operacao_patio_cancela", data.id_operacao_patio_cancela);
+        formik.setFieldValue(
+          "numero_partes_nao_motorizada",
+          data.numero_partes_nao_motorizada
+        );
+        formik.setFieldValue(
+          "id_operacao_patio_cancela",
+          data.id_operacao_patio_cancela
+        );
 
-        if(data.identificadores_conteineres !== null && data.identificadores_conteineres.length > 0) {
-          const getConteineres = data.identificadores_conteineres.replace('{', '').replace('}', '');
-  
-          const mappingConteiners = getConteineres.split(',');
-  
+        if (
+          data.identificadores_conteineres !== null &&
+          data.identificadores_conteineres.length > 0
+        ) {
+          const getConteineres = data.identificadores_conteineres
+            .replace("{", "")
+            .replace("}", "");
+
+          const mappingConteiners = getConteineres.split(",");
+
           setConteiners({
-            conteiners1: mappingConteiners[0] ? mappingConteiners[0] : '',
-            conteiners2: mappingConteiners[1] ? mappingConteiners[1] : '',
-            conteiners3: mappingConteiners[2] ? mappingConteiners[2] : '',
-            conteiners4: mappingConteiners[3] ? mappingConteiners[3] : '',
+            conteiners1: mappingConteiners[0] ? mappingConteiners[0] : "",
+            conteiners2: mappingConteiners[1] ? mappingConteiners[1] : "",
+            conteiners3: mappingConteiners[2] ? mappingConteiners[2] : "",
+            conteiners4: mappingConteiners[3] ? mappingConteiners[3] : "",
           });
-  
         }
         // formik.setFieldValue("id_operacao_patio_cancela_saida", data.id);
         // formik.setFieldValue("anoExercicioCRLV", data.ano_exercicio_crlv);
         // formik.setFieldValue("livreAcessoPatio", data.livre_acesso_patio);
         // formik.setFieldValue("ativo", data.ativo);
       }
-    }, []);
+    },
+    []
+  );
 
   const initialValues: FormValues = {
     data_hora: "",
@@ -184,7 +241,8 @@ const Form: React.FC<Props> = (props: Props) => {
   const formik = useFormik({
     initialValues,
     validationSchema: formValidator,
-    onSubmit: (values: FormValues) => handleSubmit(values, props.selectedRow, conteiners)
+    onSubmit: (values: FormValues) =>
+      handleSubmit(values, props.selectedRow, conteiners),
   });
 
   useEffect(() => {
@@ -196,7 +254,7 @@ const Form: React.FC<Props> = (props: Props) => {
     if (props.isView || props.isEdit) {
       onLoadFormValues(props.selectedRow);
     }
-  }, [])
+  }, []);
 
   return (
     <>
@@ -244,7 +302,6 @@ const Form: React.FC<Props> = (props: Props) => {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3 mb-2">
-          
           <div>
             <InputCustom
               title="Número das Partes Não Motorizadas"
@@ -343,26 +400,23 @@ const Form: React.FC<Props> = (props: Props) => {
             </div>
           </div>
           <div>
-              <SelectCustom
-                data={cancelasEntrada}
-                onChange={(selectedOption: any) => {
-                  formik.setFieldValue(
-                    "id_operacao_patio_cancela",
-                    selectedOption.value
-                  );
-                }}
-                title="Cancela Entrada"
-                touched={formik.touched.id_operacao_patio_cancela}
-                error={formik.errors.id_operacao_patio_cancela}
-                disabled={props.isView}
-                value={formik.values.id_operacao_patio_cancela}
-              />
-            </div>
-          
+            <SelectCustom
+              data={cancelasEntrada}
+              onChange={(selectedOption: any) => {
+                formik.setFieldValue(
+                  "id_operacao_patio_cancela",
+                  selectedOption.value
+                );
+              }}
+              title="Cancela Entrada"
+              touched={formik.touched.id_operacao_patio_cancela}
+              error={formik.errors.id_operacao_patio_cancela}
+              disabled={props.isView}
+              value={formik.values.id_operacao_patio_cancela}
+            />
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-1">
-        
-        </div>
+        <div className="grid grid-cols-3 gap-1"></div>
         {/* <div className="grid grid-cols-2 gap-2 mb-3">
           <div className="">
             <div>

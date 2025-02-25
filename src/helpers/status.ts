@@ -72,11 +72,11 @@ export const STATUS_OPERACOES_PORTO_AGENDADA = [
 export const STATUS_OPERACOES_PATIO_TRIAGEM = [
   { id: 0, label: "Entrou no Pátio", color: "#bf4b4b", icon: "#ff0000" },
   { id: 1, label: "Check In - Veículo Associado", color: "#c4643f", icon: "#c1491a" },
-  { id: 2, label: "Check In - Aguardando Chamada", color: "##ed916d", icon: "#e3622f" },
+  { id: 2, label: "Check In - Aguardando Chamada", color: "#ed916d", icon: "#e3622f" },
   { id: 3, label: "Check In - Chamada", color: "#f5be5b", icon: "#FFA500" },
   {
     id: 4, label: "Check In - Identificação Motorista",
-    color: "##fce16d",
+    color: "#fce16d",
     icon: "#ffce00",
   },
   {

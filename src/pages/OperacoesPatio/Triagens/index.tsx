@@ -1,12 +1,17 @@
 import { ValueFormatterParams } from "ag-grid-community";
 import React, { useRef, useState } from "react";
+import CallDriverIcon from '../../../assets/images/callDriverIcon.svg';
 import IdentifyDriverIcon from '../../../assets/images/identifyDriverIcon.svg';
+import IdentifyVehicleIcon from '../../../assets/images/identifyVehicleIcon.svg';
+import PaymentIcon from '../../../assets/images/paymentIcon.svg';
 import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
+import TicketIcon from '../../../assets/images/ticketIcon.svg';
 import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import { maskCnpj, renderCargoTypes } from "../../../helpers/format";
 import { STATUS_OPERACOES_PATIO_TRIAGEM } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
+import { useStatus } from "../../../hooks/StatusContext";
 import Create from "./Create";
 import Info from "./Info";
 import { ITriagens } from "./types/types";
@@ -42,6 +47,7 @@ const Triagens: React.FC = () => {
     {
       headerName: "Placa Dianteira",
       field: "entrada_veiculo.placa_dianteira",
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -142,6 +148,8 @@ const Triagens: React.FC = () => {
 
   const { openModal, isModalOpen, closeModal } = useModal();
 
+  const { setStatus } = useStatus();
+
   return (
     <>
       {isModalOpen && (
@@ -203,10 +211,44 @@ const Triagens: React.FC = () => {
             customButtons={[
               {
                 label: 'Identificar Motorista',
-                action: () => {},
-                status: [0, 1],
+                action: (data: any) => {
+                  setSelectedRow(data);
+                  sessionStorage.setItem('@triagem', JSON.stringify(data));
+                  setStatus(1);
+                  openModal();
+                },
+                status: [0, 1, 6],
                 icon: IdentifyDriverIcon,
               },
+              {
+                label: 'Identificar Veiculo',
+                action: () => {},
+                status: [3, 4],
+                icon: IdentifyVehicleIcon
+              },
+              {
+                label: 'Chamar Motorista',
+                action: () => {},
+                status: [3, 4, 5],
+                icon: CallDriverIcon
+              },
+              {
+                label: 'Pagamento',
+                action: (data: any) => {
+                  setSelectedRow(data);
+                  sessionStorage.setItem('@triagem', JSON.stringify(data));
+                  setStatus(3);
+                  openModal();
+                },
+                status: [10],
+                icon: PaymentIcon
+              },
+              {
+                label: 'Comprovante',
+                action: () => {},
+                status: [11, 12, 13, 14, 15, 16],
+                icon: TicketIcon
+              }
             ]}
           />
         </div>

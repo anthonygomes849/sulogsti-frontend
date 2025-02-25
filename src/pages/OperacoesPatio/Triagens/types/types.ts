@@ -11,4 +11,9 @@ export interface ITriagens {
   operacao_porto_agendada: IOperacoesPortoAgendada;
   proprietario_carga: string;
   data_historico: string;
+  operacao_patio_identificacao_veiculo?: {
+    id_veiculo_parte_nao_motorizada: number;
+    id_veiculo_parte_motorizada: number;
+    tipo_veiculo: number;
+  }
 }
