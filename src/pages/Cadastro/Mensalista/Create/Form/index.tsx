@@ -6,11 +6,15 @@ import Loading from "../../../../../core/common/Loading";
 import api from "../../../../../services/api";
 import { IMensalista } from "../../types/types";
 import formValidator from "../validators/formValidator";
+import ChoiceBox from "./shared/ChoiceBox";
+import { FaUser, FaUserAlt, FaTruck, FaTruckMoving } from "react-icons/fa";
 
 interface FormValues {
   placa: string;
+  cnpj: string;
   id_transportadora: string;
   ativo: boolean;
+  tipo_transportadora: string;
 }
 
 interface Props {
@@ -24,6 +28,18 @@ interface Props {
 const Form: React.FC<Props> = (props: Props) => {
   const [transportadoras, setTransportadoras] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [choiceOptions, setChoiceOptions] = useState([
+    {
+      id: 0,
+      label: "CNPJ Avulso",
+      icon: <FaUserAlt className="w-6 h-6 pr-2" color="white" />,
+    },
+    {
+      id: 1,
+      label: "Transportadora",
+      icon: <FaTruck className="w-6 h-6 pr-2" />,
+    },
+  ]);
 
   const getTransportadoras = useCallback(async () => {
     try {
@@ -47,7 +63,9 @@ const Form: React.FC<Props> = (props: Props) => {
       setTransportadoras(mappingData);
 
       setLoading(false);
-    } catch {}
+    } catch {
+      setLoading(false);
+    }
   }, []);
 
   const handleSubmit = useCallback(
@@ -62,10 +80,10 @@ const Form: React.FC<Props> = (props: Props) => {
         const body = {
           id_mensalista: row?.id_mensalista,
           placa: values.placa.replace("-", ""),
+          cnpj: values.cnpj,
           id_transportadora: values.id_transportadora,
           ativo: true,
           id_usuario_historico: userId,
-          status: 1,
         };
 
         if (props.isEdit) {
@@ -81,7 +99,7 @@ const Form: React.FC<Props> = (props: Props) => {
         setLoading(false);
       }
     },
-    []
+    [props]
   );
 
   const onLoadFormValues = useCallback((row: any) => {
@@ -89,18 +107,37 @@ const Form: React.FC<Props> = (props: Props) => {
 
     if (data) {
       formik.setFieldValue("placa", data.placa);
-      formik.setFieldValue(
-        "id_transportadora",
-        data.mensalista_transportadora.id_transportadora
-      );
+      formik.setFieldValue("cnpj", data.cnpj);
+      formik.setFieldValue("tipo_transportadora", "0");
+      if(data.mensalista_transportadora!= null){
+        formik.setFieldValue(
+          "id_transportadora",
+          data.mensalista_transportadora.id_transportadora
+        );
+        formik.setFieldValue("tipo_transportadora", "1");
+      }
+      setChoiceOptions([
+        {
+          id: 0,
+          label: "CNPJ Avulso",
+          icon: data.mensalista_transportadora === null ? <FaUserAlt className="w-6 h-6 pr-2" color="white" /> : <FaUser className="w-6 h-6 pr-2" />,
+        },
+        {
+          id: 1,
+          label: "Transportadora",
+          icon: data.mensalista_transportadora != null ? <FaTruckMoving className="w-6 h-6 pr-2" color="white" /> : <FaTruck className="w-6 h-6 pr-2" />,
+        },
+      ]);
       formik.setFieldValue("ativo", data.ativo);
     }
   }, []);
 
   const initialValues: FormValues = {
     placa: "",
+    cnpj:"",
     id_transportadora: "",
     ativo: true,
+    tipo_transportadora: "0",
   };
 
   const formik = useFormik({
@@ -117,13 +154,13 @@ const Form: React.FC<Props> = (props: Props) => {
     if (props.isView || props.isEdit) {
       onLoadFormValues(props.selectedRow);
     }
-  }, []);
+  }, [props.isView, props.isEdit, props.selectedRow, onLoadFormValues]);
 
   return (
     <>
       <Loading loading={loading} />
-      <div className="grid grid-cols-2 gap-3 mb-4 p-5">
-        <div>
+      <div className="grid grid-cols-1 gap-3 mb-4 p-10">
+        <div className="w-1/2">
           <InputCustom
             title="Placa"
             typeInput="mask"
@@ -137,18 +174,60 @@ const Form: React.FC<Props> = (props: Props) => {
           />
         </div>
         <div>
-          <SelectCustom
-            title="Transportadora"
-            data={transportadoras}
-            onChange={(selectedOption: any) =>
-              formik.setFieldValue("id_transportadora", selectedOption.value)
-            }
-            touched={formik.touched.id_transportadora}
-            error={formik.errors.id_transportadora}
-            value={formik.values.id_transportadora}
-            disabled={props.isView}
+          <ChoiceBox
+            data={choiceOptions}
+            onChange={(value: number) => {
+              formik.setFieldValue("tipo_transportadora", value);
+
+              setChoiceOptions([
+                {
+                  id: 0,
+                  label: "CNPJ Avulso",
+                  icon: value === 0 ? <FaUserAlt className="w-6 h-6 pr-2" color="white" /> : <FaUser className="w-6 h-6 pr-2" />,
+                },
+                {
+                  id: 1,
+                  label: "Transportadora",
+                  icon: value === 1 ? <FaTruckMoving className="w-6 h-6 pr-2" color="white" /> : <FaTruck className="w-6 h-6 pr-2" />,
+                },
+              ]);
+            }}
+            value={formik.values.tipo_transportadora}
           />
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-1 mb-4 p-1">
+        {Number(formik.values.tipo_transportadora) === 0 ? (
+          <div className="pl-8">
+            <InputCustom
+              title="CNPJ Avulso"
+              typeInput="text"
+              placeholder="CNPJ Avulso"
+              onChange={formik.handleChange("cnpj")}
+              touched={formik.touched.cnpj}
+              error={formik.errors.cnpj}
+              value={formik.values.cnpj}
+              disabled={props.isView}
+            />
+          </div>
+        ) : Number(formik.values.tipo_transportadora) === 1 ? (
+          <div className="pl-8">
+            <SelectCustom
+              title="Transportadora"
+              data={transportadoras}
+              onChange={(selectedOption: any) =>
+                formik.setFieldValue("id_transportadora", selectedOption.value)
+              }
+              touched={formik.touched.id_transportadora}
+              error={formik.errors.id_transportadora}
+              value={formik.values.id_transportadora}
+              disabled={props.isView}
+            />
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
 
       <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">

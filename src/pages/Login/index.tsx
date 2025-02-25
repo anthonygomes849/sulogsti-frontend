@@ -5,11 +5,6 @@ import sulogLogo from '../../assets/images/logoMobile.svg';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import api from "../../services/api";
 
-import Loading from "../../core/common/Loading";
-import api from "../../services/api";
-import history from "../../services/history";
-import './Login.css';
-
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

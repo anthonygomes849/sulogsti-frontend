@@ -28,6 +28,12 @@ const ListMensalista: React.FC = () => {
       },
     },
     {
+      field: "cnpj",
+      headerName: "CNPJ Avulso",
+      filter: true,
+      width: 300,
+    },
+    {
       field: "mensalista_transportadora.razao_social_transportadora",
       headerName: "Razão Social",
       filter: true,
