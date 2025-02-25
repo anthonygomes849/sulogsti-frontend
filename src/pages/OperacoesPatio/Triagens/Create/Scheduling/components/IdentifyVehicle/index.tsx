@@ -19,7 +19,7 @@ const IdentifyVehicle: React.FC = () => {
       className="page"
     >
       <div className="overflow-y-scroll max-h-[650px] p-5">
-        {/* Insert Code here */}
+      
       </div>
     </motion.div>
   );
