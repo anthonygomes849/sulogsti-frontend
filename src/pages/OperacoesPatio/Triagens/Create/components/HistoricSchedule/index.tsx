@@ -41,14 +41,14 @@ const HistoricSchedule: React.FC<Props> = (props: Props) => {
             </div>
             <div className="flex items-center w-max">
               <span
-                className={`text-sm text-[${
+                className={`${item.id === 2 ? 'text-xs' : 'text-sm'} text-[${
                   props.status === item.id ? "#000" : "#6E7880"
                 }] font-semibold ml-3 mr-3 w-full`}
               >
                 {item.label}
               </span>
             </div>
-            {item.id <= 2 && <div className={`${props.status > item.id ? 'w-7' : 'w-14'} h-[2px] bg-[${props.status > item.id ? '#A0DBAF' : '#DBDEDF'}] mr-2`} />}
+            {item.id <= 2 && <div className={`${props.status > item.id ? 'w-7' : 'w-10'} h-[2px] bg-[${props.status > item.id ? '#A0DBAF' : '#DBDEDF'}] mr-2`} />}
           </div>
           {/* {item.id <= 2 && (
           )} */}

@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
 import { formatDateBR, maskedCPF, maskedPhone } from "../../../../../../../helpers/format";
@@ -59,6 +59,18 @@ const IdentifyDriver: React.FC = () => {
     }
   }, []);
 
+  const onLoadFormValues = useCallback(() => {
+    let getDataTriagem: any = sessionStorage.getItem('@triagem');
+    if(getDataTriagem) {
+      getDataTriagem = JSON.parse(getDataTriagem);
+    }
+
+    if(getDataTriagem && getDataTriagem.operacao_porto_agendada !== null) {
+      formik.setFieldValue('cpf_motorista', getDataTriagem.operacao_porto_agendada.cpf_motorista)
+      onSearchDetailDriver(getDataTriagem.operacao_porto_agendada.cpf_motorista);
+    }
+  }, [])
+
   const onSearchDriver = useCallback(async (value: string) => {
     try {
       setLoading(true);
@@ -102,7 +114,12 @@ const IdentifyDriver: React.FC = () => {
     },
   });
 
+  useEffect(() => {
+    onLoadFormValues();
+  }, [onLoadFormValues])
+
   return (
+    <>
     <motion.div
       initial="initial"
       animate="animate"
@@ -240,6 +257,7 @@ const IdentifyDriver: React.FC = () => {
         )}
       </div>
 
+    </motion.div>
       <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
         <button
           type="button"
@@ -249,7 +267,7 @@ const IdentifyDriver: React.FC = () => {
           Avançar
         </button>
       </div>
-    </motion.div>
+      </>
   );
 };
 

@@ -3,6 +3,7 @@ import { useStatus } from "../../../../../hooks/StatusContext";
 import Associate from "./components/Associate";
 import IdentifyDriver from "./components/IdentifyDriver";
 import IdentifyVehicle from "./components/IdentifyVehicle";
+import Payment from "./components/Payment";
 
 // import { Container } from './styles';
 
@@ -23,6 +24,8 @@ const Scheduling: React.FC = () => {
         break;
       case 2:
         return <IdentifyVehicle />;
+      case 3:
+        return <Payment />;
       default:
         break;
     }

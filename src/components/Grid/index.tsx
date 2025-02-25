@@ -14,6 +14,7 @@ import Loading from "./components/Loading";
 import Status from "./components/Status";
 import { CustomButtons, GridProps } from "./model/Grid";
 
+import { Tooltip } from "@mui/material";
 import "./styles.css";
 
 const Grid: React.FC<GridProps> = (props: GridProps) => {
@@ -36,15 +37,32 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
           <div className="flex w-full h-full items-center justify-center">
             {props.customButtons &&
               props.customButtons.map((button: CustomButtons) => {
+                let showButtonStatus = false;
+                if (params.data) {
+                  if (button.status.length > 0) {
+                    const findButtonStatus = button.status.find(
+                      (item) => item == params.data.status
+                    );
+
+                    if (findButtonStatus != undefined) {
+                      showButtonStatus = true;
+                    }
+                  }
+                }
                 return (
                   <>
+                    {showButtonStatus && (
                       <div
                         className="flex cursor-pointer items-center justify-center h-full mr-4"
-                        onClick={button.action}
+                        onClick={() => button.action(params.data)}
                         id={"btnDelete"}
                       >
+                        <Tooltip title={button.label}>
+
                         <img src={button.icon} className="tw-mr-1" />
+                        </Tooltip>
                       </div>
+                    )}
                   </>
                 );
               })}
