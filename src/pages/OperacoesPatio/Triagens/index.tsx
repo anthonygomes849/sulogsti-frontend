@@ -222,7 +222,12 @@ const Triagens: React.FC = () => {
               },
               {
                 label: 'Identificar Veiculo',
-                action: () => {},
+                action: (data: any) => {
+                  setSelectedRow(data);
+                  sessionStorage.setItem('@triagem', JSON.stringify(data));
+                  setStatus(2);
+                  openModal();
+                },
                 status: [3, 4],
                 icon: IdentifyVehicleIcon
               },
