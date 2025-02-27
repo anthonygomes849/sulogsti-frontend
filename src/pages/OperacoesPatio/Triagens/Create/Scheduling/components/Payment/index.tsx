@@ -1,11 +1,10 @@
 import { motion } from "framer-motion";
 import React, { Fragment, useCallback, useEffect, useState } from "react";
-import Logo from "../../../../../../../assets/images/logo-sulog-rodape.svg";
 import InputCustom from "../../../../../../../components/InputCustom";
 import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
-import { formatDateTimeBR, renderCargoTypes, renderVehicleTypes } from "../../../../../../../helpers/format";
 import api from "../../../../../../../services/api";
+import Ticket from "./Ticket";
 import { IPaymentTicket, ITypePayment } from "./types/types";
 
 // import { Container } from './styles';
@@ -80,227 +79,7 @@ const Payment: React.FC = () => {
           <div className="w-full h-full flex items-start mt-4">
             <div className="w-2/4 max-h-[550px] overflow-y-scroll">
               <div className="w-full h-full flex items-center">
-                <div className="w-full h-full bg-[#FFF] p-1">
-                  <div
-                    className="w-full h-full p-4 flex flex-col items-center justify-center"
-                    style={{ border: "2px solid #000" }}
-                  >
-                    <div className="w-full h-full flex flex-col items-center justify-center">
-                      <img src={Logo} width={140} height={140} />
-                      <div className="w-full flex items-center justify-center mt-3">
-                        <h1 className="text-sm text-[#000] font-bold mr-1">
-                          CNPJ:
-                        </h1>
-                        <span className="text-sm text-[#000] font-bold">
-                          11.166.491/0001-61
-                        </span>
-                      </div>
-                    </div>
-
-                    <div
-                      className="w-full flex flex-col items-center justify-center mt-2 p-4"
-                      style={{ borderBottom: "2px dashed #000" }}
-                    >
-                      <span className="text-sm text-[#000] font-bold">
-                        Agendamento:
-                      </span>
-                      <span className="text-sm text-[#000] font-bold mt-1">
-                        {dataTicket &&
-                        dataTicket.operacaoPatio.operacao_porto_agendada !==
-                          null
-                          ? formatDateTimeBR(
-                              dataTicket.operacaoPatio.operacao_porto_agendada
-                                .data_agendamento_terminal
-                            )
-                          : "---"}
-                      </span>
-                    </div>
-                    <div
-                      className="w-full flex flex-col items-center justify-center p-4"
-                      style={{ borderBottom: "2px dashed #000" }}
-                    >
-                      <span className="text-sm text-[#000] font-bold">
-                        Motorista:
-                      </span>
-                      <span className="text-sm text-[#000] font-bold mt-1">
-                        ---
-                        {/* {dataTicket && dataTicket.operacaoPatio.operacao_porto_agendada !== null ? dataTicket.operacaoPatio.operacao_porto_agendada.} */}
-                      </span>
-                    </div>
-                    <div
-                      className="w-full flex flex-col items-center justify-center mt-3 p-4"
-                      style={{ borderBottom: "2px dashed #000" }}
-                    >
-                      <div className="w-full flex items-center mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Tipo do Veículo:
-                        </span>
-                        <span className="text-sm text-[#000] font-normal ml-1">
-                          {dataTicket && dataTicket.operacaoPatio.operacao_patio_identificacao_veiculo && dataTicket.operacaoPatio.operacao_patio_identificacao_veiculo !== null ? renderVehicleTypes(dataTicket.operacaoPatio.operacao_patio_identificacao_veiculo.tipo_veiculo) : '---'}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Placa:
-                        </span>
-                        <span className="text-sm text-[#000] font-normal ml-1">
-                          {dataTicket && dataTicket.operacaoPatio.operacao_porto_agendada !== null ? dataTicket.operacaoPatio.operacao_porto_agendada.placa_dianteira_veiculo : '---'}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Transportadora:
-                        </span>
-                        <span className="text-sm text-[#000] font-normal ml-1">
-                          {dataTicket && dataTicket.operacaoPatio.operacao_porto_agendada !== null && dataTicket.operacaoPatio.operacao_porto_agendada.transportadora !== null ? dataTicket.operacaoPatio.operacao_porto_agendada.transportadora.razao_social : '---'}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Terminal:
-                        </span>
-                        <span className="text-sm text-[#000] font-normal ml-1">
-                          {dataTicket && dataTicket.operacaoPatio.operacao_porto_agendada !== null && dataTicket.operacaoPatio.operacao_porto_agendada.terminal !== null ? dataTicket.operacaoPatio.operacao_porto_agendada.terminal.razao_social : '---'}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Tipo Carga:
-                        </span>
-                        <span className="text-sm text-[#000] font-normal ml-1">
-                          {dataTicket && dataTicket.operacaoPatio.operacao_porto_agendada !== null && dataTicket.operacaoPatio.operacao_porto_agendada.tipo_carga !== null ? renderCargoTypes(dataTicket.operacaoPatio.operacao_porto_agendada.tipo_carga).replace(',', '') : '---'}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Número Container:
-                        </span>
-                        <span className="text-sm text-[#000] font-normal ml-1">
-                          {dataTicket && dataTicket.operacaoPatio.operacao_porto_agendada !== null && dataTicket.operacaoPatio.operacao_porto_agendada.identificadores_conteineres !== null ? dataTicket.operacaoPatio.operacao_porto_agendada.identificadores_conteineres : '---'}
-                        </span>
-                      </div>
-                    </div>
-                    <div
-                      className="w-full flex flex-col items-center justify-center mt-3 p-4"
-                      style={{ borderBottom: "2px dashed #000" }}
-                    >
-                      <div className="w-full flex items-center mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Entrada:
-                        </span>
-                        <span className="text-sm text-[#000] font-normal ml-1">
-                          {dataTicket && dataTicket.operacaoPatio.entrada_veiculo !== null ? formatDateTimeBR(dataTicket.operacaoPatio.entrada_veiculo.data_hora) : '---'}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Pagamento:
-                        </span>
-                        <span className="text-sm text-[#000] font-normal ml-1">
-                          ---
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Tempo de Permanência:
-                        </span>
-                        <span className="text-sm text-[#000] font-normal ml-1">
-                          {dataTicket && dataTicket.tempo_permanencia !== null ? dataTicket.tempo_permanencia : '---'}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Qtd. de Horas Extras:
-                        </span>
-                        <span className="text-sm text-[#000] font-normal ml-1">
-                          {dataTicket && dataTicket.qtd_horas_extras !== null ? dataTicket.qtd_horas_extras : '---'}
-                        </span>
-                      </div>
-                    </div>
-                    <div
-                      className="w-full flex flex-col items-center justify-center mt-3 p-4"
-                      style={{ borderBottom: "2px dashed #000" }}
-                    >
-                      <div className="w-full flex items-center justify-between mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Triagem:
-                        </span>
-                        <div
-                          className="w-full ml-2 mr-2"
-                          style={{ border: "1px dashed #ccc" }}
-                        />
-                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                          R$ {Number(dataTicket?.valor_total_triagem).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center justify-between mb-4">
-                        <span className="text-sm text-[#000] font-bold">
-                          Estadia:
-                        </span>
-                        <div
-                          className="w-full ml-2 mr-2"
-                          style={{ border: "1px dashed #ccc" }}
-                        />
-                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                          R$ {Number(dataTicket?.valor_total_estadia).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center justify-between mb-1">
-                        <span className="w-[70%] text-sm text-[#000] font-bold">
-                          Valor Pago:
-                        </span>
-                        <div
-                          className="w-full ml-2 mr-2"
-                          style={{ border: "1px dashed #ccc" }}
-                        />
-                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                          R$ {Number(dataTicket?.valor_pago).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center justify-between mb-4">
-                        <span className="w-[70%] text-sm text-[#000] font-bold">
-                          Falta Pagar:
-                        </span>
-                        <div
-                          className="w-full mr-2"
-                          style={{ border: "1px dashed #ccc" }}
-                        />
-                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                          R$ {Number(dataTicket?.valor_a_pagar).toFixed(2)}
-                        </span>
-                      </div>
-
-                      <div className="w-full flex flex-col items-center justify-between mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Tipo de pagamento:
-                        </span>
-                        <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
-                          DINHEIRO
-                        </span>
-                        <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
-                          CRÉDITO
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="w-full flex flex-col items-center justify-center mt-3 p-4">
-                      <div className="w-full flex items-center justify-between mb-1">
-                        <span className="text-sm text-[#000] font-bold">
-                          Operador:
-                        </span>
-                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                          ADMINISTRADOR
-                        </span>
-                      </div>
-
-                      <div className="mt-6">
-                        <span className="max-w-[50%] text-base text-wrap text-[#000] font-bold">
-                          DOCUMENTO SEM VALOR FISCAL
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {Ticket(dataTicket)}
               </div>
             </div>
             <div className="w-[3px] h-[550px] bg-[#0A4984] ml-4" />
@@ -331,7 +110,7 @@ const Payment: React.FC = () => {
                   />
                   </div>
                   <div className="mt-4">
-                    <InputCustom title="Descontos" onChange={() => {}} placeholder="0" />
+                    <InputCustom typeInput="mask" mask="" title="Descontos" onChange={() => {}} placeholder="0" />
                   </div>
               </div>
             </div>
