@@ -1,5 +1,6 @@
 import { ValueFormatterParams } from "ag-grid-community";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
+import CallDriverActiveIcon from '../../../assets/images/CallDriverActiveIcon.svg';
 import CallDriverIcon from '../../../assets/images/callDriverIcon.svg';
 import IdentifyDriverIcon from '../../../assets/images/identifyDriverIcon.svg';
 import IdentifyVehicleIcon from '../../../assets/images/identifyVehicleIcon.svg';
@@ -8,10 +9,12 @@ import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
 import TicketIcon from '../../../assets/images/ticketIcon.svg';
 import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
+import Loading from "../../../core/common/Loading";
 import { maskCnpj, renderCargoTypes } from "../../../helpers/format";
 import { STATUS_OPERACOES_PATIO_TRIAGEM } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import { useStatus } from "../../../hooks/StatusContext";
+import api from "../../../services/api";
 import Create from "./Create";
 import Info from "./Info";
 import { ITriagens } from "./types/types";
@@ -23,6 +26,17 @@ const Triagens: React.FC = () => {
     {
       headerName: "Data de Entrada",
       field: "entrada_veiculo.data_hora",
+    },
+    {
+      headerName: "Placa Dianteira",
+      field: "entrada_veiculo.placa_dianteira",
+      filter: true,
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
     },
     {
       headerName: "Chamada Motorista",
@@ -44,17 +58,7 @@ const Triagens: React.FC = () => {
         return "---";
       },
     },
-    {
-      headerName: "Placa Dianteira",
-      field: "entrada_veiculo.placa_dianteira",
-      filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return "---";
-      },
-    },
+    
     {
       headerName: "Transportadora",
       field: "operacao_porto_agendada.transportadora.razao_social",
@@ -143,6 +147,7 @@ const Triagens: React.FC = () => {
   const [selectedRow, setSelectedRow] = useState<ITriagens>();
   const [isView, setIsView] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const gridRef: any = useRef();
 
@@ -150,8 +155,29 @@ const Triagens: React.FC = () => {
 
   const { setStatus } = useStatus();
 
+  const getCallDriver = useCallback(async (data: ITriagens) => {
+    try {
+      setLoading(true);
+
+      const body = {
+        id_operacao_patio: data.id_operacao_patio,
+        boolean_chamada: true,
+      };
+
+      const response = await api.post('/operacaopatio/chamadaMotorista', body);
+
+     setSelectedRow(data);
+
+
+      setLoading(false);
+    }catch{
+      setLoading(false);
+    }
+  }, [])
+
   return (
     <>
+      <Loading loading={loading} />
       {isModalOpen && (
         <Create
           isEdit={isEdit}
@@ -211,26 +237,39 @@ const Triagens: React.FC = () => {
             customButtons={[
               {
                 label: 'Identificar Motorista',
-                action: (data: any) => {
+                action: (data: ITriagens) => {
                   setSelectedRow(data);
                   sessionStorage.setItem('@triagem', JSON.stringify(data));
                   setStatus(1);
                   openModal();
                 },
                 status: [0, 1, 6],
-                icon: IdentifyDriverIcon,
+                icon: () => {
+                  return IdentifyDriverIcon;
+                },
               },
               {
                 label: 'Identificar Veiculo',
-                action: () => {},
+                action: (data: ITriagens) => {
+                  setSelectedRow(data);
+                  sessionStorage.setItem('@triagem', JSON.stringify(data));
+                  setStatus(2);
+                  openModal();
+                },
                 status: [3, 4],
-                icon: IdentifyVehicleIcon
+                icon: () => {
+                  return IdentifyVehicleIcon;
+                },
               },
               {
                 label: 'Chamar Motorista',
-                action: () => {},
-                status: [3, 4, 5],
-                icon: CallDriverIcon
+                action: (data: ITriagens) => {
+                  getCallDriver(data);
+                },
+                status: [2, 3, 4, 5],
+                icon: (data: ITriagens) => {
+                  return data.chamada_motorista ? CallDriverActiveIcon : CallDriverIcon;
+                }
               },
               {
                 label: 'Pagamento',
@@ -241,13 +280,20 @@ const Triagens: React.FC = () => {
                   openModal();
                 },
                 status: [10],
-                icon: PaymentIcon
+                icon: () => {
+                  return PaymentIcon;
+                }
               },
               {
                 label: 'Comprovante',
-                action: () => {},
+                action: (row: any) => {
+                  // <Ticket data={row} />
+
+                },
                 status: [11, 12, 13, 14, 15, 16],
-                icon: TicketIcon
+                icon: () => {
+                  return TicketIcon;
+                }
               }
             ]}
           />

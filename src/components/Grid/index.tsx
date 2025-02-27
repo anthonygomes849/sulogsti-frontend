@@ -59,7 +59,8 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
                       >
                         <Tooltip title={button.label}>
 
-                        <img src={button.icon} className="tw-mr-1" />
+
+                        <img src={button.icon(params.data)} alt="" />
                         </Tooltip>
                       </div>
                     )}
@@ -121,7 +122,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         field: "status",
         headerName: "Status",
         filter: true,
-        width: 270,
+        width: 310,
         cellStyle: { textAlign: "center" },
         // pinned: "left",
         cellRenderer: (params: CustomCellRendererProps) => {

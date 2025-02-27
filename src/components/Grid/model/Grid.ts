@@ -43,7 +43,7 @@ export type ColumnDef = {
 
 export type CustomButtons = {
   label: string;
-  icon: string;
+  icon: (data: any) => string;
   status: number[];
   action: (data: any) => void;
 }
