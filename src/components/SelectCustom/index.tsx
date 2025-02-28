@@ -40,7 +40,7 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <div>
+      <div className="w-full">
         <h1 className="text-sm font-semibold text-[#000] mb-2">{props.title}</h1>
 
         <Select
