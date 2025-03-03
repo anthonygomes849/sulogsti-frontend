@@ -32,7 +32,7 @@ export const formatDateBR = (value: string) => {
   })
 }
 
-export const formatDateTimeBR = (value: string) => {
+export const formatDateTimeBR = (value: string | Date) => {
   return format(new Date(value), 'dd/MM/yyyy HH:mm:ss', {
     locale: ptBR
   })

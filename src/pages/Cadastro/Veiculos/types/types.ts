@@ -14,3 +14,9 @@ export interface IVeiculos {
   motivo_inativacao: string;
   data_historico: string;
 }
+
+export enum TipoVeiculo {
+  TRUCK = "TRUCK",
+  CARRETA = "CARRETA",
+  BITREM = "BITREM",
+}

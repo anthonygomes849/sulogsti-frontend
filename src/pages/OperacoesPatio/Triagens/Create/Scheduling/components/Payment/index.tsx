@@ -1,12 +1,27 @@
 import { motion } from "framer-motion";
 import React, { Fragment, useCallback, useEffect, useState } from "react";
-import InputCustom from "../../../../../../../components/InputCustom";
+import { NumericFormat } from "react-number-format";
+import Logo from "../../../../../../../assets/images/logo-sulog-rodape.svg";
 import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
 import api from "../../../../../../../services/api";
-import Ticket from "./Ticket";
 import { IPaymentTicket, ITypePayment } from "./types/types";
 
+import { format } from "date-fns";
+import { useFormik } from "formik";
+import { Label } from "reactstrap";
+import {
+  formatDateTimeBR,
+  renderCargoTypes,
+  renderVehicleTypes,
+} from "../../../../../../../helpers/format";
+import formValidator from "./validators/formValidator";
+
+interface FormValues {
+  tipo_pagamento: string;
+  valor_pago: string;
+  desconto: string;
+}
 // import { Container } from './styles';
 
 const Payment: React.FC = () => {
@@ -20,12 +35,64 @@ const Payment: React.FC = () => {
     exit: { opacity: 0, x: 100, transition: { duration: 0.5 } },
   };
 
+  const handleSubmit = useCallback(
+    async (values: FormValues, dataTicket?: IPaymentTicket) => {
+      try {
+        setLoading(true);
+
+        let currentRow: any = sessionStorage.getItem("@triagem");
+
+        if (currentRow) {
+          currentRow = JSON.parse(currentRow);
+        }
+
+        const id_operacao_patio =
+          sessionStorage.getItem("id_operacao_patio") ||
+          currentRow.id_operacao_patio;
+
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const userId = urlParams.get("userId");
+
+        // const valorFinal = Number(values.valor_pago) + Number(values.desconto);
+
+        // const paymentFinished =
+        //   Number(dataTicket?.valor_a_pagar) > Number(valorFinal);
+        const valorPago: any = Number(values.valor_pago).toFixed(2);
+        const desconto: any = Number(values.desconto).toFixed(2);
+
+        const body = {
+          id_operacao_patio,
+          tipo_pagamento: values.tipo_pagamento,
+          desconto: parseFloat(values.desconto).toFixed(2),
+          quantia_paga: values.valor_pago,
+          valor_total: Number(valorPago - desconto).toFixed(2), //Desconto
+          data_hora_pagamento: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+          tempo_base_triagem: dataTicket && dataTicket.comercialCustoTriagem !== null ? dataTicket?.comercialCustoTriagem.tempo_base_triagem : null,
+          custo_base_triagem: dataTicket && dataTicket.comercialCustoTriagem !== null ? dataTicket.comercialCustoTriagem.custo_base_triagem : null,
+          custo_hora_extra: dataTicket && dataTicket.comercialCustoEstadia !== null ? dataTicket.comercialCustoEstadia.custo_hora : null,
+          custo_meia_diaria: dataTicket && dataTicket.comercialCustoEstadia !== null ? dataTicket.comercialCustoEstadia.custo_meia_diaria : null,
+          custo_diaria: dataTicket && dataTicket.comercialCustoEstadia !== null ? dataTicket.comercialCustoEstadia.custo_diaria : null,
+          id_usuario_historico: userId,
+          status: 11,
+        };
+
+        const response = await api.post('/operacaopatio/adicionarPagamento', body);
+
+        setLoading(false);
+      } catch {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
   const getPaymentTicket = useCallback(async () => {
     try {
       setLoading(true);
 
-      let getDataTriagem: any = sessionStorage.getItem('@triagem');
-      if(getDataTriagem) {
+      let getDataTriagem: any = sessionStorage.getItem("@triagem");
+      if (getDataTriagem) {
         getDataTriagem = JSON.parse(getDataTriagem);
       }
 
@@ -37,6 +104,8 @@ const Payment: React.FC = () => {
 
       if (response.status === 200) {
         setDataTicket(response.data);
+
+        formik.setFieldValue('valor_pago', response.data.valor_a_pagar)
       }
 
       setLoading(false);
@@ -44,15 +113,29 @@ const Payment: React.FC = () => {
   }, []);
 
   const getPaymentTypes = useCallback(() => {
-      const data = Object.values(ITypePayment).map((value: any, index: number) => {
+    const data = Object.values(ITypePayment).map(
+      (value: any, index: number) => {
         return {
           value: `${index + 1}`,
           label: value,
         };
-      });
-  
-      setPaymentTypes(data);
-    }, []);
+      }
+    );
+
+    setPaymentTypes(data);
+  }, []);
+
+  const initialValues: FormValues = {
+    tipo_pagamento: "",
+    desconto: "",
+    valor_pago: "",
+  };
+
+  const formik = useFormik({
+    initialValues,
+    validationSchema: formValidator,
+    onSubmit: (values: FormValues) => handleSubmit(values, dataTicket),
+  });
 
   useEffect(() => {
     getPaymentTicket();
@@ -79,11 +162,288 @@ const Payment: React.FC = () => {
           <div className="w-full h-full flex items-start mt-4">
             <div className="w-2/4 max-h-[550px] overflow-y-scroll">
               <div className="w-full h-full flex items-center">
-                {Ticket(dataTicket)}
+                <div className="w-full h-full bg-[#FFF] p-1" id="ticket">
+                  <div
+                    className="w-full h-full p-4 flex flex-col items-center justify-center"
+                    style={{ border: "2px solid #000" }}
+                  >
+                    <div className="w-full h-full flex flex-col items-center justify-center">
+                      <img src={Logo} width={140} height={140} />
+                      <div className="w-full flex items-center justify-center mt-3">
+                        <h1 className="text-sm text-[#000] font-bold mr-1">
+                          CNPJ:
+                        </h1>
+                        <span className="text-sm text-[#000] font-bold">
+                          11.166.491/0001-61
+                        </span>
+                      </div>
+                    </div>
+
+                    <div
+                      className="w-full flex flex-col items-center justify-center mt-2 p-4"
+                      style={{ borderBottom: "2px dashed #000" }}
+                    >
+                      <span className="text-sm text-[#000] font-bold">
+                        Agendamento:
+                      </span>
+                      <span className="text-sm text-[#000] font-bold mt-1">
+                        {dataTicket &&
+                        dataTicket.operacaoPatio.operacao_porto_agendada !==
+                          null
+                          ? formatDateTimeBR(
+                              dataTicket.operacaoPatio.operacao_porto_agendada
+                                .data_agendamento_terminal
+                            )
+                          : "---"}
+                      </span>
+                    </div>
+                    <div
+                      className="w-full flex flex-col items-center justify-center p-4"
+                      style={{ borderBottom: "2px dashed #000" }}
+                    >
+                      <span className="text-sm text-[#000] font-bold">
+                        Motorista:
+                      </span>
+                      <span className="text-sm text-[#000] font-bold mt-1">
+                        ---
+                        {/* {data && data.operacaoPatio.operacao_porto_agendada !== null ? data.operacaoPatio.operacao_porto_agendada.} */}
+                      </span>
+                    </div>
+                    <div
+                      className="w-full flex flex-col items-center justify-center mt-3 p-4"
+                      style={{ borderBottom: "2px dashed #000" }}
+                    >
+                      <div className="w-full flex items-center mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Tipo do Veículo:
+                        </span>
+                        <span className="text-sm text-[#000] font-normal ml-1">
+                          {dataTicket &&
+                          dataTicket.operacaoPatio
+                            .operacao_patio_identificacao_veiculo &&
+                          dataTicket.operacaoPatio
+                            .operacao_patio_identificacao_veiculo !== null
+                            ? renderVehicleTypes(
+                                dataTicket.operacaoPatio
+                                  .operacao_patio_identificacao_veiculo
+                                  .tipo_veiculo
+                              )
+                            : "---"}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Placa:
+                        </span>
+                        <span className="text-sm text-[#000] font-normal ml-1">
+                          {dataTicket &&
+                          dataTicket.operacaoPatio.operacao_porto_agendada !==
+                            null
+                            ? dataTicket.operacaoPatio.operacao_porto_agendada
+                                .placa_dianteira_veiculo
+                            : "---"}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Transportadora:
+                        </span>
+                        <span className="text-sm text-[#000] font-normal ml-1">
+                          {dataTicket &&
+                          dataTicket.operacaoPatio.operacao_porto_agendada !==
+                            null &&
+                          dataTicket.operacaoPatio.operacao_porto_agendada
+                            .transportadora !== null
+                            ? dataTicket.operacaoPatio.operacao_porto_agendada
+                                .transportadora.razao_social
+                            : "---"}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Terminal:
+                        </span>
+                        <span className="text-sm text-[#000] font-normal ml-1">
+                          {dataTicket &&
+                          dataTicket.operacaoPatio.operacao_porto_agendada !==
+                            null &&
+                          dataTicket.operacaoPatio.operacao_porto_agendada
+                            .terminal !== null
+                            ? dataTicket.operacaoPatio.operacao_porto_agendada
+                                .terminal.razao_social
+                            : "---"}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Tipo Carga:
+                        </span>
+                        <span className="text-sm text-[#000] font-normal ml-1">
+                          {dataTicket &&
+                          dataTicket.operacaoPatio.operacao_porto_agendada !==
+                            null &&
+                          dataTicket.operacaoPatio.operacao_porto_agendada
+                            .tipo_carga !== null
+                            ? renderCargoTypes(
+                                dataTicket.operacaoPatio.operacao_porto_agendada
+                                  .tipo_carga
+                              ).replace(",", "")
+                            : "---"}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Número Container:
+                        </span>
+                        <span className="text-sm text-[#000] font-normal ml-1">
+                          {dataTicket &&
+                          dataTicket.operacaoPatio.operacao_porto_agendada !==
+                            null &&
+                          dataTicket.operacaoPatio.operacao_porto_agendada
+                            .identificadores_conteineres !== null
+                            ? dataTicket.operacaoPatio.operacao_porto_agendada
+                                .identificadores_conteineres
+                            : "---"}
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      className="w-full flex flex-col items-center justify-center mt-3 p-4"
+                      style={{ borderBottom: "2px dashed #000" }}
+                    >
+                      <div className="w-full flex items-center mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Entrada:
+                        </span>
+                        <span className="text-sm text-[#000] font-normal ml-1">
+                          {dataTicket &&
+                          dataTicket.operacaoPatio.entrada_veiculo !== null
+                            ? formatDateTimeBR(
+                                dataTicket.operacaoPatio.entrada_veiculo
+                                  .data_hora
+                              )
+                            : "---"}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Pagamento:
+                        </span>
+                        <span className="text-sm text-[#000] font-normal ml-1">
+                          ---
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Tempo de Permanência:
+                        </span>
+                        <span className="text-sm text-[#000] font-normal ml-1">
+                          {dataTicket && dataTicket.tempo_permanencia !== null
+                            ? dataTicket.tempo_permanencia
+                            : "---"}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Qtd. de Horas Extras:
+                        </span>
+                        <span className="text-sm text-[#000] font-normal ml-1">
+                          {dataTicket && dataTicket.qtd_horas_extras !== null
+                            ? dataTicket.qtd_horas_extras
+                            : "---"}
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      className="w-full flex flex-col items-center justify-center mt-3 p-4"
+                      style={{ borderBottom: "2px dashed #000" }}
+                    >
+                      <div className="w-full flex items-center justify-between mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Triagem:
+                        </span>
+                        <div
+                          className="w-full ml-2 mr-2"
+                          style={{ border: "1px dashed #ccc" }}
+                        />
+                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                          R${" "}
+                          {Number(dataTicket?.valor_total_triagem).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center justify-between mb-4">
+                        <span className="text-sm text-[#000] font-bold">
+                          Estadia:
+                        </span>
+                        <div
+                          className="w-full ml-2 mr-2"
+                          style={{ border: "1px dashed #ccc" }}
+                        />
+                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                          R${" "}
+                          {Number(dataTicket?.valor_total_estadia).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center justify-between mb-1">
+                        <span className="w-[70%] text-sm text-[#000] font-bold">
+                          Valor Pago:
+                        </span>
+                        <div
+                          className="w-full ml-2 mr-2"
+                          style={{ border: "1px dashed #ccc" }}
+                        />
+                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                          R$ {Number(dataTicket?.valor_pago).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center justify-between mb-4">
+                        <span className="w-[70%] text-sm text-[#000] font-bold">
+                          Falta Pagar:
+                        </span>
+                        <div
+                          className="w-full mr-2"
+                          style={{ border: "1px dashed #ccc" }}
+                        />
+                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                          R$ {Number(dataTicket?.valor_a_pagar).toFixed(2)}
+                        </span>
+                      </div>
+
+                      <div className="w-full flex flex-col items-center justify-between mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Tipo de pagamento:
+                        </span>
+                        <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
+                          DINHEIRO
+                        </span>
+                        <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
+                          CRÉDITO
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="w-full flex flex-col items-center justify-center mt-3 p-4">
+                      <div className="w-full flex items-center justify-between mb-1">
+                        <span className="text-sm text-[#000] font-bold">
+                          Operador:
+                        </span>
+                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                          ADMINISTRADOR
+                        </span>
+                      </div>
+
+                      <div className="mt-6">
+                        <span className="max-w-[50%] text-base text-wrap text-[#000] font-bold">
+                          DOCUMENTO SEM VALOR FISCAL
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="w-[3px] h-[550px] bg-[#0A4984] ml-4" />
-            <div className="">
+            <div className="w-2/4 mr-6">
               <div className="flex flex-col mb-2 ml-6">
                 <span className="text-base text-[#000] font-bold">
                   Informações para pagamento
@@ -91,27 +451,66 @@ const Payment: React.FC = () => {
               </div>
               <div className="w-full grid grid-cols-1 gap-3 mb-4 ml-6 mt-4">
                 <div className="w-full">
-
-                <SelectCustom
-                  title="Tipo de pagamento"
-                  data={paymentTypes}
-                  onChange={(selectedOption: any) => {
-                    
-                    // formik.setFieldValue(
-                      //   "id_transportadora",
-                      //   selectedOption.value
-                      // )
-                    }
-                  }
-                  // touched={formik.touched.id_transportadora}
-                  // error={formik.errors.id_transportadora}
-                  // value={formik.values.id_transportadora}
-                  // disabled={props.isView}
+                  <SelectCustom
+                    title="Tipo de pagamento"
+                    data={paymentTypes}
+                    onChange={(selectedOption: any) => {
+                      formik.setFieldValue(
+                        "tipo_pagamento",
+                        selectedOption.value
+                      );
+                    }}
+                    touched={formik.touched.tipo_pagamento}
+                    error={formik.errors.tipo_pagamento}
+                    value={formik.values.tipo_pagamento}
                   />
-                  </div>
-                  <div className="mt-4">
-                    <InputCustom typeInput="mask" mask="" title="Descontos" onChange={() => {}} placeholder="0" />
-                  </div>
+                </div>
+                <div className="mt-4">
+                  <Label className="text-sm text-[#000] font-semibold mb-2">
+                    Valor a Pagar
+                  </Label>
+                  <NumericFormat
+                    thousandSeparator=","
+                    decimalSeparator="."
+                    decimalScale={2}
+                    fixedDecimalScale
+                    prefix="R$"
+                    placeholder="R$ 0,00"
+                    onValueChange={(values: any) => {
+                      formik.setFieldValue("valor_pago", values.value); // Unformatted numeric value
+                    }}
+                    value={formik.values.valor_pago}
+                    className="h-[38px]"
+                  />
+                  {formik.touched.valor_pago && formik.errors.valor_pago && (
+                    <span className="text-sm text-[#EA004C] font-bold">
+                      {formik.errors.valor_pago}
+                    </span>
+                  )}
+                </div>
+                <div className="">
+                  <Label className="text-sm text-[#000] font-semibold mb-2">
+                    Descontos
+                  </Label>
+                  <NumericFormat
+                    thousandSeparator=","
+                    decimalSeparator="."
+                    decimalScale={2}
+                    fixedDecimalScale
+                    prefix="R$"
+                    placeholder="R$ 0,00"
+                    onValueChange={(values: any) => {
+                      formik.setFieldValue("desconto", values.value); // Unformatted numeric value
+                    }}
+                    value={formik.values.desconto}
+                    className="h-[38px]"
+                  />
+                  {formik.touched.desconto && formik.errors.desconto && (
+                    <span className="text-sm text-[#EA004C] font-bold">
+                      {formik.errors.desconto}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -121,7 +520,7 @@ const Payment: React.FC = () => {
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
-          // onClick={() => formik.handleSubmit()}
+          onClick={() => formik.handleSubmit()}
         >
           Avançar
         </button>

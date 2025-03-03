@@ -53,8 +53,12 @@ const IdentifyDriver: React.FC = () => {
 
       const userId = urlParams.get("userId");
 
+      const idOperacaoPatio = sessionStorage.getItem('id_operacao_patio');
+
+      const id = idOperacaoPatio && idOperacaoPatio.length > 0 ? idOperacaoPatio : currentRow.id_operacao_patio; 
+
       const body = {
-        id_operacao_patio: currentRow?.id_operacao_patio,
+        id_operacao_patio: id,
         id_motorista: values.id_motorista,
         id_usuario_historico: userId,
         status: 4
@@ -63,6 +67,7 @@ const IdentifyDriver: React.FC = () => {
       const response = await api.post('/operacaopatio/confirmDriverIdentity', body);
 
       if(response.status === 200) {
+        sessionStorage.setItem('id_operacao_patio', response.data);
         setStatus(2);
       }
 
@@ -205,7 +210,6 @@ const IdentifyDriver: React.FC = () => {
                 className="w-full max-w-28 h-10 flex items-center justify-center border-none rounded-full bg-[#0A4984] text-base text-[#fff] font-bold mt-6 ml-3 cursor-pointer"
                 type="button"
                 onClick={() => {
-                  console.log(formik.values.cpf_motorista);
                   if (String(formik.values.cpf_motorista).length > 0) {
                     onSearchDetailDriver(formik.values.cpf_motorista);
                   }
