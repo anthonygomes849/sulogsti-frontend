@@ -15,6 +15,7 @@ import Status from "./components/Status";
 import { CustomButtons, GridProps } from "./model/Grid";
 
 import { Tooltip } from "@mui/material";
+import CustomFilter from "./components/CustomFilter";
 import "./styles.css";
 
 const Grid: React.FC<GridProps> = (props: GridProps) => {
@@ -121,12 +122,11 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cols.unshift({
         field: "status",
         headerName: "Status",
-        filter: true,
+        filter: CustomFilter,
         width: 310,
         cellStyle: { textAlign: "center" },
         // pinned: "left",
         cellRenderer: (params: CustomCellRendererProps) => {
-          console.log("Status", params.data);
           if (params.data) {
             return <Status data={props.status} status={params.data.status} />;
           }
@@ -178,7 +178,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
                   )} 23:59:59`;
                 }
               } else {
-                filters[`${customFilter}`] = newFilter.filter;
+                filters[`${customFilter}`] = newFilter.filter || newFilter.value;
               }
             }
           }
@@ -195,8 +195,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
           };
 
           const response = await api.post(`${path}?page=${page + 1}`, reqDTO);
-
-          console.log(response.data.data);
 
           params.successCallback(response.data.data, response.data.total);
           setRowData(response.data.data);
