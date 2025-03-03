@@ -9,6 +9,19 @@ import { IPaymentTicket, ITypePayment } from "./types/types";
 
 // import { Container } from './styles';
 
+declare global {
+  interface Window {
+    PaykitCheckout: {
+      authenticate: (
+        authRequest: any,
+        success: (response: any) => void,
+        error: (error: any) => void,
+        handlePendingPayments: (pendingPayment: any) => void
+      ) => void;
+    };
+  }
+}
+
 const Payment: React.FC = () => {
   const [dataTicket, setDataTicket] = useState<IPaymentTicket>();
   const [paymentTypes, setPaymentTypes] = useState<any[]>([]);
@@ -25,7 +38,7 @@ const Payment: React.FC = () => {
       setLoading(true);
 
       let getDataTriagem: any = sessionStorage.getItem('@triagem');
-      if(getDataTriagem) {
+      if (getDataTriagem) {
         getDataTriagem = JSON.parse(getDataTriagem);
       }
 
@@ -40,24 +53,60 @@ const Payment: React.FC = () => {
       }
 
       setLoading(false);
-    } catch {}
+    } catch { }
   }, []);
 
   const getPaymentTypes = useCallback(() => {
-      const data = Object.values(ITypePayment).map((value: any, index: number) => {
-        return {
-          value: `${index + 1}`,
-          label: value,
-        };
-      });
-  
-      setPaymentTypes(data);
-    }, []);
+    const data = Object.values(ITypePayment).map((value: any, index: number) => {
+      return {
+        value: `${index + 1}`,
+        label: value,
+      };
+    });
+
+    setPaymentTypes(data);
+  }, []);
+
+  if (window.PaykitCheckout) {
+    const authenticationRequest = {
+      authenticationKey: '11166491000161'
+    };
+
+    // Success handler
+    const success = (response: any) => {
+      console.log('Payment successful!', response);
+    };
+
+    // Error handler
+    const error = (error: any) => {
+      console.error('Payment failed', error);
+    };
+
+    // Pending payments handler
+    const handlePendingPayments = (pendingPayment: any) => {
+      console.log('Handling pending payment:', pendingPayment);
+    };
+
+    // Triggering the PaykitCheckout.authenticate method
+    window.PaykitCheckout.authenticate(
+      authenticationRequest,
+      success,
+      error,
+      handlePendingPayments
+    );
+  }
+
+
 
   useEffect(() => {
     getPaymentTicket();
     getPaymentTypes();
   }, [getPaymentTicket, getPaymentTypes]);
+
+  useEffect(() => {
+
+
+  }, [])
 
   return (
     <Fragment>
@@ -79,7 +128,6 @@ const Payment: React.FC = () => {
           <div className="w-full h-full flex items-start mt-4">
             <div className="w-2/4 max-h-[550px] overflow-y-scroll">
               <div className="w-full h-full flex items-center">
-                {Ticket(dataTicket)}
               </div>
             </div>
             <div className="w-[3px] h-[550px] bg-[#0A4984] ml-4" />
@@ -92,26 +140,26 @@ const Payment: React.FC = () => {
               <div className="w-full grid grid-cols-1 gap-3 mb-4 ml-6 mt-4">
                 <div className="w-full">
 
-                <SelectCustom
-                  title="Tipo de pagamento"
-                  data={paymentTypes}
-                  onChange={(selectedOption: any) => {
-                    
-                    // formik.setFieldValue(
+                  <SelectCustom
+                    title="Tipo de pagamento"
+                    data={paymentTypes}
+                    onChange={(selectedOption: any) => {
+
+                      // formik.setFieldValue(
                       //   "id_transportadora",
                       //   selectedOption.value
                       // )
                     }
-                  }
+                    }
                   // touched={formik.touched.id_transportadora}
                   // error={formik.errors.id_transportadora}
                   // value={formik.values.id_transportadora}
                   // disabled={props.isView}
                   />
-                  </div>
-                  <div className="mt-4">
-                    <InputCustom typeInput="mask" mask="" title="Descontos" onChange={() => {}} placeholder="0" />
-                  </div>
+                </div>
+                <div className="mt-4">
+                  <InputCustom typeInput="mask" mask="" title="Descontos" onChange={() => { }} placeholder="0" />
+                </div>
               </div>
             </div>
           </div>
@@ -121,7 +169,7 @@ const Payment: React.FC = () => {
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
-          // onClick={() => formik.handleSubmit()}
+        // onClick={() => formik.handleSubmit()}
         >
           Avançar
         </button>
