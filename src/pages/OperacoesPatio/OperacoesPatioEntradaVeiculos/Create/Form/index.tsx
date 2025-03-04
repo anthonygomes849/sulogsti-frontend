@@ -56,6 +56,8 @@ const Form: React.FC<Props> = (props: Props) => {
 
       const response = await api.post("/cadastrar/operacaoPatioTriagem", body);
 
+      sessionStorage.setItem('id_operacao_patio', response.data.id_operacao_patio);
+
       setLoading(false);
 
       return;

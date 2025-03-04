@@ -1,12 +1,12 @@
 import { ValueFormatterParams } from "ag-grid-community";
 import React, { useCallback, useRef, useState } from "react";
-import CallDriverActiveIcon from '../../../assets/images/CallDriverActiveIcon.svg';
-import CallDriverIcon from '../../../assets/images/callDriverIcon.svg';
-import IdentifyDriverIcon from '../../../assets/images/identifyDriverIcon.svg';
-import IdentifyVehicleIcon from '../../../assets/images/identifyVehicleIcon.svg';
-import PaymentIcon from '../../../assets/images/paymentIcon.svg';
+import CallDriverActiveIcon from "../../../assets/images/CallDriverActiveIcon.svg";
+import CallDriverIcon from "../../../assets/images/callDriverIcon.svg";
+import IdentifyDriverIcon from "../../../assets/images/identifyDriverIcon.svg";
+import IdentifyVehicleIcon from "../../../assets/images/identifyVehicleIcon.svg";
+import PaymentIcon from "../../../assets/images/paymentIcon.svg";
 import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
-import TicketIcon from '../../../assets/images/ticketIcon.svg';
+import TicketIcon from "../../../assets/images/ticketIcon.svg";
 import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import Loading from "../../../core/common/Loading";
@@ -16,6 +16,7 @@ import { useModal } from "../../../hooks/ModalContext";
 import { useStatus } from "../../../hooks/StatusContext";
 import api from "../../../services/api";
 import Create from "./Create";
+import Ticket from "./Create/Scheduling/components/Payment/Ticket";
 import Info from "./Info";
 import { ITriagens } from "./types/types";
 
@@ -58,7 +59,7 @@ const Triagens: React.FC = () => {
         return "---";
       },
     },
-    
+
     {
       headerName: "Transportadora",
       field: "operacao_porto_agendada.transportadora.razao_social",
@@ -148,6 +149,9 @@ const Triagens: React.FC = () => {
   const [isView, setIsView] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showTicket, setShowTicket] = useState<boolean>(false);
+
+  const printRef = useRef();
 
   const gridRef: any = useRef();
 
@@ -164,17 +168,17 @@ const Triagens: React.FC = () => {
         boolean_chamada: true,
       };
 
-      const response = await api.post('/operacaopatio/chamadaMotorista', body);
+      const response = await api.post("/operacaopatio/chamadaMotorista", body);
 
-     setSelectedRow(data);
-
+      setSelectedRow(data);
 
       setLoading(false);
-    }catch{
+    } catch {
       setLoading(false);
     }
-  }, [])
+  }, []);
 
+  
   return (
     <>
       <Loading loading={loading} />
@@ -197,6 +201,11 @@ const Triagens: React.FC = () => {
           onClose={() => setIsView(!isView)}
         />
       )}
+      {showTicket && (
+        <div className="hidden">
+          <Ticket data={selectedRow} onClose={() => {}} />
+        </div>
+      )}
 
       <div className="flex flex-col w-full h-screen bg-[#F5F5F5] p-5">
         <div className="flex items-center justify-between w-full mb-3">
@@ -212,7 +221,7 @@ const Triagens: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="flex w-screen">
+        <div className="flex w-[calc(100vh - 90px)]">
           <Grid
             ref={gridRef}
             columns={columns}
@@ -236,10 +245,10 @@ const Triagens: React.FC = () => {
             }}
             customButtons={[
               {
-                label: 'Identificar Motorista',
+                label: "Identificar Motorista",
                 action: (data: ITriagens) => {
                   setSelectedRow(data);
-                  sessionStorage.setItem('@triagem', JSON.stringify(data));
+                  sessionStorage.setItem("@triagem", JSON.stringify(data));
                   setStatus(1);
                   openModal();
                 },
@@ -249,10 +258,10 @@ const Triagens: React.FC = () => {
                 },
               },
               {
-                label: 'Identificar Veiculo',
+                label: "Identificar Veiculo",
                 action: (data: ITriagens) => {
                   setSelectedRow(data);
-                  sessionStorage.setItem('@triagem', JSON.stringify(data));
+                  sessionStorage.setItem("@triagem", JSON.stringify(data));
                   setStatus(2);
                   openModal();
                 },
@@ -262,39 +271,43 @@ const Triagens: React.FC = () => {
                 },
               },
               {
-                label: 'Chamar Motorista',
+                label: "Chamar Motorista",
                 action: (data: ITriagens) => {
                   getCallDriver(data);
                 },
                 status: [2, 3, 4, 5],
                 icon: (data: ITriagens) => {
-                  return data.chamada_motorista ? CallDriverActiveIcon : CallDriverIcon;
-                }
+                  return data.chamada_motorista
+                    ? CallDriverActiveIcon
+                    : CallDriverIcon;
+                },
               },
               {
-                label: 'Pagamento',
+                label: "Pagamento",
                 action: (data: any) => {
                   setSelectedRow(data);
-                  sessionStorage.setItem('@triagem', JSON.stringify(data));
+                  sessionStorage.setItem("@triagem", JSON.stringify(data));
                   setStatus(3);
                   openModal();
                 },
                 status: [10],
                 icon: () => {
                   return PaymentIcon;
-                }
+                },
               },
               {
-                label: 'Comprovante',
+                label: "Comprovante",
                 action: (row: any) => {
-                  // <Ticket data={row} />
-
+                  setSelectedRow(row);
+                  setShowTicket(false);
+                  setShowTicket(true);
+                  sessionStorage.setItem("@triagem", JSON.stringify(row));
                 },
                 status: [11, 12, 13, 14, 15, 16],
                 icon: () => {
                   return TicketIcon;
-                }
-              }
+                },
+              },
             ]}
           />
         </div>

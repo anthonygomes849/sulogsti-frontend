@@ -31,7 +31,7 @@ function App() {
   }, [fetchPermissions]);
 
   return (
-    <div className="flex w-full h-screen">
+    <div className="flex w-full h-[calc(100vh - 90px)]">
       <AuthenticateProvider>
         <StatusProvider>
 

@@ -157,7 +157,7 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="flex w-screen">
+        <div className="flex w-[calc(100vh - 90px)]">
           <Grid
             ref={gridRef}
             columns={columns}

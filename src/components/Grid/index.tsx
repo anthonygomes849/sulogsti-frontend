@@ -15,6 +15,7 @@ import Status from "./components/Status";
 import { CustomButtons, GridProps } from "./model/Grid";
 
 import { Tooltip } from "@mui/material";
+import CustomFilter from "./components/CustomFilter";
 import "./styles.css";
 
 const Grid: React.FC<GridProps> = (props: GridProps) => {
@@ -121,12 +122,14 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cols.unshift({
         field: "status",
         headerName: "Status",
-        filter: true,
+        filter: CustomFilter,
+        filterParams: {
+          status: props.status
+        },
         width: 310,
         cellStyle: { textAlign: "center" },
         // pinned: "left",
         cellRenderer: (params: CustomCellRendererProps) => {
-          console.log("Status", params.data);
           if (params.data) {
             return <Status data={props.status} status={params.data.status} />;
           }
@@ -156,6 +159,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
           // Adiciona os filtros de colunas customizados.
           if (params.filterModel != null) {
+            console.log(params.filterModel);
             for (const customFilter in params.filterModel) {
               // Tem que fazer o teste se é um array, pois caso o receba
               // será um filtro por período.
@@ -178,7 +182,10 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
                   )} 23:59:59`;
                 }
               } else {
-                filters[`${customFilter}`] = newFilter.filter;
+                console.log(newFilter);
+                filters[`${customFilter}`] = newFilter.filter || Number(newFilter.value);
+
+                console.log(filters);
               }
             }
           }
@@ -195,8 +202,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
           };
 
           const response = await api.post(`${path}?page=${page + 1}`, reqDTO);
-
-          console.log(response.data.data);
 
           params.successCallback(response.data.data, response.data.total);
           setRowData(response.data.data);
@@ -222,7 +227,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   return (
     <div
       className="ag-theme-quartz bg-[#FFFFFF] max-w-[96%] rounded-lg p-3 mr-5 shadow-md"
-      style={{ width: "100%", height: "calc(100vh - 90px)" }}
+      style={{ width: "100%", height: "calc(100vh - 120px)" }}
     >
       <LoadingIndicator loading={loading} />
 
