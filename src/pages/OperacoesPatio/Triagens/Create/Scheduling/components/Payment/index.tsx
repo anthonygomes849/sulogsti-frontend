@@ -24,6 +24,19 @@ interface FormValues {
 }
 // import { Container } from './styles';
 
+declare global {
+  interface Window {
+    PaykitCheckout: {
+      authenticate: (
+        authRequest: any,
+        success: (response: any) => void,
+        error: (error: any) => void,
+        handlePendingPayments: (pendingPayment: any) => void
+      ) => void;
+    };
+  }
+}
+
 const Payment: React.FC = () => {
   const [dataTicket, setDataTicket] = useState<IPaymentTicket>();
   const [paymentTypes, setPaymentTypes] = useState<any[]>([]);
@@ -109,7 +122,7 @@ const Payment: React.FC = () => {
       }
 
       setLoading(false);
-    } catch {}
+    } catch { }
   }, []);
 
   const getPaymentTypes = useCallback(() => {
@@ -124,6 +137,36 @@ const Payment: React.FC = () => {
 
     setPaymentTypes(data);
   }, []);
+
+  if (window.PaykitCheckout) {
+    const authenticationRequest = {
+      authenticationKey: '11166491000161'
+    };
+
+    // Success handler
+    const success = (response: any) => {
+      console.log('Payment successful!', response);
+    };
+
+    // Error handler
+    const error = (error: any) => {
+      console.error('Payment failed', error);
+    };
+
+    // Pending payments handler
+    const handlePendingPayments = (pendingPayment: any) => {
+      console.log('Handling pending payment:', pendingPayment);
+    };
+
+    // Triggering the PaykitCheckout.authenticate method
+    window.PaykitCheckout.authenticate(
+      authenticationRequest,
+      success,
+      error,
+      handlePendingPayments
+    );
+  }
+
 
   const initialValues: FormValues = {
     tipo_pagamento: "",
@@ -141,6 +184,11 @@ const Payment: React.FC = () => {
     getPaymentTicket();
     getPaymentTypes();
   }, [getPaymentTicket, getPaymentTypes]);
+
+  useEffect(() => {
+
+
+  }, [])
 
   return (
     <Fragment>

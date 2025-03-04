@@ -9,7 +9,7 @@ interface Props {
 
 const Main: React.FC<Props> = (props: Props) => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full">
       <PermissionProvider>
         <ModalProvider>
           <BreadcrumbProvider>

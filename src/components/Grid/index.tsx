@@ -123,6 +123,9 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         field: "status",
         headerName: "Status",
         filter: CustomFilter,
+        filterParams: {
+          status: props.status
+        },
         width: 310,
         cellStyle: { textAlign: "center" },
         // pinned: "left",
@@ -156,6 +159,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
           // Adiciona os filtros de colunas customizados.
           if (params.filterModel != null) {
+            console.log(params.filterModel);
             for (const customFilter in params.filterModel) {
               // Tem que fazer o teste se é um array, pois caso o receba
               // será um filtro por período.
@@ -178,7 +182,10 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
                   )} 23:59:59`;
                 }
               } else {
-                filters[`${customFilter}`] = newFilter.filter || newFilter.value;
+                console.log(newFilter);
+                filters[`${customFilter}`] = newFilter.filter || Number(newFilter.value);
+
+                console.log(filters);
               }
             }
           }
@@ -220,7 +227,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   return (
     <div
       className="ag-theme-quartz bg-[#FFFFFF] max-w-[96%] rounded-lg p-3 mr-5 shadow-md"
-      style={{ width: "100%", height: "calc(100vh - 90px)" }}
+      style={{ width: "100%", height: "calc(100vh - 120px)" }}
     >
       <LoadingIndicator loading={loading} />
 

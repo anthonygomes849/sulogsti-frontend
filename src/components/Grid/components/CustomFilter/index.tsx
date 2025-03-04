@@ -12,6 +12,8 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
   const [filterValue, setFilterValue] = useState<string>("");
   const [selected, setSelected] = useState<any>();
 
+  console.log(props.status);
+
   // Implementação da interface de filtro
   useImperativeHandle(ref, () => ({
     doesFilterPass(params) {
@@ -65,7 +67,7 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
           </div>
         </Listbox.Button>
         <Listbox.Options className="w-full mt-1 bg-white border rounded-md shadow-lg h-[220px] overflow-scroll">
-          {STATUS_OPERACOES_PATIO_TRIAGEM.map((item) => (
+          {props.status.map((item: any) => (
             <Listbox.Option
               // key={item.value}
               value={item}
