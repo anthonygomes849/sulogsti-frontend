@@ -12,6 +12,8 @@ import {
   TipoVeiculo,
 } from "../../../../../../Cadastro/Veiculos/types/types";
 // import Checkbox from "./components/Checkbox";
+import { ToastContainer } from "react-toastify";
+import Checkbox from "../../../../../../../components/Checkbox";
 import formValidator from "./validators/formValidator";
 import formValidator2 from "./validators/formValidator2";
 
@@ -117,7 +119,7 @@ const IdentifyVehicle: React.FC = () => {
           values.id_veiculo_parte_nao_motorizada.length > 0
             ? Number(values.id_veiculo_parte_nao_motorizada)
             : null,
-        tipo_veiculo: 1,
+        tipo_veiculo: values.tipo_veiculo,
         data_hora_identificacao: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
         id_usuario_historico: userId,
         status: 5,
@@ -306,6 +308,7 @@ const IdentifyVehicle: React.FC = () => {
   return (
     <>
       <Loading loading={loading} />
+      <ToastContainer />
       <motion.div
         initial="initial"
         animate="animate"
@@ -418,14 +421,10 @@ const IdentifyVehicle: React.FC = () => {
                           <SelectCustom
                             data={vehicleTypes}
                             onChange={(selectedOption: any) => {
-                              // formik.setFieldValue(
-                              //   "id_veiculo_parte_motorizada",
-                              //   selectedOption.value
-                              // );
-                              // formik.setFieldValue(
-                              //   "license_plate_motorized",
-                              //   selectedOption.label
-                              // );
+                              formik.setFieldValue(
+                                "tipo_veiculo",
+                                selectedOption.value
+                              );
                             }}
                             title="Tipo Veiculo"
                             touched={formik.touched.tipo_veiculo}
@@ -593,8 +592,8 @@ const IdentifyVehicle: React.FC = () => {
                       value={formik.values.id_transportadora}
                     />
                   </div>
-                  <div className="flex flex-col w-full mt-4">
-                    {/* <Checkbox
+                  <div className="flex flex-col w-full mt-5">
+                    <Checkbox
                       title="Devolução de Container Cheio"
                       checked={formik.values.identificacao_carga}
                       onChecked={() =>
@@ -603,7 +602,7 @@ const IdentifyVehicle: React.FC = () => {
                           !formik.values.identificacao_carga
                         )
                       }
-                    /> */}
+                    />
                     <div className="w-11/12 mt-2">
                       <span className="text-[#666666] font-normal text-sm">Deve ser marcado caso seja identificado operação de descarga com container cheio.</span>
                       </div>

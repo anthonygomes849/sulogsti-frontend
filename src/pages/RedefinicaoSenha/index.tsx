@@ -1,11 +1,11 @@
-import React, { useCallback, useState } from "react";
-import './Login.css';
-import sulogLogin from '../../assets/images/sulog_login.svg';
+import { useCallback, useState } from "react";
+import { FaEye, FaEyeSlash, FaKey, FaLock } from 'react-icons/fa';
 import sulogLogo from '../../assets/images/logoMobile.svg';
-import { FaKey, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
-import api from "../../services/api";
+import sulogLogin from '../../assets/images/sulog_login.svg';
 import Loading from "../../core/common/Loading";
+import api from "../../services/api";
 import history from "../../services/history";
+import './Login.css';
 
 const RedefinicaoSenha = () => {
   const [token, setToken] = useState('');

@@ -2,7 +2,6 @@ import { Listbox } from "@headlessui/react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { IFilterReactComp } from "ag-grid-react";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
-import { STATUS_OPERACOES_PATIO_TRIAGEM } from "../../../../helpers/status";
 
 export interface CustomTextFilterModel {
   value: string;

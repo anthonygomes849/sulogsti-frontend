@@ -16,7 +16,7 @@ interface Props {
   onClose: () => void;
 }
 
-const Ticket = (props: Props, ref: any) => {
+const Ticket = (props: Props) => {
   const [dataTicket, setDataTicket] = useState<IPaymentTicket[]>([]);
   const printRef: any = useRef(null);
 
@@ -50,10 +50,6 @@ const Ticket = (props: Props, ref: any) => {
       }
     } catch {}
   }, [props.data]);
-
-  const onClose = () => {
-    props.onClose();
-  }
 
   useEffect(() => {
     getPaymentTicket();
