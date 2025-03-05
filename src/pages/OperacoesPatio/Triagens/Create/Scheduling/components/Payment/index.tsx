@@ -90,7 +90,7 @@ const Payment: React.FC = () => {
           status: 11,
         };
 
-        const response = await api.post('/operacaopatio/adicionarPagamento', body);
+        await api.post('/operacaopatio/adicionarPagamento', body);
 
         setLoading(false);
       } catch {

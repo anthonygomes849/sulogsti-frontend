@@ -119,7 +119,7 @@ const IdentifyVehicle: React.FC = () => {
           values.id_veiculo_parte_nao_motorizada.length > 0
             ? Number(values.id_veiculo_parte_nao_motorizada)
             : null,
-        tipo_veiculo: 1,
+        tipo_veiculo: values.tipo_veiculo,
         data_hora_identificacao: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
         id_usuario_historico: userId,
         status: 5,
@@ -421,14 +421,10 @@ const IdentifyVehicle: React.FC = () => {
                           <SelectCustom
                             data={vehicleTypes}
                             onChange={(selectedOption: any) => {
-                              // formik.setFieldValue(
-                              //   "id_veiculo_parte_motorizada",
-                              //   selectedOption.value
-                              // );
-                              // formik.setFieldValue(
-                              //   "license_plate_motorized",
-                              //   selectedOption.label
-                              // );
+                              formik.setFieldValue(
+                                "tipo_veiculo",
+                                selectedOption.value
+                              );
                             }}
                             title="Tipo Veiculo"
                             touched={formik.touched.tipo_veiculo}

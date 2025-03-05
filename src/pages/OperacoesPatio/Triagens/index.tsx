@@ -151,8 +151,6 @@ const Triagens: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showTicket, setShowTicket] = useState<boolean>(false);
 
-  const printRef = useRef();
-
   const gridRef: any = useRef();
 
   const { openModal, isModalOpen, closeModal } = useModal();
@@ -168,7 +166,7 @@ const Triagens: React.FC = () => {
         boolean_chamada: true,
       };
 
-      const response = await api.post("/operacaopatio/chamadaMotorista", body);
+      await api.post("/operacaopatio/chamadaMotorista", body);
 
       setSelectedRow(data);
 

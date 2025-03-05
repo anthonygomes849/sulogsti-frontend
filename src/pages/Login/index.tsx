@@ -1,9 +1,11 @@
-import React, { useCallback, useState } from "react";
-import './Login.css';
-import sulogLogin from '../../assets/images/sulog_login.svg';
+import { useCallback, useState } from "react";
+import { FaEnvelope, FaEye, FaEyeSlash, FaLock } from 'react-icons/fa';
 import sulogLogo from '../../assets/images/logoMobile.svg';
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import sulogLogin from '../../assets/images/sulog_login.svg';
+import Loading from "../../core/common/Loading";
 import api from "../../services/api";
+import history from "../../services/history";
+import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
