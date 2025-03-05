@@ -1,6 +1,7 @@
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
 import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
 import {
@@ -10,6 +11,7 @@ import {
 } from "../../../../../../../helpers/format";
 import { useStatus } from "../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../services/api";
+import { FrontendNotification } from "../../../../../../../shared/Notification";
 import { IMotorista } from "../../../../../../Cadastro/Motoristas/Create/types/types";
 import formValidator from "./validators/formValidator";
 
@@ -53,27 +55,36 @@ const IdentifyDriver: React.FC = () => {
 
       const userId = urlParams.get("userId");
 
-      const idOperacaoPatio = sessionStorage.getItem('id_operacao_patio');
+      const idOperacaoPatio = sessionStorage.getItem("id_operacao_patio");
 
-      const id = idOperacaoPatio && idOperacaoPatio.length > 0 ? idOperacaoPatio : currentRow.id_operacao_patio; 
+      const id =
+        idOperacaoPatio && idOperacaoPatio.length > 0
+          ? idOperacaoPatio
+          : currentRow.id_operacao_patio;
 
       const body = {
         id_operacao_patio: id,
         id_motorista: values.id_motorista,
         id_usuario_historico: userId,
-        status: 4
+        status: 4,
       };
 
-      const response = await api.post('/operacaopatio/confirmDriverIdentity', body);
+      const response = await api.post(
+        "/operacaopatio/confirmDriverIdentity",
+        body
+      );
 
-      if(response.status === 200) {
-        sessionStorage.setItem('id_operacao_patio', response.data);
+      if (response.status === 200) {
+        sessionStorage.setItem("id_operacao_patio", response.data);
         setStatus(2);
+      } else {
+        FrontendNotification("Erro ao identificar o motorista", "error");
       }
 
       setLoading(false);
     } catch {
       setLoading(false);
+      FrontendNotification("Erro ao identificar o motorista", "error");
     }
   }, []);
 
@@ -169,6 +180,7 @@ const IdentifyDriver: React.FC = () => {
 
   return (
     <>
+      <ToastContainer />
       <motion.div
         initial="initial"
         animate="animate"
