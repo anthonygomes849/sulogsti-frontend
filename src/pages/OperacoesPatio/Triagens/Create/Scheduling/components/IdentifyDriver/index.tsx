@@ -257,7 +257,7 @@ const IdentifyDriver: React.FC = () => {
                           CPF
                         </span>
                         <span className="text-sm text-[#1E2121] font-light mt-1">
-                          {maskedCPF(item.cpf)}
+                          {item.cpf && item.cpf.length > 0 ? maskedCPF(item.cpf): '---'}
                         </span>
                       </div>
                       <div className="flex flex-col items-start">
@@ -282,7 +282,7 @@ const IdentifyDriver: React.FC = () => {
                           Celular
                         </span>
                         <span className="text-sm text-[#1E2121] font-light mt-1">
-                          {maskedPhone(item.celular)}
+                          {item.celular && item.celular.length > 0 ? maskedPhone(item.celular): '---'}
                         </span>
                       </div>
                       <div className="flex flex-col items-start">
@@ -290,13 +290,13 @@ const IdentifyDriver: React.FC = () => {
                           CNH | Categoria | Data Expiração
                         </span>
                         <span className="text-sm text-[#1E2121] font-light mt-1">
-                          {item.numero_cnh !== null
+                          {item.numero_cnh && item.numero_cnh !== null
                             ? `${maskedCPF(item.numero_cnh)} |`
                             : "---"}{" "}
-                          {item.categoria_cnh !== null
+                          {item.categoria_cnh && item.categoria_cnh !== null
                             ? `${item.categoria_cnh} |`
                             : "---"}{" "}
-                          {item.data_expiracao_cnh !== null
+                          {item.data_expiracao_cnh && item.data_expiracao_cnh !== null
                             ? formatDateBR(item.data_expiracao_cnh)
                             : "---"}
                         </span>

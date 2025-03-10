@@ -13,6 +13,7 @@ import { IPaymentTicket } from "../types/types";
 
 interface Props {
   data: any;
+  numPages?: number;
   onClose: () => void;
 }
 
@@ -31,14 +32,15 @@ const Ticket = (props: Props) => {
   const getPaymentTicket = useCallback(async () => {
     try {
       const body = {
-        id_operacao_patio: props.data.id_operacao_patio,
+        id_operacao_patio: props.data.id_operacao_patio || props.data.operacaoPatio.id_operacao_patio,
       };
 
       const response = await api.post("/operacaopatio/custoOperacao", body);
 
       if (response.status === 200) {
         let rows: IPaymentTicket[] = [];
-        for (var i = 0; i < 3; i++) {
+        var numPages = props.numPages || 3;
+        for (var i = 0; i < numPages; i++) {
           rows.push(response.data);
         }
         setDataTicket(rows);

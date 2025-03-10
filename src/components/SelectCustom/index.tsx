@@ -23,11 +23,11 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
       zIndex: "99999999",
       borderRadius: "2.313rem"
     }),
-    option: (styles: any) => {
+    option: (styles: any, state: any) => {
       // const color = chroma(data.color);
       return {
         ...styles,
-        backgroundColor: "#FFF",
+        backgroundColor: state.isDisabled ? "#CCC" : "#FFF",
         fontSize: '0.820rem',
         fontFamily: 'Poppins',
         fontWeight: 400,

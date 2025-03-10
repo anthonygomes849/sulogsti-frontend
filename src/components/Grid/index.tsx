@@ -81,7 +81,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
             )}
             {/* {hasPermissions("CONHECER") && (
             )} */}
-            {usePermissions("SALVAR") && (
+            {usePermissions("SALVAR") && !window.location.pathname.includes('triagens') && (
               <>
                 <button
                   className="mr-4"

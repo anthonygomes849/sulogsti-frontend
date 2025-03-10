@@ -6,8 +6,11 @@ import IdentifyVehicle from "./components/IdentifyVehicle";
 import Payment from "./components/Payment";
 
 // import { Container } from './styles';
+interface Props {
+  onClose: () => void;
+}
 
-const Scheduling: React.FC = () => {
+const Scheduling: React.FC<Props> = (props: Props) => {
 
   const { status } = useStatus();
 
@@ -25,7 +28,7 @@ const Scheduling: React.FC = () => {
       case 2:
         return <IdentifyVehicle />;
       case 3:
-        return <Payment />;
+        return <Payment onClose={props.onClose} />;
       default:
         break;
     }

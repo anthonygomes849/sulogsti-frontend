@@ -9,12 +9,15 @@ import { IPaymentTicket, ITypePayment } from "./types/types";
 
 import { format } from "date-fns";
 import { useFormik } from "formik";
+import { ToastContainer } from "react-toastify";
 import { Label } from "reactstrap";
 import {
   formatDateTimeBR,
   renderCargoTypes,
   renderVehicleTypes,
 } from "../../../../../../../helpers/format";
+import { FrontendNotification } from "../../../../../../../shared/Notification";
+import Ticket from "./Ticket";
 import formValidator from "./validators/formValidator";
 
 interface FormValues {
@@ -37,10 +40,15 @@ declare global {
   }
 }
 
-const Payment: React.FC = () => {
+interface Props {
+  onClose: () => void;
+}
+
+const Payment: React.FC<Props> = (props: Props) => {
   const [dataTicket, setDataTicket] = useState<IPaymentTicket>();
   const [paymentTypes, setPaymentTypes] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showTicket, setShowTicket] = useState<boolean>(false);
 
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
@@ -77,7 +85,7 @@ const Payment: React.FC = () => {
         const body = {
           id_operacao_patio,
           tipo_pagamento: values.tipo_pagamento,
-          desconto: parseFloat(values.desconto).toFixed(2),
+          desconto: values.desconto.length > 0 ? parseFloat(values.desconto).toFixed(2) : 0.00,
           quantia_paga: values.valor_pago,
           valor_total: Number(valorPago - desconto).toFixed(2), //Desconto
           data_hora_pagamento: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
@@ -90,7 +98,20 @@ const Payment: React.FC = () => {
           status: 11,
         };
 
-        await api.post('/operacaopatio/adicionarPagamento', body);
+        const response = await api.post('/operacaopatio/adicionarPagamento', body, {
+          headers: {
+            'Host': 'https://api2.sulog.com.br',
+          }
+        });
+
+        if(response.status === 200) {
+          FrontendNotification('Pagamento realizado com sucesso!', 'success');
+          setShowTicket(false);
+          setShowTicket(true);
+          setTimeout(() => {
+            props.onClose();
+          }, 3000)
+        }
 
         setLoading(false);
       } catch {
@@ -131,6 +152,7 @@ const Payment: React.FC = () => {
         return {
           value: `${index + 1}`,
           label: value,
+          isDisabled : index <= 6
         };
       }
     );
@@ -138,34 +160,34 @@ const Payment: React.FC = () => {
     setPaymentTypes(data);
   }, []);
 
-  if (window.PaykitCheckout) {
-    const authenticationRequest = {
-      authenticationKey: '11166491000161'
-    };
+  // if (window.PaykitCheckout) {
+  //   const authenticationRequest = {
+  //     authenticationKey: '11166491000161'
+  //   };
 
-    // Success handler
-    const success = (response: any) => {
-      console.log('Payment successful!', response);
-    };
+  //   // Success handler
+  //   const success = (response: any) => {
+  //     console.log('Payment successful!', response);
+  //   };
 
-    // Error handler
-    const error = (error: any) => {
-      console.error('Payment failed', error);
-    };
+  //   // Error handler
+  //   const error = (error: any) => {
+  //     console.error('Payment failed', error);
+  //   };
 
-    // Pending payments handler
-    const handlePendingPayments = (pendingPayment: any) => {
-      console.log('Handling pending payment:', pendingPayment);
-    };
+  //   // Pending payments handler
+  //   const handlePendingPayments = (pendingPayment: any) => {
+  //     console.log('Handling pending payment:', pendingPayment);
+  //   };
 
-    // Triggering the PaykitCheckout.authenticate method
-    window.PaykitCheckout.authenticate(
-      authenticationRequest,
-      success,
-      error,
-      handlePendingPayments
-    );
-  }
+  //   // Triggering the PaykitCheckout.authenticate method
+  //   window.PaykitCheckout.authenticate(
+  //     authenticationRequest,
+  //     success,
+  //     error,
+  //     handlePendingPayments
+  //   );
+  // }
 
 
   const initialValues: FormValues = {
@@ -185,13 +207,15 @@ const Payment: React.FC = () => {
     getPaymentTypes();
   }, [getPaymentTicket, getPaymentTypes]);
 
-  useEffect(() => {
-
-
-  }, [])
-
   return (
     <Fragment>
+      <Loading loading={loading} />
+      <ToastContainer />
+      {showTicket && (
+        <div className="hidden">
+          <Ticket numPages={1} data={dataTicket} onClose={() => {}} />
+        </div>
+      )}
       <motion.div
         initial="initial"
         animate="animate"
@@ -199,7 +223,6 @@ const Payment: React.FC = () => {
         variants={pageVariants}
         className="page"
       >
-        <Loading loading={loading} />
         <div className="overflow-y-scroll w-auto max-h-[650px] p-5">
           <div className="flex flex-col mb-2 mt-3">
             <span className="text-sm text-[#000] font-bold">
@@ -253,8 +276,7 @@ const Payment: React.FC = () => {
                         Motorista:
                       </span>
                       <span className="text-sm text-[#000] font-bold mt-1">
-                        ---
-                        {/* {data && data.operacaoPatio.operacao_porto_agendada !== null ? data.operacaoPatio.operacao_porto_agendada.} */}
+                        {dataTicket && dataTicket.motorista !== null ? dataTicket.motorista.nome : '---'}
                       </span>
                     </div>
                     <div
@@ -522,6 +544,7 @@ const Payment: React.FC = () => {
                     decimalSeparator="."
                     decimalScale={2}
                     fixedDecimalScale
+                    disabled
                     prefix="R$"
                     placeholder="R$ 0,00"
                     onValueChange={(values: any) => {
@@ -570,7 +593,7 @@ const Payment: React.FC = () => {
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
           onClick={() => formik.handleSubmit()}
         >
-          Avançar
+          Finalizar
         </button>
       </div>
     </Fragment>

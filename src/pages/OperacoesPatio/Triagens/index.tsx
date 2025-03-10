@@ -1,5 +1,6 @@
 import { ValueFormatterParams } from "ag-grid-community";
 import React, { useCallback, useRef, useState } from "react";
+import { ToastContainer } from "react-toastify";
 import CallDriverActiveIcon from "../../../assets/images/CallDriverActiveIcon.svg";
 import CallDriverIcon from "../../../assets/images/callDriverIcon.svg";
 import IdentifyDriverIcon from "../../../assets/images/identifyDriverIcon.svg";
@@ -15,6 +16,7 @@ import { STATUS_OPERACOES_PATIO_TRIAGEM } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import { useStatus } from "../../../hooks/StatusContext";
 import api from "../../../services/api";
+import { FrontendNotification } from "../../../shared/Notification";
 import Create from "./Create";
 import Ticket from "./Create/Scheduling/components/Payment/Ticket";
 import Info from "./Info";
@@ -170,6 +172,12 @@ const Triagens: React.FC = () => {
 
       setSelectedRow(data);
 
+      FrontendNotification('Chamada do motorista realizada com sucesso!', 'success');
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
       setLoading(false);
     } catch {
       setLoading(false);
@@ -180,12 +188,16 @@ const Triagens: React.FC = () => {
   return (
     <>
       <Loading loading={loading} />
+      <ToastContainer />
       {isModalOpen && (
         <Create
           isEdit={isEdit}
           isView={isView}
           selectedRow={selectedRow}
-          onClear={() => closeModal()}
+          onClear={() => {
+            window.location.reload();
+            closeModal();
+          }}
           onConfirm={() => {
             window.location.reload();
           }}
