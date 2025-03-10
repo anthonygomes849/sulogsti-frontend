@@ -134,7 +134,12 @@ const Form: React.FC<Props> = (props: Props) => {
 
         setLoading(false);
 
-        // props.onConfirm();
+
+        setTimeout(() => {
+          props.onConfirm();
+
+        },  3000)
+
       } catch {
         setLoading(false);
       }
