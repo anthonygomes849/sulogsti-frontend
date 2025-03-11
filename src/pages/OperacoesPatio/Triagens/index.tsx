@@ -68,6 +68,7 @@ const Triagens: React.FC = () => {
     {
       headerName: "Tipo de Operação no Porto",
       field: "operacao_porto_agendada.tipo_carga",
+      fieldName: "tipo_operacao_porto",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.data.id_operacao_porto_agendada !== null) {
           return "TRIAGEM";
@@ -81,6 +82,8 @@ const Triagens: React.FC = () => {
     {
       headerName: "Tipo de Agendamento",
       field: "operacao_porto_agendada.tipo_carga",
+      filter: true,
+      fieldName: "tipo_carga",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return renderCargoTypes(params.value).replaceAll(",", "");
@@ -91,6 +94,8 @@ const Triagens: React.FC = () => {
     {
       headerName: "CPF do Motorista",
       field: "operacao_porto_agendada.cpf_motorista",
+      filter: true,
+      fieldName: "cpf_motorista",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
