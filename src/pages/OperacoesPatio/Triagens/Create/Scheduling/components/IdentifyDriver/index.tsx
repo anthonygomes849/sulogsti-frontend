@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
@@ -26,6 +26,8 @@ const IdentifyDriver: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [listDriver, setListDriver] = useState([]);
   const [detailDriver, setDetailDriver] = useState<IMotorista[]>([]);
+
+  const selectRef: any = useRef(null);
 
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
@@ -104,6 +106,15 @@ const IdentifyDriver: React.FC = () => {
         data.push(response.data);
 
         setDetailDriver(data);
+
+        let getDataTriagem: any = sessionStorage.getItem("@triagem");
+        if (getDataTriagem) {
+          getDataTriagem = JSON.parse(getDataTriagem);
+        }
+
+        if(getDataTriagem && getDataTriagem.operacao_porto_agendada !== null && response.data) {
+          formik.setFieldValue('id_motorista', response.data.id_motorista)
+        }
       }
 
       setLoading(false);
@@ -123,6 +134,7 @@ const IdentifyDriver: React.FC = () => {
         "cpf_motorista",
         getDataTriagem.operacao_porto_agendada.cpf_motorista
       );
+
       onSearchDetailDriver(
         getDataTriagem.operacao_porto_agendada.cpf_motorista
       );
@@ -202,6 +214,7 @@ const IdentifyDriver: React.FC = () => {
             <div className="flex items-center w-full">
               <div className="w-full">
                 <SelectCustom
+                  selectRef={selectRef}
                   data={listDriver}
                   onChange={(selectedOption: any) => {
                     formik.setFieldValue("id_motorista", selectedOption.value);
@@ -215,7 +228,7 @@ const IdentifyDriver: React.FC = () => {
                   title="CPF do Motorista"
                   touched={formik.touched.id_motorista}
                   error={formik.errors.id_motorista}
-                  value={formik.values.id_motorista}
+                  value={formik.values.cpf_motorista}
                 />
               </div>
               <button
@@ -257,7 +270,9 @@ const IdentifyDriver: React.FC = () => {
                           CPF
                         </span>
                         <span className="text-sm text-[#1E2121] font-light mt-1">
-                          {item.cpf && item.cpf.length > 0 ? maskedCPF(item.cpf): '---'}
+                          {item.cpf && item.cpf.length > 0
+                            ? maskedCPF(item.cpf)
+                            : "---"}
                         </span>
                       </div>
                       <div className="flex flex-col items-start">
@@ -282,7 +297,9 @@ const IdentifyDriver: React.FC = () => {
                           Celular
                         </span>
                         <span className="text-sm text-[#1E2121] font-light mt-1">
-                          {item.celular && item.celular.length > 0 ? maskedPhone(item.celular): '---'}
+                          {item.celular && item.celular.length > 0
+                            ? maskedPhone(item.celular)
+                            : "---"}
                         </span>
                       </div>
                       <div className="flex flex-col items-start">
@@ -296,7 +313,8 @@ const IdentifyDriver: React.FC = () => {
                           {item.categoria_cnh && item.categoria_cnh !== null
                             ? `${item.categoria_cnh} |`
                             : "---"}{" "}
-                          {item.data_expiracao_cnh && item.data_expiracao_cnh !== null
+                          {item.data_expiracao_cnh &&
+                          item.data_expiracao_cnh !== null
                             ? formatDateBR(item.data_expiracao_cnh)
                             : "---"}
                         </span>

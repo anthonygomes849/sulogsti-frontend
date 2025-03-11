@@ -45,18 +45,21 @@ const Form: React.FC<Props> = (props: Props) => {
       setLoading(true);
       const urlParams = new URLSearchParams(window.location.search);
 
-        const userId = urlParams.get("userId");
+      const userId = urlParams.get("userId");
 
       const body = {
         id_operacao_patio_entrada_veiculo: idEntradaVeiculo,
         status: 0,
         id_usuario_historico: userId,
-        ativo: true
+        ativo: true,
       };
 
       const response = await api.post("/cadastrar/operacaoPatioTriagem", body);
 
-      sessionStorage.setItem('id_operacao_patio', response.data.id_operacao_patio);
+      sessionStorage.setItem(
+        "id_operacao_patio",
+        response.data.id_operacao_patio
+      );
 
       setLoading(false);
 
@@ -132,14 +135,12 @@ const Form: React.FC<Props> = (props: Props) => {
           }
         }
 
-        setLoading(false);
-
-
+        
         setTimeout(() => {
           props.onConfirm();
-
-        },  3000)
-
+        }, 3000);
+        
+        setLoading(false);
       } catch {
         setLoading(false);
       }

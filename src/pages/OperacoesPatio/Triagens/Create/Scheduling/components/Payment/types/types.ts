@@ -1,4 +1,5 @@
 import { IMotorista } from "../../../../../../../Cadastro/Motoristas/Create/types/types";
+import { IVeiculos } from "../../../../../../../Cadastro/Veiculos/types/types";
 import { ITriagens } from "../../../../../types/types";
 
 export interface IPaymentTicket  {
@@ -27,6 +28,7 @@ export interface IPaymentTicket  {
     custo_hora: number;
     custo_meia_diaria: number;
   },
+  veiculo: IVeiculos;
 }
 
 export enum ITypePayment {

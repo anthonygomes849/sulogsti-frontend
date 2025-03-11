@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { domainTiposCarga, domainTypesOperation, domainTypeVehicle } from './renderer';
+import { CargaType, OperationType } from '../pages/OperacoesPorto/OperacoesPortoAgendada/types/types';
+import { domainPaymentTypes, domainTiposCarga, domainTypesOperation, domainTypeVehicle } from './renderer';
 
 export const maskedCPF = (value: string) => {
   value = value.replace(/\D/g, "")                    //Remove tudo o que não é dígito
@@ -48,6 +49,28 @@ export const maskedZipcode = (value: string) => {
   return value
 }
 
+export const getCargoTypes = () => {
+  const data = Object.values(CargaType).map((value: any, index: number) => {
+    return {
+      value: `${index + 1}`,
+      label: value,
+    };
+  });
+
+  return data;
+};
+
+export const getOperationTypes = () => {
+  const data = Object.values(OperationType).map((value: any, index: number) => {
+    return {
+      value: `${index + 1}`,
+      label: value,
+    };
+  });
+
+  return data;
+};
+
 export const renderCargoTypes = (data: any) => {
   let s = "";
 
@@ -62,7 +85,7 @@ export const renderCargoTypes = (data: any) => {
 
     for (var i = 0; i < arrayData.length; i++) {
       if (i < arrayData.length - 1) {
-        s += domainTiposCarga[parseInt(arrayData[i]) - 1] + ",";
+        s += domainTiposCarga[parseInt(arrayData[i]) - 1] + ", ";
       } else {
         s += domainTiposCarga[parseInt(arrayData[i]) - 1]
       }
@@ -82,4 +105,8 @@ export const renderOperationTypes = (data: any) => {
 
 export const renderVehicleTypes = (data: any) => {
   return domainTypeVehicle[parseInt(data)];
+}
+
+export const renderPaymentTypes = (data: any) => {
+  return domainPaymentTypes[parseInt(data)];
 }

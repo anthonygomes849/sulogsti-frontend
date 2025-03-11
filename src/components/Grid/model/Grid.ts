@@ -27,7 +27,9 @@ export interface GridProps {
 
 export type ColumnDef = {
   field: string;
+  fieldName?: string;
   headerName?: string;
+  type?: string;
   width?: number;
   checkboxSelection?: boolean;
   editable?: boolean;

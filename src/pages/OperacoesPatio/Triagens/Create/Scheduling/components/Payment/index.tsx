@@ -14,6 +14,7 @@ import { Label } from "reactstrap";
 import {
   formatDateTimeBR,
   renderCargoTypes,
+  renderPaymentTypes,
   renderVehicleTypes,
 } from "../../../../../../../helpers/format";
 import { FrontendNotification } from "../../../../../../../shared/Notification";
@@ -85,32 +86,54 @@ const Payment: React.FC<Props> = (props: Props) => {
         const body = {
           id_operacao_patio,
           tipo_pagamento: values.tipo_pagamento,
-          desconto: values.desconto.length > 0 ? parseFloat(values.desconto).toFixed(2) : 0.00,
+          desconto:
+            values.desconto.length > 0
+              ? parseFloat(values.desconto).toFixed(2)
+              : 0.0,
           quantia_paga: values.valor_pago,
           valor_total: Number(valorPago - desconto).toFixed(2), //Desconto
-          data_hora_pagamento: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-          tempo_base_triagem: dataTicket && dataTicket.comercialCustoTriagem !== null ? dataTicket?.comercialCustoTriagem.tempo_base_triagem : null,
-          custo_base_triagem: dataTicket && dataTicket.comercialCustoTriagem !== null ? dataTicket.comercialCustoTriagem.custo_base_triagem : null,
-          custo_hora_extra: dataTicket && dataTicket.comercialCustoEstadia !== null ? dataTicket.comercialCustoEstadia.custo_hora : null,
-          custo_meia_diaria: dataTicket && dataTicket.comercialCustoEstadia !== null ? dataTicket.comercialCustoEstadia.custo_meia_diaria : null,
-          custo_diaria: dataTicket && dataTicket.comercialCustoEstadia !== null ? dataTicket.comercialCustoEstadia.custo_diaria : null,
+          data_hora_pagamento: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+          tempo_base_triagem:
+            dataTicket && dataTicket.comercialCustoTriagem !== null
+              ? dataTicket?.comercialCustoTriagem.tempo_base_triagem
+              : null,
+          custo_base_triagem:
+            dataTicket && dataTicket.comercialCustoTriagem !== null
+              ? dataTicket.comercialCustoTriagem.custo_base_triagem
+              : null,
+          custo_hora_extra:
+            dataTicket && dataTicket.comercialCustoEstadia !== null
+              ? dataTicket.comercialCustoEstadia.custo_hora
+              : null,
+          custo_meia_diaria:
+            dataTicket && dataTicket.comercialCustoEstadia !== null
+              ? dataTicket.comercialCustoEstadia.custo_meia_diaria
+              : null,
+          custo_diaria:
+            dataTicket && dataTicket.comercialCustoEstadia !== null
+              ? dataTicket.comercialCustoEstadia.custo_diaria
+              : null,
           id_usuario_historico: userId,
           status: 11,
         };
 
-        const response = await api.post('/operacaopatio/adicionarPagamento', body, {
-          headers: {
-            'Host': 'https://api2.sulog.com.br',
+        const response = await api.post(
+          "/operacaopatio/adicionarPagamento",
+          body,
+          {
+            headers: {
+              Host: "https://api2.sulog.com.br",
+            },
           }
-        });
+        );
 
-        if(response.status === 200) {
-          FrontendNotification('Pagamento realizado com sucesso!', 'success');
+        if (response.status === 200) {
+          FrontendNotification("Pagamento realizado com sucesso!", "success");
           setShowTicket(false);
           setShowTicket(true);
           setTimeout(() => {
             props.onClose();
-          }, 3000)
+          }, 3000);
         }
 
         setLoading(false);
@@ -139,11 +162,11 @@ const Payment: React.FC<Props> = (props: Props) => {
       if (response.status === 200) {
         setDataTicket(response.data);
 
-        formik.setFieldValue('valor_pago', response.data.valor_a_pagar)
+        formik.setFieldValue("valor_pago", response.data.valor_a_pagar);
       }
 
       setLoading(false);
-    } catch { }
+    } catch {}
   }, []);
 
   const getPaymentTypes = useCallback(() => {
@@ -152,7 +175,7 @@ const Payment: React.FC<Props> = (props: Props) => {
         return {
           value: `${index + 1}`,
           label: value,
-          isDisabled : index <= 6
+          isDisabled: index <= 6,
         };
       }
     );
@@ -188,7 +211,6 @@ const Payment: React.FC<Props> = (props: Props) => {
   //     handlePendingPayments
   //   );
   // }
-
 
   const initialValues: FormValues = {
     tipo_pagamento: "",
@@ -276,7 +298,9 @@ const Payment: React.FC<Props> = (props: Props) => {
                         Motorista:
                       </span>
                       <span className="text-sm text-[#000] font-bold mt-1">
-                        {dataTicket && dataTicket.motorista !== null ? dataTicket.motorista.nome : '---'}
+                        {dataTicket && dataTicket.motorista !== null
+                          ? dataTicket.motorista.nome
+                          : "---"}
                       </span>
                     </div>
                     <div
@@ -306,11 +330,8 @@ const Payment: React.FC<Props> = (props: Props) => {
                           Placa:
                         </span>
                         <span className="text-sm text-[#000] font-normal ml-1">
-                          {dataTicket &&
-                          dataTicket.operacaoPatio.operacao_porto_agendada !==
-                            null
-                            ? dataTicket.operacaoPatio.operacao_porto_agendada
-                                .placa_dianteira_veiculo
+                          {dataTicket && dataTicket.veiculo !== null
+                            ? dataTicket.veiculo.placa
                             : "---"}
                         </span>
                       </div>
@@ -400,7 +421,15 @@ const Payment: React.FC<Props> = (props: Props) => {
                           Pagamento:
                         </span>
                         <span className="text-sm text-[#000] font-normal ml-1">
-                          ---
+                        {dataTicket?.operacaoPatio &&
+                    dataTicket?.operacaoPatio.pagamento &&
+                    dataTicket?.operacaoPatio.pagamento.length > 0
+                      ? dataTicket?.operacaoPatio.pagamento
+                          .map((item: any) =>
+                            formatDateTimeBR(item.data_hora_pagamento)
+                          )
+                          .join(",")
+                      : "---"}
                         </span>
                       </div>
                       <div className="w-full flex items-center mb-1">
@@ -437,8 +466,13 @@ const Payment: React.FC<Props> = (props: Props) => {
                           style={{ border: "1px dashed #ccc" }}
                         />
                         <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                          R${" "}
-                          {Number(dataTicket?.valor_total_triagem).toFixed(2)}
+                          {dataTicket?.valor_total_triagem.toLocaleString(
+                            "pt-BR",
+                            {
+                              style: "currency",
+                              currency: "BRL",
+                            }
+                          )}
                         </span>
                       </div>
                       <div className="w-full flex items-center justify-between mb-4">
@@ -450,8 +484,13 @@ const Payment: React.FC<Props> = (props: Props) => {
                           style={{ border: "1px dashed #ccc" }}
                         />
                         <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                          R${" "}
-                          {Number(dataTicket?.valor_total_estadia).toFixed(2)}
+                          {dataTicket?.valor_total_estadia.toLocaleString(
+                            "pt-BR",
+                            {
+                              style: "currency",
+                              currency: "BRL",
+                            }
+                          )}
                         </span>
                       </div>
                       <div className="w-full flex items-center justify-between mb-1">
@@ -463,7 +502,10 @@ const Payment: React.FC<Props> = (props: Props) => {
                           style={{ border: "1px dashed #ccc" }}
                         />
                         <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                          R$ {Number(dataTicket?.valor_pago).toFixed(2)}
+                          {dataTicket?.valor_pago.toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          })}
                         </span>
                       </div>
                       <div className="w-full flex items-center justify-between mb-4">
@@ -475,7 +517,15 @@ const Payment: React.FC<Props> = (props: Props) => {
                           style={{ border: "1px dashed #ccc" }}
                         />
                         <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                          R$ {Number(dataTicket?.valor_a_pagar).toFixed(2)}
+                          {dataTicket?.valor_a_pagar
+                            ? dataTicket?.valor_a_pagar.toLocaleString(
+                                "pt-BR",
+                                {
+                                  style: "currency",
+                                  currency: "BRL",
+                                }
+                              )
+                            : `R$ 0.00`}
                         </span>
                       </div>
 
@@ -483,12 +533,21 @@ const Payment: React.FC<Props> = (props: Props) => {
                         <span className="text-sm text-[#000] font-bold">
                           Tipo de pagamento:
                         </span>
-                        <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
-                          DINHEIRO
-                        </span>
-                        <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
-                          CRÉDITO
-                        </span>
+                        {dataTicket?.operacaoPatio &&
+                        dataTicket?.operacaoPatio.pagamento &&
+                        dataTicket?.operacaoPatio.pagamento.length > 0 ? (
+                          <>
+                            {dataTicket?.operacaoPatio.pagamento.map(
+                              (item: any) => (
+                                <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
+                                  {renderPaymentTypes(item.tipo_pagamento)}
+                                </span>
+                              )
+                            )}
+                          </>
+                        ) : (
+                          "---"
+                        )}
                       </div>
                     </div>
 

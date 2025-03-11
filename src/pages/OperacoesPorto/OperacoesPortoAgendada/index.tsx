@@ -6,6 +6,8 @@ import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
 import {
+  getCargoTypes,
+  getOperationTypes,
   renderCargoTypes,
   renderOperationTypes,
 } from "../../../helpers/format";
@@ -23,22 +25,33 @@ const OperacoesPortoAgendada: React.FC = () => {
     {
       field: "data_agendamento_terminal",
       headerName: "Data/Hora",
+      filter: true,
+      type: "dateColumn",
     },
     {
       field: "tolerancia_inicio_agendamento",
       headerName: "Tolerância Inicial",
+      type: "numberColumn"
     },
     {
       field: "tolerancia_fim_agendamento",
       headerName: "Tolerância Final",
+      type: "numberColumn"
     },
     {
-      field: "tipo_carga",
+      field: "terminal.tipos_carga",
+      fieldName: "tipo_carga",
       headerName: "Tipo de Carga",
       filter: true,
+      filterParams: {
+        selected: {
+          isMultiple: true,
+          data: getCargoTypes()
+        }
+      },
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
-          return String(renderCargoTypes(params.value)).replace(",", "");
+          return String(renderCargoTypes(params.value))
         }
         return "---";
       },
@@ -47,6 +60,12 @@ const OperacoesPortoAgendada: React.FC = () => {
       field: "tipo_operacao",
       headerName: "Tipo da Operação",
       filter: true,
+      filterParams: {
+        selected: {
+          isMultiple: false,
+          data: getOperationTypes()
+        }
+      },
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return renderOperationTypes(params.value);
@@ -57,6 +76,7 @@ const OperacoesPortoAgendada: React.FC = () => {
     {
       field: "cpf_motorista",
       headerName: "CPF Motorista",
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -66,6 +86,8 @@ const OperacoesPortoAgendada: React.FC = () => {
     },
     {
       field: "placa_dianteira_veiculo",
+      fieldName: "placa",
+      filter: true,
       headerName: "Placa Dianteira",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
@@ -77,6 +99,8 @@ const OperacoesPortoAgendada: React.FC = () => {
     {
       field: "placa_traseira_veiculo",
       headerName: "Placa Traseira",
+      fieldName: "placa",
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;

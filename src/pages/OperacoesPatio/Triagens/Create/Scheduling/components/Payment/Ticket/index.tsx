@@ -6,6 +6,7 @@ import Logo from "../../../../../../../../assets/images/logo-sulog-rodape.svg";
 import {
   formatDateTimeBR,
   renderCargoTypes,
+  renderPaymentTypes,
   renderVehicleTypes,
 } from "../../../../../../../../helpers/format";
 import api from "../../../../../../../../services/api";
@@ -32,7 +33,9 @@ const Ticket = (props: Props) => {
   const getPaymentTicket = useCallback(async () => {
     try {
       const body = {
-        id_operacao_patio: props.data.id_operacao_patio || props.data.operacaoPatio.id_operacao_patio,
+        id_operacao_patio:
+          props.data.id_operacao_patio ||
+          props.data.operacaoPatio.id_operacao_patio,
       };
 
       const response = await api.post("/operacaopatio/custoOperacao", body);
@@ -47,7 +50,6 @@ const Ticket = (props: Props) => {
 
         setTimeout(() => {
           handlePrint();
-          
         }, 1000);
       }
     } catch {}
@@ -209,7 +211,15 @@ const Ticket = (props: Props) => {
                     Pagamento:
                   </span>
                   <span className="text-sm text-[#000] font-normal ml-1">
-                    ---
+                    {item.operacaoPatio &&
+                    item.operacaoPatio.pagamento &&
+                    item.operacaoPatio.pagamento.length > 0
+                      ? item.operacaoPatio.pagamento
+                          .map((item: any) =>
+                            formatDateTimeBR(item.data_hora_pagamento)
+                          )
+                          .join(",")
+                      : "---"}
                   </span>
                 </div>
                 <div className="w-full flex items-center mb-1">
@@ -246,7 +256,10 @@ const Ticket = (props: Props) => {
                     style={{ border: "1px dashed #ccc" }}
                   />
                   <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                    R$ {Number(item.valor_total_triagem).toFixed(2)}
+                    {item.valor_total_triagem.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
                   </span>
                 </div>
                 <div className="w-full flex items-center justify-between mb-4">
@@ -258,7 +271,10 @@ const Ticket = (props: Props) => {
                     style={{ border: "1px dashed #ccc" }}
                   />
                   <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                    R$ {Number(item.valor_total_estadia).toFixed(2)}
+                    {item.valor_total_estadia.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
                   </span>
                 </div>
                 <div className="w-full flex items-center justify-between mb-1">
@@ -270,7 +286,10 @@ const Ticket = (props: Props) => {
                     style={{ border: "1px dashed #ccc" }}
                   />
                   <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                    R$ {Number(item.valor_pago).toFixed(2)}
+                    {item.valor_pago.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
                   </span>
                 </div>
                 <div className="w-full flex items-center justify-between mb-4">
@@ -282,10 +301,12 @@ const Ticket = (props: Props) => {
                     style={{ border: "1px dashed #ccc" }}
                   />
                   <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                    R${" "}
                     {item.valor_a_pagar
-                      ? Number(item.valor_a_pagar).toFixed(2)
-                      : 0}
+                      ? item.valor_a_pagar.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })
+                      : `R$ 0.00`}
                   </span>
                 </div>
 
@@ -293,12 +314,22 @@ const Ticket = (props: Props) => {
                   <span className="text-sm text-[#000] font-bold">
                     Tipo de pagamento:
                   </span>
-                  <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
-                    DINHEIRO
-                  </span>
-                  <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
+                  {item.operacaoPatio &&
+                  item.operacaoPatio.pagamento &&
+                  item.operacaoPatio.pagamento.length > 0 ? (
+                    <>
+                      {item.operacaoPatio.pagamento.map((item: any) => (
+                        <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
+                          {renderPaymentTypes(item.tipo_pagamento)}
+                        </span>
+                      ))}
+                    </>
+                  ) : (
+                    "---"
+                  )}
+                  {/* <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
                     CRÉDITO
-                  </span>
+                  </span> */}
                 </div>
               </div>
 

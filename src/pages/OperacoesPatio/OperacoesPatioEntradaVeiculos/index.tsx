@@ -20,6 +20,7 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
       field: "data_hora",
       headerName: "Data/Hora Entrada",
       filter: true,
+      type: "dateColumn",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return formatDateTimeBR(params.value);
@@ -41,7 +42,6 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
     {
       field: "cancela.numero_cancela",
       headerName: "Cancela Entrada",
-      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -52,6 +52,8 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
     {
       field: "saida.data_hora",
       headerName: "Data/Hora Saída",
+      filter: true,
+      type: "dateColumn",
       valueFormatter: (params: ValueFormatterParams) => {
         if(params.value) {
           return params.value;
@@ -62,6 +64,7 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
     {
       field: "saida.placa_dianteira",
       headerName: "Placa Dianteira Saída",
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if(params.value) {
           return params.value;
@@ -73,8 +76,9 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
       field: "data_historico",
       headerName: "Data de Modificação",
       filter: true,
-      cellDataType: "date",
-      flex: 1,
+      filterParams: {
+        dateBetween: true,
+      },
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return formatDateBR(params.value);

@@ -1,7 +1,8 @@
-import { Listbox } from "@headlessui/react";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { IFilterReactComp } from "ag-grid-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import SelectCustom from "../../../SelectCustom";
 
 export interface CustomTextFilterModel {
   value: string;
@@ -9,9 +10,9 @@ export interface CustomTextFilterModel {
 
 const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
   const [filterValue, setFilterValue] = useState<string>("");
-  const [selected, setSelected] = useState<any>();
-
-  console.log(props.status);
+  const [initialDate, setInitialDate] = useState<string>('');
+  const [finalDate, setFinalDate] = useState<string>('');
+  const [selected, setSelected]  = useState();
 
   // Implementação da interface de filtro
   useImperativeHandle(ref, () => ({
@@ -24,23 +25,133 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
     isFilterActive() {
       return filterValue.trim() !== "";
     },
-    getModel(): CustomTextFilterModel | null {
-      return filterValue ? { value: filterValue } : null;
+    getModel(): any | null {
+      if (!filterValue && !initialDate && !finalDate) {
+        return null; // Remove o filtro do AG Grid
+      }
+
+      
+      let value: any = filterValue.length > 0 ? filterValue : null;
+      if (props.dateBetween) {
+        value = [initialDate, finalDate];
+      }
+
+      const fieldName = props.colDef.fieldName || props.colDef.field;
+
+      console.log(value);
+    
+      return { value, field: fieldName };
     },
     setModel(model: CustomTextFilterModel | null) {
-      setFilterValue(model?.value || "");
+      console.log(model);
+      if (!model) {
+        setFilterValue("");
+        setInitialDate("");
+        setFinalDate("");
+      } else {
+        setFilterValue(model.value || "");
+      }
     },
   }));
 
   useEffect(() => {
-    if(filterValue.length > 0) {
-      props.filterChangedCallback(); // Notifica o AG Grid que o filtro mudou
+
+    console.log(filterValue);
+    if (filterValue.length > 0 || (initialDate.length > 0 && finalDate.length > 0)) {
+      console.log("entrou");
+      props.filterChangedCallback();
+    } else {
+      props.filterChangedCallback(); // Força o grid a remover o filtro
     }
-  }, [filterValue]);
+  }, [filterValue, initialDate, finalDate]);
+
+  console.log(props);
 
   return (
-    <div className="relaw-full h-full rounded-sm p-4 relative">
-      <Listbox
+    <div className="w-full h-full rounded-sm p-4 relative">
+      {props.selected ? (
+        <SelectCustom
+          data={props.selected.data}
+          isMulti={props.selected.isMultiple}
+          onChange={(selectedOption: any) => {
+            if (props.colDef.fieldName === "tipo_carga") {
+              console.log(selectedOption);
+              // setSelected(selectedOption);
+              let dataCargoTypes = "{";
+              selectedOption.map((item: any) => {
+                dataCargoTypes = dataCargoTypes.concat(item.value) + ",";
+              });
+              let value = dataCargoTypes.replace(/,$/, "");
+              value = value.concat("}");
+              setFilterValue(value);
+            } else {
+              setFilterValue(selectedOption.value);
+            }
+          }}
+          title=""
+          value={selected}
+        />
+      ) : props.dateBetween ? (
+        <>
+          <input
+            onChange={(e: any) => {
+              const dateColumn = format(e.target.value, "yyyy-MM-dd HH:mm", {
+                locale: ptBR,
+              });
+
+              setInitialDate(dateColumn);
+            }}
+            placeholder="Pesquisar..."
+            type="datetime-local"
+            className="w-full h-8 rounded-full p-2 shadow-lg border-[#DBDEDF] border-2 mb-2"
+          />
+          <input
+            onChange={(e: any) => {
+              const dateColumn = format(e.target.value, "yyyy-MM-dd HH:mm", {
+                locale: ptBR,
+              });
+
+              setFinalDate(dateColumn);
+            }}
+            placeholder="Pesquisar..."
+            type="datetime-local"
+            className="w-full h-8 rounded-full p-2 shadow-lg border-[#DBDEDF] border-2"
+          />
+        </>
+      ) : (
+        <input
+          onChange={(e: any) => {
+            if (props.colDef.type === "dateColumn") {
+              const dateColumn = format(e.target.value, "yyyy-MM-dd HH:mm", {
+                locale: ptBR,
+              });
+
+              setFilterValue(dateColumn);
+            } else {
+              console.log(e.target.value.length);
+              if(e.target.value.length == 0) {
+                console.log("entrou");
+                setFilterValue("");
+                props.filterChangedCallback();
+              } else {
+
+                setFilterValue(e.target.value);
+              }
+            }
+          }}
+          placeholder="Pesquisar..."
+          type={
+            props.colDef.type === "dateColumn"
+              ? "datetime-local"
+              : props.colDef.type === "numberColumn"
+              ? "number"
+              : "text"
+          }
+          className="w-full h-8 rounded-full p-2 shadow-lg border-[#DBDEDF] border-2"
+        />
+      )}
+
+      {/* <Listbox
         value={filterValue}
         onChange={(value: any) => {
           setFilterValue(String(value.id));
@@ -80,7 +191,7 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
             </Listbox.Option>
           ))}
         </Listbox.Options>
-      </Listbox>
+      </Listbox> */}
     </div>
   );
 });

@@ -15,6 +15,9 @@ import { ToastContainer } from "react-toastify";
 import Checkbox from "../../../../../../../components/Checkbox";
 import { FrontendNotification } from "../../../../../../../shared/Notification";
 import CreateVeiculos from "../../../../../../Cadastro/Veiculos/components/Create";
+import { ITriagens } from "../../../../types/types";
+import formValidator from "./validators/formValidator";
+import formValidator2 from "./validators/formValidator2";
 
 // import { Container } from './styles';
 
@@ -40,6 +43,7 @@ const IdentifyVehicle: React.FC = () => {
   const [vehicleTypes, setVehicleTypes] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [showCreateVehicle, setShowCreateVehicle] = useState<boolean>(false);
+  const [rowData, setRowData] = useState<ITriagens>();
 
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
@@ -65,12 +69,13 @@ const IdentifyVehicle: React.FC = () => {
     async (
       values: FormValues,
       idOperacaoPatio: string | number,
-      idUser: string | null
+      idUser: string | null,
+      data: any[]
     ) => {
       try {
         setLoading(true);
 
-        const isInvoiced: boolean = isInvoicedCarrier(values);
+        const isInvoiced: boolean = isInvoicedCarrier(values, data);
 
         const body = {
           id_operacao_patio: idOperacaoPatio,
@@ -112,7 +117,7 @@ const IdentifyVehicle: React.FC = () => {
     []
   );
 
-  const handleSubmit = useCallback(async (values: FormValues) => {
+  const handleSubmit = useCallback(async (values: FormValues, data: any[]) => {
     try {
       setLoading(true);
 
@@ -154,9 +159,11 @@ const IdentifyVehicle: React.FC = () => {
         body
       );
 
+
+
       if (response.status === 200) {
         sessionStorage.setItem("id_operacao_patio", response.data);
-        onUpdateAutorizacao(values, id, userId);
+        onUpdateAutorizacao(values, id, userId, data);
       } else {
         FrontendNotification(
           "Erro ao realizar a identificação do veiculo!",
@@ -328,10 +335,18 @@ const IdentifyVehicle: React.FC = () => {
     });
 
     setVehicleTypes(data);
+
+    let currentRow: any = sessionStorage.getItem("@triagem");
+
+    if (currentRow) {
+      currentRow = JSON.parse(currentRow);
+    }
+
+    setRowData(currentRow);
   }, []);
 
-  const isInvoicedCarrier = (values: FormValues) => {
-    const findCarrierById = transportadoras.find(
+  const isInvoicedCarrier = (values: FormValues, data: any[]) => {
+    const findCarrierById = data.find(
       (item: any) =>
         String(item.id_transportadora) == String(values.id_transportadora)
     );
@@ -357,13 +372,13 @@ const IdentifyVehicle: React.FC = () => {
 
   const formik = useFormik({
     initialValues,
-    // validationSchema:
-    //   detailVehicleMotorized.length > 0 &&
-    //   detailVehicleMotorized[0].tipo_veiculo != TipoVeiculo.TRUCK
-    //     ? formValidator2
-    //     : formValidator,
+    validationSchema:
+      detailVehicleMotorized.length > 0 &&
+      detailVehicleMotorized[0].tipo_veiculo != TipoVeiculo.TRUCK
+        ? formValidator2
+        : formValidator,
     onSubmit: (values: FormValues) => {
-      handleSubmit(values);
+      handleSubmit(values, transportadoras);
     },
   });
 
@@ -381,7 +396,7 @@ const IdentifyVehicle: React.FC = () => {
           isEdit={false}
           // selectedRow={null}
           onClear={() => {
-            setShowCreateVehicle(!showCreateVehicle)
+            setShowCreateVehicle(!showCreateVehicle);
             // closeModal();
             // setIsEdit(false);
           }}
@@ -508,12 +523,13 @@ const IdentifyVehicle: React.FC = () => {
                           </React.Fragment>
                         ))}
 
-                        {detailVehicleMotorized.length > 0 &&
-                          detailVehicleMotorized[0].tipo_veiculo !=
-                            TipoVeiculo.TRUCK && (
+                        
                             <div className="w-full mt-4">
                               <SelectCustom
                                 data={vehicleTypes}
+                                disabled={detailVehicleMotorized.length > 0 &&
+                                  detailVehicleMotorized[0].tipo_veiculo ==
+                                    TipoVeiculo.TRUCK}
                                 onChange={(selectedOption: any) => {
                                   formik.setFieldValue(
                                     "tipo_veiculo",
@@ -526,7 +542,7 @@ const IdentifyVehicle: React.FC = () => {
                                 value={formik.values.tipo_veiculo}
                               />
                             </div>
-                          )}
+                          
                       </div>
                     </div>
                   </>
@@ -690,24 +706,28 @@ const IdentifyVehicle: React.FC = () => {
                       value={formik.values.id_transportadora}
                     />
                   </div>
-                  <div className="flex flex-col w-full mt-5">
-                    <Checkbox
-                      title="Devolução de Container Cheio"
-                      checked={formik.values.identificacao_carga}
-                      onChecked={() =>
-                        formik.setFieldValue(
-                          "identificacao_carga",
-                          !formik.values.identificacao_carga
-                        )
-                      }
-                    />
-                    <div className="w-11/12 mt-2">
-                      <span className="text-[#666666] font-normal text-sm">
-                        Deve ser marcado caso seja identificado operação de
-                        descarga com container cheio.
-                      </span>
-                    </div>
-                  </div>
+                  {rowData &&
+                    rowData.operacao_porto_agendada &&
+                    rowData.operacao_porto_agendada.tipo_carga === 3 && (
+                      <div className="flex flex-col w-full mt-5">
+                        <Checkbox
+                          title="Devolução de Container Cheio"
+                          checked={formik.values.identificacao_carga}
+                          onChecked={() =>
+                            formik.setFieldValue(
+                              "identificacao_carga",
+                              !formik.values.identificacao_carga
+                            )
+                          }
+                        />
+                        <div className="w-11/12 mt-2">
+                          <span className="text-[#666666] font-normal text-sm">
+                            Deve ser marcado caso seja identificado operação de
+                            descarga com container cheio.
+                          </span>
+                        </div>
+                      </div>
+                    )}
                 </div>
               )}
             </div>

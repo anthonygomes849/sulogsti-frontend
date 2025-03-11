@@ -18,6 +18,7 @@ const ListOperacoesPatioServicos: React.FC = () => {
   const [columns] = useState<ColumnDef[]>([
     {
       field: "entrada_veiculo.placa_dianteira",
+      fieldName: "placa",
       headerName: "Placa Dianteira Entrada",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
