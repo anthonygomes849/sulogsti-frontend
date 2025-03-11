@@ -87,7 +87,10 @@ const CustomModal: React.FC<Props> = (props: Props) => {
           aria-label="close"
           onClick={() => {
             props.onClose();
-            window.location.reload();
+            if(!window.location.pathname.includes('triagens')) {
+
+              window.location.reload();
+            }
           }}
           sx={(theme) => ({
             position: "absolute",

@@ -15,5 +15,6 @@ export interface ITriagens {
     id_veiculo_parte_nao_motorizada: number;
     id_veiculo_parte_motorizada: number;
     tipo_veiculo: number;
-  }
+  },
+  pagamento?: any[];
 }

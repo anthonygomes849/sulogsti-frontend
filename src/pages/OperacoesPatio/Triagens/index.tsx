@@ -1,5 +1,6 @@
 import { ValueFormatterParams } from "ag-grid-community";
 import React, { useCallback, useRef, useState } from "react";
+import { ToastContainer } from "react-toastify";
 import CallDriverActiveIcon from "../../../assets/images/CallDriverActiveIcon.svg";
 import CallDriverIcon from "../../../assets/images/callDriverIcon.svg";
 import IdentifyDriverIcon from "../../../assets/images/identifyDriverIcon.svg";
@@ -9,12 +10,14 @@ import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
 import TicketIcon from "../../../assets/images/ticketIcon.svg";
 import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
+import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
 import { maskCnpj, renderCargoTypes } from "../../../helpers/format";
 import { STATUS_OPERACOES_PATIO_TRIAGEM } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import { useStatus } from "../../../hooks/StatusContext";
 import api from "../../../services/api";
+import { FrontendNotification } from "../../../shared/Notification";
 import Create from "./Create";
 import Ticket from "./Create/Scheduling/components/Payment/Ticket";
 import Info from "./Info";
@@ -27,14 +30,27 @@ const Triagens: React.FC = () => {
     {
       headerName: "Data de Entrada",
       field: "entrada_veiculo.data_hora",
+      filter: true,
+      type: "dateColumn"
     },
     {
       headerName: "Placa Dianteira",
       field: "entrada_veiculo.placa_dianteira",
+      fieldName: "placa",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
+        }
+        return "---";
+      },
+    },
+    {
+      headerName: "Identificadores dos Contêineres",
+      field: "operacao_porto_agendada.identificadores_conteineres",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value.replace("{", "").replace("}", "");
         }
         return "---";
       },
@@ -50,32 +66,34 @@ const Triagens: React.FC = () => {
       },
     },
     {
-      headerName: "Data de Saída",
-      field: "entrada_veiculo.saida.data_hora",
+      headerName: "Tipo de Operação no Porto",
+      field: "operacao_porto_agendada.tipo_carga",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.data.id_operacao_porto_agendada !== null) {
+          return "TRIAGEM";
+        } else if (params.data.id_operacao_porto_carrossel !== null) {
+          return "CARROSSEL";
+        } else {
+          return "ESTADIA";
+        }
+      },
+    },
+    {
+      headerName: "Tipo de Agendamento",
+      field: "operacao_porto_agendada.tipo_carga",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
-          return params.value;
+          return renderCargoTypes(params.value).replaceAll(",", "");
         }
         return "---";
       },
     },
-
     {
-      headerName: "Transportadora",
-      field: "operacao_porto_agendada.transportadora.razao_social",
+      headerName: "CPF do Motorista",
+      field: "operacao_porto_agendada.cpf_motorista",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
-        }
-        return "---";
-      },
-    },
-    {
-      headerName: "CNPJ da Transportadora",
-      field: "operacao_porto_agendada.transportadora.cnpj",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return maskCnpj(params.value);
         }
         return "---";
       },
@@ -101,8 +119,8 @@ const Triagens: React.FC = () => {
       },
     },
     {
-      headerName: "CPF do Motorista",
-      field: "operacao_porto_agendada.cpf_motorista",
+      headerName: "Transportadora",
+      field: "operacao_porto_agendada.transportadora.razao_social",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -111,38 +129,26 @@ const Triagens: React.FC = () => {
       },
     },
     {
-      headerName: "Tipo de Agendamento",
-      field: "operacao_porto_agendada.tipo_carga",
+      headerName: "CNPJ da Transportadora",
+      field: "operacao_porto_agendada.transportadora.cnpj",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
-          return renderCargoTypes(params.value).replaceAll(",", "");
+          return maskCnpj(params.value);
         }
         return "---";
       },
     },
     {
-      headerName: "Tipo de Operação no Porto",
-      field: "operacao_porto_agendada.tipo_carga",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.data.id_operacao_porto_agendada !== null) {
-          return "TRIAGEM";
-        } else if (params.data.id_operacao_porto_carrossel !== null) {
-          return "CARROSSEL";
-        } else {
-          return "ESTADIA";
-        }
-      },
-    },
-    {
-      headerName: "Identificadores dos Contêineres",
-      field: "operacao_porto_agendada.identificadores_conteineres",
+      headerName: "Data de Saída",
+      field: "entrada_veiculo.saida.data_hora",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
-          return params.value.replace("{", "").replace("}", "");
+          return params.value;
         }
         return "---";
       },
     },
+    
   ]);
   const [isRemove, setIsRemove] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<ITriagens>();
@@ -170,22 +176,61 @@ const Triagens: React.FC = () => {
 
       setSelectedRow(data);
 
+      FrontendNotification(
+        "Chamada do motorista realizada com sucesso!",
+        "success"
+      );
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
       setLoading(false);
     } catch {
       setLoading(false);
     }
   }, []);
 
-  
+  const onDelete = useCallback(async (rowId?: number) => {
+    try {
+      setLoading(true);
+      const body = {
+        id_operacao_patio: rowId,
+      };
+
+      await api.post("/deletar/operacaoPatioTriagem", body);
+
+      setLoading(false);
+
+      setIsRemove(false);
+
+      window.location.reload();
+    } catch {
+      setLoading(false);
+    }
+  }, []);
+
   return (
     <>
       <Loading loading={loading} />
+      <ToastContainer />
+
+      {isRemove && (
+        <ModalDelete
+          onCancel={() => setIsRemove(!isRemove)}
+          onConfirm={() => onDelete(selectedRow?.id_operacao_patio)}
+          row={selectedRow?.entrada_veiculo.placa_dianteira}
+        />
+      )}
       {isModalOpen && (
         <Create
           isEdit={isEdit}
           isView={isView}
           selectedRow={selectedRow}
-          onClear={() => closeModal()}
+          onClear={() => {
+            window.location.reload();
+            closeModal();
+          }}
           onConfirm={() => {
             window.location.reload();
           }}
@@ -247,6 +292,7 @@ const Triagens: React.FC = () => {
                 action: (data: ITriagens) => {
                   setSelectedRow(data);
                   sessionStorage.setItem("@triagem", JSON.stringify(data));
+                  sessionStorage.setItem("id_operacao_patio", JSON.stringify(data.id_operacao_patio));
                   setStatus(1);
                   openModal();
                 },

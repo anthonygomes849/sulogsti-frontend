@@ -42,6 +42,7 @@ const ListMotorista: React.FC = () => {
     {
       field: "celular",
       headerName: "Celular",
+      filter: false,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return maskedPhone(params.value);
@@ -53,7 +54,7 @@ const ListMotorista: React.FC = () => {
     {
       field: "numero_cnh",
       headerName: "Número da CNH",
-      filter: true,
+      filter: false,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return maskedCPF(params.value);
@@ -64,12 +65,12 @@ const ListMotorista: React.FC = () => {
     {
       field: "categoria_cnh",
       headerName: "Categoria da CNH",
-      filter: true,
+      filter: false,
     },
     {
       field: "data_expiracao_cnh",
       headerName: "Data de Expiraçao da CNH",
-      filter: true,
+      filter: false,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return formatDateBR(params.value);
@@ -158,7 +159,9 @@ const ListMotorista: React.FC = () => {
       field: "data_historico",
       headerName: "Data de Modificação",
       filter: true,
-      cellDataType: "date",
+      filterParams: {
+        dateBetween: true,
+      },
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return formatDateBR(params.value);

@@ -1,7 +1,6 @@
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { AgGridReact, CustomCellRendererProps } from "ag-grid-react";
-import { format } from "date-fns";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import DeleteIcon from "../../assets/images/deleteIcon.svg";
 import EditIcon from "../../assets/images/editIcon.svg";
@@ -16,6 +15,7 @@ import { CustomButtons, GridProps } from "./model/Grid";
 
 import { Tooltip } from "@mui/material";
 import CustomFilter from "./components/CustomFilter";
+import CustomStatusFilter from "./components/CustomStatusFilter";
 import "./styles.css";
 
 const Grid: React.FC<GridProps> = (props: GridProps) => {
@@ -81,7 +81,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
             )}
             {/* {hasPermissions("CONHECER") && (
             )} */}
-            {usePermissions("SALVAR") && (
+            {usePermissions("SALVAR") && !window.location.pathname.includes('triagens') && (
               <>
                 <button
                   className="mr-4"
@@ -121,8 +121,9 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
     if (props.isShowStatus) {
       cols.unshift({
         field: "status",
+        fieldName: "status",
         headerName: "Status",
-        filter: CustomFilter,
+        filter: CustomStatusFilter,
         filterParams: {
           status: props.status
         },
@@ -143,6 +144,10 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         column.headerName = column.headerName;
       }
 
+      if(column.filter) {
+        column.filter = CustomFilter;
+      }
+
       cols.push(column);
     });
 
@@ -159,32 +164,27 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
           // Adiciona os filtros de colunas customizados.
           if (params.filterModel != null) {
-            console.log(params.filterModel);
+            console.log(params);
             for (const customFilter in params.filterModel) {
               // Tem que fazer o teste se é um array, pois caso o receba
               // será um filtro por período.
               let newFilter: any = params.filterModel[customFilter];
 
-              if (customFilter === "data_historico") {
-                if (newFilter.dateFrom.length > 0) {
-                  filters["data_inicial"] = newFilter.dateFrom;
-                }
-
-                if (newFilter.dateTo !== null && newFilter.dateTo.length > 0) {
-                  filters["data_final"] = newFilter.dateTo.replace(
-                    "00:00:00",
-                    "23:59:59"
-                  );
-                } else {
-                  filters["data_final"] = `${format(
-                    new Date(),
-                    "yyyy-MM-dd"
-                  )} 23:59:59`;
+              if (newFilter.field === "data_historico") {
+                if (newFilter.value.length > 0) {
+                  filters["data_inicial"] = newFilter.value[0];
+                  filters["data_final"] = newFilter.value[1];
                 }
               } else {
-                console.log(newFilter);
-                filters[`${customFilter}`] = newFilter.filter || Number(newFilter.value);
+                console.log(newFilter.field);
+                let field = newFilter.field;
+                // if(new === "placa_dianteira_veiculo" || customFilter === "placa_traseira_veiculo") {
+                //   field = "placa";
+                // }
+                
+                const vauleFilter = field === "status" ? Number(newFilter.value) : newFilter.value;
 
+                filters[`${field}`] = newFilter.filter || vauleFilter;
                 console.log(filters);
               }
             }

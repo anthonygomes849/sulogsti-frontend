@@ -1,10 +1,8 @@
-import { format } from "date-fns";
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
-import { maskedPlate } from "../../../../../../../helpers/format";
 import { useStatus } from "../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../services/api";
 import {
@@ -12,8 +10,12 @@ import {
   TipoVeiculo,
 } from "../../../../../../Cadastro/Veiculos/types/types";
 // import Checkbox from "./components/Checkbox";
+import { format } from "date-fns";
 import { ToastContainer } from "react-toastify";
 import Checkbox from "../../../../../../../components/Checkbox";
+import { FrontendNotification } from "../../../../../../../shared/Notification";
+import CreateVeiculos from "../../../../../../Cadastro/Veiculos/components/Create";
+import { ITriagens } from "../../../../types/types";
 import formValidator from "./validators/formValidator";
 import formValidator2 from "./validators/formValidator2";
 
@@ -27,7 +29,7 @@ interface FormValues {
   id_transportadora: string;
   cnpj_transportadora: string;
   tipo_placa: number;
-  tipo_veiculo: number;
+  tipo_veiculo: string;
   identificacao_carga: boolean;
 }
 
@@ -40,6 +42,8 @@ const IdentifyVehicle: React.FC = () => {
   const [transportadoras, setTransportadoras] = useState<any[]>([]);
   const [vehicleTypes, setVehicleTypes] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showCreateVehicle, setShowCreateVehicle] = useState<boolean>(false);
+  const [rowData, setRowData] = useState<ITriagens>();
 
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
@@ -61,34 +65,59 @@ const IdentifyVehicle: React.FC = () => {
 
   const { setStatus } = useStatus();
 
-  const onUpdateAutorizacao = useCallback(async (values: FormValues, idOperacaoPatio: number, idUser: string | null) => {
-    try {
-      setLoading(true);
+  const onUpdateAutorizacao = useCallback(
+    async (
+      values: FormValues,
+      idOperacaoPatio: string | number,
+      idUser: string | null,
+      data: any[]
+    ) => {
+      try {
+        setLoading(true);
 
-      const body = {
-        id_operacao_patio: idOperacaoPatio,
-        identificacao_carga: values.identificacao_carga,
-        cnpj_transportadora: values.cnpj_transportadora.length > 0 && values.cnpj_transportadora != "-1" ? values.cnpj_transportadora : null,
-        autorizacao_faturar: values.cnpj_transportadora.length > 0 && values.cnpj_transportadora != "-1" ? true : false,
-        status: 10,
-        id_usuario_historico: idUser
-      };
-      
+        const isInvoiced: boolean = isInvoicedCarrier(values, data);
 
-      const response = await api.post('/operacaopatio/adicionarAutorizacao', body); 
+        const body = {
+          id_operacao_patio: idOperacaoPatio,
+          identificacao_carga: values.identificacao_carga,
+          cnpj_transportadora:
+            values.cnpj_transportadora !== null
+              ? values.cnpj_transportadora
+              : null,
+          autorizacao_faturar:
+            values.cnpj_transportadora !== null ? true : false,
+          status: isInvoiced ? 11 : 10,
+          id_usuario_historico: idUser,
+        };
 
-      if (response.status === 200) {
+        const response = await api.post(
+          "/operacaopatio/adicionarAutorizacao",
+          body
+        );
 
-        setStatus(3);
+        if (response.status === 200) {
+          if (isInvoiced) {
+            setStatus(4);
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          } else {
+            setStatus(3);
+          }
+        } else {
+          FrontendNotification("Erro na identificação do veiculo!", "error");
+        }
+
+        setLoading(false);
+      } catch {
+        setLoading(false);
+        FrontendNotification("Erro na identificação do veiculo!", "error");
       }
+    },
+    []
+  );
 
-      setLoading(false);
-    } catch {
-      setLoading(false);
-    }
-  }, []);
-
-  const handleSubmit = useCallback(async (values: FormValues) => {
+  const handleSubmit = useCallback(async (values: FormValues, data: any[]) => {
     try {
       setLoading(true);
 
@@ -130,15 +159,25 @@ const IdentifyVehicle: React.FC = () => {
         body
       );
 
+
+
       if (response.status === 200) {
         sessionStorage.setItem("id_operacao_patio", response.data);
-
-        onUpdateAutorizacao(values, id, userId);
+        onUpdateAutorizacao(values, id, userId, data);
+      } else {
+        FrontendNotification(
+          "Erro ao realizar a identificação do veiculo!",
+          "error"
+        );
       }
 
       setLoading(false);
     } catch {
       setLoading(false);
+      FrontendNotification(
+        "Erro ao realizar a identificação do veiculo!",
+        "error"
+      );
     }
   }, []);
 
@@ -159,7 +198,7 @@ const IdentifyVehicle: React.FC = () => {
 
         const mappingResponse = response.data.data.map((item: IVeiculos) => {
           return {
-            label: `${maskedPlate(item.placa)}`,
+            label: `${item.placa}`,
             // liscense_plate: maskedPlate(item.placa),
             value: item.id_veiculo,
           };
@@ -193,11 +232,20 @@ const IdentifyVehicle: React.FC = () => {
         data.push(response.data);
 
         setDetailVehicle(data);
+      } else {
+        FrontendNotification(
+          "Não foi possivel encontrar o veículo com a placa informada",
+          "error"
+        );
       }
 
       setLoading(false);
     } catch {
       setLoading(false);
+      FrontendNotification(
+        "Não foi possivel encontrar o veículo com a placa informada",
+        "error"
+      );
     }
   }, []);
 
@@ -222,11 +270,20 @@ const IdentifyVehicle: React.FC = () => {
           data.push(response.data);
 
           setDetailVehicleMotorized(data);
+        } else {
+          FrontendNotification(
+            "Não foi possivel encontrar o veículo com a placa informada",
+            "warning"
+          );
         }
 
         setLoading(false);
       } catch {
         setLoading(false);
+        FrontendNotification(
+          "Não foi possivel encontrar o veículo com a placa informada",
+          "warning"
+        );
       }
     },
     []
@@ -250,6 +307,7 @@ const IdentifyVehicle: React.FC = () => {
             label: item.razao_social,
             value: item.id_transportadora,
             cnpj: item.cnpj,
+            ...item,
           };
         });
 
@@ -277,7 +335,28 @@ const IdentifyVehicle: React.FC = () => {
     });
 
     setVehicleTypes(data);
+
+    let currentRow: any = sessionStorage.getItem("@triagem");
+
+    if (currentRow) {
+      currentRow = JSON.parse(currentRow);
+    }
+
+    setRowData(currentRow);
   }, []);
+
+  const isInvoicedCarrier = (values: FormValues, data: any[]) => {
+    const findCarrierById = data.find(
+      (item: any) =>
+        String(item.id_transportadora) == String(values.id_transportadora)
+    );
+
+    return findCarrierById &&
+      findCarrierById.faturamento_triagem &&
+      findCarrierById.faturamento_estadia
+      ? true
+      : false;
+  };
 
   const initialValues: FormValues = {
     id_veiculo_parte_motorizada: "",
@@ -287,16 +366,19 @@ const IdentifyVehicle: React.FC = () => {
     id_transportadora: "",
     cnpj_transportadora: "",
     tipo_placa: 1,
-    tipo_veiculo: 0,
+    tipo_veiculo: "1",
     identificacao_carga: false,
   };
 
   const formik = useFormik({
     initialValues,
-    validationSchema: detailVehicleMotorized.length > 0 &&
-    detailVehicleMotorized[0].tipo_veiculo != TipoVeiculo.TRUCK ? formValidator2 : formValidator,
+    validationSchema:
+      detailVehicleMotorized.length > 0 &&
+      detailVehicleMotorized[0].tipo_veiculo != TipoVeiculo.TRUCK
+        ? formValidator2
+        : formValidator,
     onSubmit: (values: FormValues) => {
-      handleSubmit(values);
+      handleSubmit(values, transportadoras);
     },
   });
 
@@ -308,7 +390,21 @@ const IdentifyVehicle: React.FC = () => {
   return (
     <>
       <Loading loading={loading} />
-      <ToastContainer />
+      {showCreateVehicle && (
+        <CreateVeiculos
+          isView={false}
+          isEdit={false}
+          // selectedRow={null}
+          onClear={() => {
+            setShowCreateVehicle(!showCreateVehicle);
+            // closeModal();
+            // setIsEdit(false);
+          }}
+          onConfirm={() => {
+            setShowCreateVehicle(!showCreateVehicle);
+          }}
+        />
+      )}
       <motion.div
         initial="initial"
         animate="animate"
@@ -316,44 +412,53 @@ const IdentifyVehicle: React.FC = () => {
         variants={pageVariants}
         className="page"
       >
+        <ToastContainer />
         <div className="overflow-y-scroll max-h-[650px] p-5">
-          <div className="flex flex-col mb-3 mt-3">
-            <span className="text-sm text-[#000] font-bold">
-              Identificação da placa
-            </span>
-            <span className="text-sm text-[#666666] font-normal mt-3">
-              Procura do cadastro do veículo
-            </span>
+          <div className="flex mb-3 mt-3">
+            <div className="flex flex-col">
+              <span className="text-sm text-[#000] font-bold">
+                Identificação da placa
+              </span>
+              <span className="text-sm text-[#666666] font-normal mt-3">
+                Procura do cadastro do veículo
+              </span>
+            </div>
+            <button
+              type="button"
+              className="w-24 h-9 ml-4 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+              onClick={() => setShowCreateVehicle(!showCreateVehicle)}
+            >
+              + Veículos
+            </button>
           </div>
           <div className="w-full h-full flex">
             <div className="w-[50%] h-full flex">
               <div className="w-full h-full flex flex-col">
                 <div className="w-full flex">
                   <div className="flex flex-col w-full">
-
-                  <SelectCustom
-                    data={listVehicle}
-                    onChange={(selectedOption: any) => {
-                      formik.setFieldValue(
-                        "id_veiculo_parte_motorizada",
-                        String(selectedOption.value)
-                      );
-                      formik.setFieldValue(
-                        "license_plate_motorized",
-                        selectedOption.label
-                      );
-                    }}
-                    onInputChange={(value) => {
-                      if (value.length >= 3) {
-                        onSearchVehicle(value);
-                      }
-                    }}
-                    title="Placa Dianteira"
-                    touched={formik.touched.id_veiculo_parte_motorizada}
-                    error={formik.errors.id_veiculo_parte_motorizada}
-                    value={formik.values.id_veiculo_parte_motorizada}
+                    <SelectCustom
+                      data={listVehicle}
+                      onChange={(selectedOption: any) => {
+                        formik.setFieldValue(
+                          "id_veiculo_parte_motorizada",
+                          String(selectedOption.value)
+                        );
+                        formik.setFieldValue(
+                          "license_plate_motorized",
+                          selectedOption.label
+                        );
+                      }}
+                      onInputChange={(value) => {
+                        if (value.length >= 3) {
+                          onSearchVehicle(value);
+                        }
+                      }}
+                      title="Placa Dianteira"
+                      touched={formik.touched.id_veiculo_parte_motorizada}
+                      error={formik.errors.id_veiculo_parte_motorizada}
+                      value={formik.values.id_veiculo_parte_motorizada}
                     />
-                    </div>
+                  </div>
                   <button
                     className="w-full max-w-28 h-10 flex items-center justify-center border-none rounded-full bg-[#0A4984] text-base text-[#fff] font-bold mt-6 ml-3 cursor-pointer"
                     type="button"
@@ -417,21 +522,27 @@ const IdentifyVehicle: React.FC = () => {
                             </div>
                           </React.Fragment>
                         ))}
-                        <div className="w-full mt-4">
-                          <SelectCustom
-                            data={vehicleTypes}
-                            onChange={(selectedOption: any) => {
-                              formik.setFieldValue(
-                                "tipo_veiculo",
-                                selectedOption.value
-                              );
-                            }}
-                            title="Tipo Veiculo"
-                            touched={formik.touched.tipo_veiculo}
-                            error={formik.errors.tipo_veiculo}
-                            value={formik.values.tipo_veiculo}
-                          />
-                        </div>
+
+                        
+                            <div className="w-full mt-4">
+                              <SelectCustom
+                                data={vehicleTypes}
+                                disabled={detailVehicleMotorized.length > 0 &&
+                                  detailVehicleMotorized[0].tipo_veiculo ==
+                                    TipoVeiculo.TRUCK}
+                                onChange={(selectedOption: any) => {
+                                  formik.setFieldValue(
+                                    "tipo_veiculo",
+                                    selectedOption.value
+                                  );
+                                }}
+                                title="Tipo Veiculo"
+                                touched={formik.touched.tipo_veiculo}
+                                error={formik.errors.tipo_veiculo}
+                                value={formik.values.tipo_veiculo}
+                              />
+                            </div>
+                          
                       </div>
                     </div>
                   </>
@@ -455,31 +566,34 @@ const IdentifyVehicle: React.FC = () => {
                     >
                       <div className="w-full flex">
                         <div className="flex flex-col w-full">
-
-                        <SelectCustom
-                          data={listVehicle}
-                          onChange={(selectedOption: any) => {
-                            formik.setFieldValue(
-                              "id_veiculo_parte_nao_motorizada",
-                              String(selectedOption.value)
-                            );
-                            formik.setFieldValue(
-                              "license_plate",
-                              selectedOption.label
-                            );
-                          }}
-                          onInputChange={(value) => {
-                            if (value.length >= 3) {
-                              onSearchVehicle(value);
+                          <SelectCustom
+                            data={listVehicle}
+                            onChange={(selectedOption: any) => {
+                              formik.setFieldValue(
+                                "id_veiculo_parte_nao_motorizada",
+                                String(selectedOption.value)
+                              );
+                              formik.setFieldValue(
+                                "license_plate",
+                                selectedOption.label
+                              );
+                            }}
+                            onInputChange={(value) => {
+                              if (value.length >= 3) {
+                                onSearchVehicle(value);
+                              }
+                            }}
+                            title="Placa Traseira"
+                            touched={
+                              formik.touched.id_veiculo_parte_nao_motorizada
                             }
-                          }}
-                          title="Placa Traseira"
-                          touched={
-                            formik.touched.id_veiculo_parte_nao_motorizada
-                          }
-                          error={formik.errors.id_veiculo_parte_nao_motorizada}
-                          value={formik.values.id_veiculo_parte_nao_motorizada}
-                        />
+                            error={
+                              formik.errors.id_veiculo_parte_nao_motorizada
+                            }
+                            value={
+                              formik.values.id_veiculo_parte_nao_motorizada
+                            }
+                          />
                         </div>
 
                         <button
@@ -583,7 +697,7 @@ const IdentifyVehicle: React.FC = () => {
                         );
                         formik.setFieldValue(
                           "cnpj_transportadora",
-                          selectedOption.label
+                          selectedOption.cnpj
                         );
                       }}
                       title="Transportadoras"
@@ -592,21 +706,28 @@ const IdentifyVehicle: React.FC = () => {
                       value={formik.values.id_transportadora}
                     />
                   </div>
-                  <div className="flex flex-col w-full mt-5">
-                    <Checkbox
-                      title="Devolução de Container Cheio"
-                      checked={formik.values.identificacao_carga}
-                      onChecked={() =>
-                        formik.setFieldValue(
-                          "identificacao_carga",
-                          !formik.values.identificacao_carga
-                        )
-                      }
-                    />
-                    <div className="w-11/12 mt-2">
-                      <span className="text-[#666666] font-normal text-sm">Deve ser marcado caso seja identificado operação de descarga com container cheio.</span>
+                  {rowData &&
+                    rowData.operacao_porto_agendada &&
+                    rowData.operacao_porto_agendada.tipo_carga === 3 && (
+                      <div className="flex flex-col w-full mt-5">
+                        <Checkbox
+                          title="Devolução de Container Cheio"
+                          checked={formik.values.identificacao_carga}
+                          onChecked={() =>
+                            formik.setFieldValue(
+                              "identificacao_carga",
+                              !formik.values.identificacao_carga
+                            )
+                          }
+                        />
+                        <div className="w-11/12 mt-2">
+                          <span className="text-[#666666] font-normal text-sm">
+                            Deve ser marcado caso seja identificado operação de
+                            descarga com container cheio.
+                          </span>
+                        </div>
                       </div>
-                  </div>
+                    )}
                 </div>
               )}
             </div>

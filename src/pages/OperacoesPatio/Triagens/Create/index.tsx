@@ -25,7 +25,7 @@ const Create: React.FC<Props> = (props: Props) => {
         onClose={props.onClear}
         header={<HistoricSchedule data={listTimeline} status={status} />}
       >
-        <Scheduling />
+        <Scheduling onClose={props.onClear} />
       </CustomModal>
   );
 };

@@ -42,7 +42,7 @@ const ListVeiculo: React.FC = () => {
       field: "tipo_parte_veiculo",
       headerName: "Motorizado",
       cellStyle: { textAlign: "left" },
-      filter: true,
+      filter: false,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return "SIM";
@@ -77,6 +77,7 @@ const ListVeiculo: React.FC = () => {
       field: "data_expiracao_rntrc",
       headerName: "Expiraçao do RNTRC",
       filter: true,
+      type: "dateColumn",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -87,6 +88,7 @@ const ListVeiculo: React.FC = () => {
     {
       field: "ano_exercicio_crlv",
       headerName: "Ano de Exercício do CRLV",
+      type: "numberColumn",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
@@ -109,6 +111,10 @@ const ListVeiculo: React.FC = () => {
     {
       field: "data_historico",
       headerName: "Data de Modificação",
+      filter: true,
+      filterParams: {
+        dateBetween: true
+      },
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;

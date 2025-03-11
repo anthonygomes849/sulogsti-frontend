@@ -12,38 +12,44 @@ interface Props {
   value?: any;
   disabled?: boolean;
   isMulti?: boolean;
+  selectRef?: any;
 }
 
 const SelectCustom: React.FC<Props> = (props: Props) => {
   const colourStyles: StylesConfig = {
     menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-    control: (styles: any) => ({
+    control: (styles: any, state) => ({
       ...styles,
       backgroundColor: "white",
       zIndex: "99999999",
-      borderRadius: "2.313rem"
+      borderRadius: "2.313rem",
     }),
-    option: (styles: any) => {
+    option: (styles: any, state: any) => {
       // const color = chroma(data.color);
       return {
         ...styles,
-        backgroundColor: "#FFF",
-        fontSize: '0.820rem',
-        fontFamily: 'Poppins',
+        backgroundColor: state.isDisabled ? "#CCC" : "#FFF",
+        fontSize: "0.820rem",
+        fontFamily: "Poppins",
         fontWeight: 400,
         color: "#000",
       };
     },
   };
 
-  const defaultValue = props.data.find((item: any) => item.value == props.value);
+  const defaultValue = props.data.find(
+    (item: any) => item.value == props.value
+  );
 
   return (
     <>
       <div className="w-full">
-        <h1 className="text-sm font-semibold text-[#000] mb-2">{props.title}</h1>
+        <h1 className="text-sm font-semibold text-[#000] mb-2">
+          {props.title}
+        </h1>
 
         <Select
+          ref={props.selectRef}
           className="basic-multi-select"
           classNamePrefix="select"
           menuPortalTarget={document.body}
@@ -57,6 +63,8 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
           onChange={props.onChange}
           onInputChange={props.onInputChange}
           value={defaultValue}
+          openMenuOnFocus={true} // Abre o menu quando o select recebe foco
+          isSearchable={true} // Permite digitação
         />
       </div>
 

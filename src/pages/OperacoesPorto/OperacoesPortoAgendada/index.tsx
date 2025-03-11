@@ -6,6 +6,8 @@ import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
 import {
+  getCargoTypes,
+  getOperationTypes,
   renderCargoTypes,
   renderOperationTypes,
 } from "../../../helpers/format";
@@ -23,46 +25,8 @@ const OperacoesPortoAgendada: React.FC = () => {
     {
       field: "data_agendamento_terminal",
       headerName: "Data/Hora",
-    },
-    {
-      field: "tolerancia_inicio_agendamento",
-      headerName: "Tolerância Inicial",
-    },
-    {
-      field: "tolerancia_fim_agendamento",
-      headerName: "Tolerância Final",
-    },
-    {
-      field: "tipo_carga",
-      headerName: "Tipo de Carga",
       filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return String(renderCargoTypes(params.value)).replace(",", "");
-        }
-        return "---";
-      },
-    },
-    {
-      field: "tipo_operacao",
-      headerName: "Tipo da Operação",
-      filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return renderOperationTypes(params.value);
-        }
-        return "---";
-      },
-    },
-    {
-      field: "cpf_motorista",
-      headerName: "CPF Motorista",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return "---";
-      },
+      type: "dateColumn",
     },
     {
       field: "placa_dianteira_veiculo",
@@ -83,6 +47,59 @@ const OperacoesPortoAgendada: React.FC = () => {
         }
         return "---";
       },
+    },
+    {
+      field: "cpf_motorista",
+      headerName: "CPF Motorista",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
+    },
+    {
+      field: "terminal.tipos_carga",
+      fieldName: "tipo_carga",
+      headerName: "Tipo de Carga",
+      filter: true,
+      filterParams: {
+        selected: {
+          isMultiple: true,
+          data: getCargoTypes()
+        }
+      },
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return String(renderCargoTypes(params.value))
+        }
+        return "---";
+      },
+    },
+    {
+      field: "tipo_operacao",
+      headerName: "Tipo da Operação",
+      filter: true,
+      filterParams: {
+        selected: {
+          isMultiple: false,
+          data: getOperationTypes()
+        }
+      },
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return renderOperationTypes(params.value);
+        }
+        return "---";
+      },
+    },
+    {
+      field: "tolerancia_inicio_agendamento",
+      headerName: "Tolerância Inicial",
+    },
+    {
+      field: "tolerancia_fim_agendamento",
+      headerName: "Tolerância Final",
     },
   ]);
 

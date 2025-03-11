@@ -8,8 +8,7 @@ import React, {
 import api from "../services/api";
 
 // Defina o tipo para o contexto
-interface AuthenticateContextType {
-}
+interface AuthenticateContextType {}
 
 // Crie o contexto com o tipo definido
 const AuthenticateContext = createContext<AuthenticateContextType | undefined>(
@@ -24,16 +23,18 @@ interface AuthenticateProviderProps {
 export const AuthenticateProvider: React.FC<AuthenticateProviderProps> = ({
   children,
 }) => {
-
   const onAuthenticate = useCallback(() => {
-
     // const token = sessionStorage.getItem('token');
 
     const urlParams = new URLSearchParams(window.location.search);
 
     const token = urlParams.get("token");
 
-    api.defaults.headers.common = { Authorization: `Bearer ${token}` };
+    api.defaults.headers.common = {
+      Authorization: `Bearer ${token}`,
+    
+    };
+    // api.defaults.headers.common = { Accept: `application/json` };
   }, []);
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export const AuthenticateProvider: React.FC<AuthenticateProviderProps> = ({
   }, [onAuthenticate]);
 
   return (
-    <AuthenticateContext.Provider value={{  }}>
+    <AuthenticateContext.Provider value={{}}>
       {children}
     </AuthenticateContext.Provider>
   );
