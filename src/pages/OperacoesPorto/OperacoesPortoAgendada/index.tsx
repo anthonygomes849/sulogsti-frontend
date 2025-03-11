@@ -29,14 +29,34 @@ const OperacoesPortoAgendada: React.FC = () => {
       type: "dateColumn",
     },
     {
-      field: "tolerancia_inicio_agendamento",
-      headerName: "Tolerância Inicial",
-      type: "numberColumn"
+      field: "placa_dianteira_veiculo",
+      headerName: "Placa Dianteira",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
     },
     {
-      field: "tolerancia_fim_agendamento",
-      headerName: "Tolerância Final",
-      type: "numberColumn"
+      field: "placa_traseira_veiculo",
+      headerName: "Placa Traseira",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
+    },
+    {
+      field: "cpf_motorista",
+      headerName: "CPF Motorista",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value;
+        }
+        return "---";
+      },
     },
     {
       field: "terminal.tipos_carga",
@@ -74,39 +94,12 @@ const OperacoesPortoAgendada: React.FC = () => {
       },
     },
     {
-      field: "cpf_motorista",
-      headerName: "CPF Motorista",
-      filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return "---";
-      },
+      field: "tolerancia_inicio_agendamento",
+      headerName: "Tolerância Inicial",
     },
     {
-      field: "placa_dianteira_veiculo",
-      fieldName: "placa",
-      filter: true,
-      headerName: "Placa Dianteira",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return "---";
-      },
-    },
-    {
-      field: "placa_traseira_veiculo",
-      headerName: "Placa Traseira",
-      fieldName: "placa",
-      filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return "---";
-      },
+      field: "tolerancia_fim_agendamento",
+      headerName: "Tolerância Final",
     },
   ]);
 
