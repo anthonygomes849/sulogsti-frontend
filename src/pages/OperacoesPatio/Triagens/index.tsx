@@ -40,6 +40,16 @@ const Triagens: React.FC = () => {
       },
     },
     {
+      headerName: "Identificadores dos Contêineres",
+      field: "operacao_porto_agendada.identificadores_conteineres",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value.replace("{", "").replace("}", "");
+        }
+        return "---";
+      },
+    },
+    {
       headerName: "Chamada Motorista",
       field: "chamada_motorista",
       valueFormatter: (params: ValueFormatterParams) => {
@@ -50,32 +60,34 @@ const Triagens: React.FC = () => {
       },
     },
     {
-      headerName: "Data de Saída",
-      field: "entrada_veiculo.saida.data_hora",
+      headerName: "Tipo de Operação no Porto",
+      field: "operacao_porto_agendada.tipo_carga",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.data.id_operacao_porto_agendada !== null) {
+          return "TRIAGEM";
+        } else if (params.data.id_operacao_porto_carrossel !== null) {
+          return "CARROSSEL";
+        } else {
+          return "ESTADIA";
+        }
+      },
+    },
+    {
+      headerName: "Tipo de Agendamento",
+      field: "operacao_porto_agendada.tipo_carga",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
-          return params.value;
+          return renderCargoTypes(params.value).replaceAll(",", "");
         }
         return "---";
       },
     },
-
     {
-      headerName: "Transportadora",
-      field: "operacao_porto_agendada.transportadora.razao_social",
+      headerName: "CPF do Motorista",
+      field: "operacao_porto_agendada.cpf_motorista",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
-        }
-        return "---";
-      },
-    },
-    {
-      headerName: "CNPJ da Transportadora",
-      field: "operacao_porto_agendada.transportadora.cnpj",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return maskCnpj(params.value);
         }
         return "---";
       },
@@ -101,8 +113,8 @@ const Triagens: React.FC = () => {
       },
     },
     {
-      headerName: "CPF do Motorista",
-      field: "operacao_porto_agendada.cpf_motorista",
+      headerName: "Transportadora",
+      field: "operacao_porto_agendada.transportadora.razao_social",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -111,38 +123,26 @@ const Triagens: React.FC = () => {
       },
     },
     {
-      headerName: "Tipo de Agendamento",
-      field: "operacao_porto_agendada.tipo_carga",
+      headerName: "CNPJ da Transportadora",
+      field: "operacao_porto_agendada.transportadora.cnpj",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
-          return renderCargoTypes(params.value).replaceAll(",", "");
+          return maskCnpj(params.value);
         }
         return "---";
       },
     },
     {
-      headerName: "Tipo de Operação no Porto",
-      field: "operacao_porto_agendada.tipo_carga",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.data.id_operacao_porto_agendada !== null) {
-          return "TRIAGEM";
-        } else if (params.data.id_operacao_porto_carrossel !== null) {
-          return "CARROSSEL";
-        } else {
-          return "ESTADIA";
-        }
-      },
-    },
-    {
-      headerName: "Identificadores dos Contêineres",
-      field: "operacao_porto_agendada.identificadores_conteineres",
+      headerName: "Data de Saída",
+      field: "entrada_veiculo.saida.data_hora",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
-          return params.value.replace("{", "").replace("}", "");
+          return params.value;
         }
         return "---";
       },
     },
+    
   ]);
   const [isRemove, setIsRemove] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<ITriagens>();
