@@ -101,19 +101,25 @@ const IdentifyDriver: React.FC = () => {
       const response = await api.post("/operacaopatio/searchDriver", body);
 
       if (response.status === 200) {
-        let data = [];
+        if (response.data) {
+          let data = [];
 
-        data.push(response.data);
+          data.push(response.data);
 
-        setDetailDriver(data);
+          setDetailDriver(data);
 
-        let getDataTriagem: any = sessionStorage.getItem("@triagem");
-        if (getDataTriagem) {
-          getDataTriagem = JSON.parse(getDataTriagem);
-        }
+          let getDataTriagem: any = sessionStorage.getItem("@triagem");
+          if (getDataTriagem) {
+            getDataTriagem = JSON.parse(getDataTriagem);
+          }
 
-        if(getDataTriagem && getDataTriagem.operacao_porto_agendada !== null && response.data) {
-          formik.setFieldValue('id_motorista', response.data.id_motorista)
+          if (
+            getDataTriagem &&
+            getDataTriagem.operacao_porto_agendada !== null &&
+            response.data
+          ) {
+            formik.setFieldValue("id_motorista", response.data.id_motorista);
+          }
         }
       }
 

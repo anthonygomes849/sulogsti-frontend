@@ -3,6 +3,7 @@ import { useStatus } from "../../../../../hooks/StatusContext";
 import Associate from "./components/Associate";
 import IdentifyDriver from "./components/IdentifyDriver";
 import IdentifyVehicle from "./components/IdentifyVehicle";
+import Invoiced from "./components/Invocied";
 import Payment from "./components/Payment";
 
 // import { Container } from './styles';
@@ -29,6 +30,8 @@ const Scheduling: React.FC<Props> = (props: Props) => {
         return <IdentifyVehicle />;
       case 3:
         return <Payment onClose={props.onClose} />;
+      case 4:
+        return <Invoiced onClose={props.onClose} />
       default:
         break;
     }

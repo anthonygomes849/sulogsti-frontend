@@ -30,6 +30,8 @@ const OperacoesPortoAgendada: React.FC = () => {
     },
     {
       field: "placa_dianteira_veiculo",
+      fieldName: "placa",
+      filter: true,
       headerName: "Placa Dianteira",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
@@ -40,6 +42,8 @@ const OperacoesPortoAgendada: React.FC = () => {
     },
     {
       field: "placa_traseira_veiculo",
+      fieldName: "placa",
+      filter: true,
       headerName: "Placa Traseira",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
@@ -50,6 +54,7 @@ const OperacoesPortoAgendada: React.FC = () => {
     },
     {
       field: "cpf_motorista",
+      filter: true,
       headerName: "CPF Motorista",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {

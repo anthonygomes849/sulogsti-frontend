@@ -12,7 +12,7 @@ import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
-import { maskCnpj, renderCargoTypes } from "../../../helpers/format";
+import { formatDateTimeBR, maskCnpj, renderCargoTypes } from "../../../helpers/format";
 import { STATUS_OPERACOES_PATIO_TRIAGEM } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import { useStatus } from "../../../hooks/StatusContext";
@@ -31,7 +31,14 @@ const Triagens: React.FC = () => {
       headerName: "Data de Entrada",
       field: "entrada_veiculo.data_hora",
       filter: true,
-      type: "dateColumn"
+      type: "dateColumn",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if(params.value) {
+          return formatDateTimeBR(params.value);
+        }
+
+        return '---'
+      }
     },
     {
       headerName: "Placa Dianteira",
@@ -68,19 +75,26 @@ const Triagens: React.FC = () => {
     {
       headerName: "Tipo de Operação no Porto",
       field: "operacao_porto_agendada.tipo_carga",
+      fieldName: "tipo_operacao_porto",
       valueFormatter: (params: ValueFormatterParams) => {
-        if (params.data.id_operacao_porto_agendada !== null) {
-          return "TRIAGEM";
-        } else if (params.data.id_operacao_porto_carrossel !== null) {
-          return "CARROSSEL";
-        } else {
-          return "ESTADIA";
+        if(params.data) {
+
+          if (params.data.id_operacao_porto_agendada !== null) {
+            return "TRIAGEM";
+          } else if (params.data.id_operacao_porto_carrossel !== null) {
+            return "CARROSSEL";
+          } else {
+            return "ESTADIA";
+          }
         }
+        return '---';
       },
     },
     {
       headerName: "Tipo de Agendamento",
       field: "operacao_porto_agendada.tipo_carga",
+      filter: true,
+      fieldName: "tipo_carga",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return renderCargoTypes(params.value).replaceAll(",", "");
@@ -91,6 +105,8 @@ const Triagens: React.FC = () => {
     {
       headerName: "CPF do Motorista",
       field: "operacao_porto_agendada.cpf_motorista",
+      filter: true,
+      fieldName: "cpf_motorista",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -101,6 +117,8 @@ const Triagens: React.FC = () => {
     {
       headerName: "Terminal",
       field: "operacao_porto_agendada.terminal.razao_social",
+      fieldName: 'terminal',
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -111,6 +129,7 @@ const Triagens: React.FC = () => {
     {
       headerName: "Proprietario de Carga",
       field: "proprietario_carga",
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -121,6 +140,8 @@ const Triagens: React.FC = () => {
     {
       headerName: "Transportadora",
       field: "operacao_porto_agendada.transportadora.razao_social",
+      fieldName: "transportadora",
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -131,6 +152,8 @@ const Triagens: React.FC = () => {
     {
       headerName: "CNPJ da Transportadora",
       field: "operacao_porto_agendada.transportadora.cnpj",
+      fieldName: 'cnpj_transportadora',
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return maskCnpj(params.value);
@@ -306,6 +329,7 @@ const Triagens: React.FC = () => {
                 action: (data: ITriagens) => {
                   setSelectedRow(data);
                   sessionStorage.setItem("@triagem", JSON.stringify(data));
+                  sessionStorage.setItem("id_operacao_patio", JSON.stringify(data.id_operacao_patio));
                   setStatus(2);
                   openModal();
                 },

@@ -77,6 +77,8 @@ const IdentifyVehicle: React.FC = () => {
 
         const isInvoiced: boolean = isInvoicedCarrier(values, data);
 
+        console.log(values);
+
         const body = {
           id_operacao_patio: idOperacaoPatio,
           identificacao_carga: values.identificacao_carga,
@@ -98,9 +100,6 @@ const IdentifyVehicle: React.FC = () => {
         if (response.status === 200) {
           if (isInvoiced) {
             setStatus(4);
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
           } else {
             setStatus(3);
           }
@@ -134,9 +133,10 @@ const IdentifyVehicle: React.FC = () => {
       const idOperacaoPatio = sessionStorage.getItem("id_operacao_patio");
 
       const id =
-        currentRow && currentRow.id_operacao_patio
-          ? currentRow.id_operacao_patio
-          : idOperacaoPatio;
+        idOperacaoPatio && idOperacaoPatio.length > 0
+          ? idOperacaoPatio
+          : currentRow.id_operacao_patio;
+      
 
       const body = {
         id_operacao_patio: id,

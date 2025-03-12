@@ -18,7 +18,7 @@ interface Props {
 const SelectCustom: React.FC<Props> = (props: Props) => {
   const colourStyles: StylesConfig = {
     menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-    control: (styles: any, state) => ({
+    control: (styles: any) => ({
       ...styles,
       backgroundColor: "white",
       zIndex: "99999999",
