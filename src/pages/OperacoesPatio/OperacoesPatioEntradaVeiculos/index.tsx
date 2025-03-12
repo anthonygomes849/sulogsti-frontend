@@ -39,6 +39,17 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
       },
     },
     {
+      field: "permanencia_horas",
+      headerName: "Permanencia em Horas",
+      filter: true,
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value) {
+          return params.value.toUpperCase();
+        }
+        return "---";
+      },
+    },
+    {
       field: "cancela.numero_cancela",
       headerName: "Cancela Entrada",
       filter: true,
