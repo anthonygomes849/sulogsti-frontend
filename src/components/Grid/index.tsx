@@ -118,6 +118,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       cols.unshift(defaultColumn);
     });
 
+
     if (props.isShowStatus) {
       cols.unshift({
         field: "status",
@@ -127,7 +128,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         filterParams: {
           status: props.status
         },
-        width: 310,
+        // width: 310,
         cellStyle: { textAlign: "center" },
         // pinned: "left",
         cellRenderer: (params: CustomCellRendererProps) => {
@@ -214,6 +215,9 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
     };
 
     // params.api.setGridOption('datasource', dataSource)
+
+    params.api.sizeColumnsToFit();
+
 
     params.api.setDatasource(dataSource);
 

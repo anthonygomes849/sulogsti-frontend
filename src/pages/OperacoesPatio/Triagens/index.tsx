@@ -12,7 +12,7 @@ import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
-import { maskCnpj, renderCargoTypes } from "../../../helpers/format";
+import { formatDateTimeBR, maskCnpj, renderCargoTypes } from "../../../helpers/format";
 import { STATUS_OPERACOES_PATIO_TRIAGEM } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import { useStatus } from "../../../hooks/StatusContext";
@@ -31,7 +31,14 @@ const Triagens: React.FC = () => {
       headerName: "Data de Entrada",
       field: "entrada_veiculo.data_hora",
       filter: true,
-      type: "dateColumn"
+      type: "dateColumn",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if(params.value) {
+          return formatDateTimeBR(params.value);
+        }
+
+        return '---'
+      }
     },
     {
       headerName: "Placa Dianteira",

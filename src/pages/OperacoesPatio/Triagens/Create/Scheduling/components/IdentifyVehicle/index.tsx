@@ -77,6 +77,8 @@ const IdentifyVehicle: React.FC = () => {
 
         const isInvoiced: boolean = isInvoicedCarrier(values, data);
 
+        console.log(values);
+
         const body = {
           id_operacao_patio: idOperacaoPatio,
           identificacao_carga: values.identificacao_carga,
