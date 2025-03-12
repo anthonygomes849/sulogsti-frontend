@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CargaType, OperationType } from '../pages/OperacoesPorto/OperacoesPortoAgendada/types/types';
-import { domainPaymentTypes, domainTiposCarga, domainTypesOperation, domainTypeVehicle } from './renderer';
+import { domainActive, domainPaymentTypes, domainTiposCarga, domainTypeOperationPorto, domainTypesOperation, domainTypeVehicle } from './renderer';
 
 export const maskedCPF = (value: string) => {
   value = value.replace(/\D/g, "")                    //Remove tudo o que não é dígito
@@ -71,6 +71,28 @@ export const getOperationTypes = () => {
   return data;
 };
 
+export const getActiveTypes = () => {
+  const data = Object.values(domainActive).map((value: any) => {
+    return {
+      value: value === "SIM" ? "true": "false",
+      label: value,
+    };
+  });
+
+  return data;
+};
+
+export const getOperationTypesPorto = () => {
+  const data = Object.values(domainTypeOperationPorto).map((value: any, index: number) => {
+    return {
+      value: index,
+      label: value,
+    };
+  });
+
+  return data;
+};
+
 export const renderCargoTypes = (data: any) => {
   let s = "";
 
@@ -104,9 +126,9 @@ export const renderOperationTypes = (data: any) => {
 }
 
 export const renderVehicleTypes = (data: any) => {
-  return domainTypeVehicle[parseInt(data)];
+  return domainTypeVehicle[parseInt(data) - 1];
 }
 
 export const renderPaymentTypes = (data: any) => {
-  return domainPaymentTypes[parseInt(data)];
+  return domainPaymentTypes[parseInt(data) - 1];
 }

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import Logo from "../../../../../../../../assets/images/logo-sulog-rodape.svg";
 
+import Loading from "../../../../../../../../core/common/Loading";
 import {
   formatDateTimeBR,
   renderCargoTypes,
@@ -20,6 +21,7 @@ interface Props {
 
 const Ticket = (props: Props) => {
   const [dataTicket, setDataTicket] = useState<IPaymentTicket[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const printRef: any = useRef(null);
 
   const handlePrint = () => {
@@ -32,10 +34,18 @@ const Ticket = (props: Props) => {
 
   const getPaymentTicket = useCallback(async () => {
     try {
+      setLoading(true);
+
+      let currentRow: any = sessionStorage.getItem("@triagem");
+
+      if (currentRow) {
+        currentRow = JSON.parse(currentRow);
+      }
+
       const body = {
         id_operacao_patio:
-          props.data.id_operacao_patio ||
-          props.data.operacaoPatio.id_operacao_patio,
+          sessionStorage.getItem("id_operacao_patio") ||
+          currentRow.id_operacao_patio,
       };
 
       const response = await api.post("/operacaopatio/custoOperacao", body);
@@ -51,8 +61,16 @@ const Ticket = (props: Props) => {
         setTimeout(() => {
           handlePrint();
         }, 1000);
+
+        setLoading(false);
+
+        setTimeout(() => {
+          props.onClose();
+        }, 3000);
       }
-    } catch {}
+    } catch {
+      setLoading(false);
+    }
   }, [props.data]);
 
   useEffect(() => {
@@ -61,6 +79,7 @@ const Ticket = (props: Props) => {
 
   return (
     <>
+      <Loading loading={loading} />
       <div
         ref={printRef}
         className="w-[300px] h-full bg-[#FFF] p-1 ml-2 mt-4"
@@ -131,9 +150,8 @@ const Ticket = (props: Props) => {
                 <div className="w-full flex items-center mb-1">
                   <span className="text-sm text-[#000] font-bold">Placa:</span>
                   <span className="text-sm text-[#000] font-normal ml-1">
-                    {item.operacaoPatio.operacao_porto_agendada !== null
-                      ? item.operacaoPatio.operacao_porto_agendada
-                          .placa_dianteira_veiculo
+                    {item.veiculo !== null
+                      ? item.veiculo.placa
                       : "---"}
                   </span>
                 </div>

@@ -1,6 +1,10 @@
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import CheckMarker from "../../../../../../../assets/images/checkMarker.svg";
+import Loading from "../../../../../../../core/common/Loading";
+import api from "../../../../../../../services/api";
+import Ticket from "../Payment/Ticket";
+import { IPaymentTicket } from "../Payment/types/types";
 // import { Container } from './styles';
 
 interface Props {
@@ -8,13 +12,65 @@ interface Props {
 }
 
 const Invoiced: React.FC<Props> = (props: Props) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [dataTicket, setDataTicket] = useState<IPaymentTicket>();
+  const [showTicket, setShowTicket] = useState<boolean>(false);
+
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
     animate: { opacity: 1, x: 0, transition: { duration: 0.8 } },
     exit: { opacity: 0, x: 100, transition: { duration: 0.5 } },
   };
+
+  const getPaymentTicket = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      let getDataTriagem: any = sessionStorage.getItem("@triagem");
+      if (getDataTriagem) {
+        getDataTriagem = JSON.parse(getDataTriagem);
+      }
+      const idOperacaoPatio = sessionStorage.getItem("id_operacao_patio");
+
+      const id =
+        idOperacaoPatio && idOperacaoPatio.length > 0
+          ? idOperacaoPatio
+          : getDataTriagem?.id_operacao_patio;
+
+      const body = {
+        id_operacao_patio: id,
+      };
+
+      const response = await api.post("/operacaopatio/custoOperacao", body);
+
+      if (response.status === 200) {
+        setDataTicket(response.data);
+
+        setShowTicket(true);
+      }
+
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    getPaymentTicket();
+  }, [getPaymentTicket]);
+  
   return (
     <>
+    <Loading loading={loading} />
+      {showTicket && (
+        <div className="hidden">
+          <Ticket
+            numPages={1}
+            data={dataTicket}
+            onClose={() => setShowTicket(!showTicket)}
+          />
+        </div>
+      )}
       <motion.div
         initial="initial"
         animate="animate"
@@ -30,7 +86,9 @@ const Invoiced: React.FC<Props> = (props: Props) => {
               >
                 <img src={CheckMarker} />
               </div>
-              <span className="ml-4 text-base text-[#000] font-bold">Triagem faturada com sucesso!</span>
+              <span className="ml-4 text-base text-[#000] font-bold">
+                Triagem faturada com sucesso!
+              </span>
             </div>
           </div>
         </div>
