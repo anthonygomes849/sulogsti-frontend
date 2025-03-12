@@ -152,9 +152,12 @@ const Payment: React.FC<Props> = (props: Props) => {
       if (getDataTriagem) {
         getDataTriagem = JSON.parse(getDataTriagem);
       }
+      const idOperacaoPatio = sessionStorage.getItem('id_operacao_patio');
+
+      const id = idOperacaoPatio && idOperacaoPatio.length > 0 ? idOperacaoPatio : getDataTriagem?.id_operacao_patio
 
       const body = {
-        id_operacao_patio: getDataTriagem?.id_operacao_patio,
+        id_operacao_patio: id,
       };
 
       const response = await api.post("/operacaopatio/custoOperacao", body);
@@ -166,7 +169,9 @@ const Payment: React.FC<Props> = (props: Props) => {
       }
 
       setLoading(false);
-    } catch {}
+    } catch {
+      setLoading(false);
+    }
   }, []);
 
   const getPaymentTypes = useCallback(() => {

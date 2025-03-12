@@ -70,13 +70,17 @@ const Triagens: React.FC = () => {
       field: "operacao_porto_agendada.tipo_carga",
       fieldName: "tipo_operacao_porto",
       valueFormatter: (params: ValueFormatterParams) => {
-        if (params.data.id_operacao_porto_agendada !== null) {
-          return "TRIAGEM";
-        } else if (params.data.id_operacao_porto_carrossel !== null) {
-          return "CARROSSEL";
-        } else {
-          return "ESTADIA";
+        if(params.data) {
+
+          if (params.data.id_operacao_porto_agendada !== null) {
+            return "TRIAGEM";
+          } else if (params.data.id_operacao_porto_carrossel !== null) {
+            return "CARROSSEL";
+          } else {
+            return "ESTADIA";
+          }
         }
+        return '---';
       },
     },
     {
@@ -106,6 +110,8 @@ const Triagens: React.FC = () => {
     {
       headerName: "Terminal",
       field: "operacao_porto_agendada.terminal.razao_social",
+      fieldName: 'terminal',
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -116,6 +122,7 @@ const Triagens: React.FC = () => {
     {
       headerName: "Proprietario de Carga",
       field: "proprietario_carga",
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -126,6 +133,8 @@ const Triagens: React.FC = () => {
     {
       headerName: "Transportadora",
       field: "operacao_porto_agendada.transportadora.razao_social",
+      fieldName: "transportadora",
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -136,6 +145,8 @@ const Triagens: React.FC = () => {
     {
       headerName: "CNPJ da Transportadora",
       field: "operacao_porto_agendada.transportadora.cnpj",
+      fieldName: 'cnpj_transportadora',
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return maskCnpj(params.value);
@@ -311,6 +322,7 @@ const Triagens: React.FC = () => {
                 action: (data: ITriagens) => {
                   setSelectedRow(data);
                   sessionStorage.setItem("@triagem", JSON.stringify(data));
+                  sessionStorage.setItem("id_operacao_patio", JSON.stringify(data.id_operacao_patio));
                   setStatus(2);
                   openModal();
                 },

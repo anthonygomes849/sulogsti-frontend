@@ -12,7 +12,6 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
   const [filterValue, setFilterValue] = useState<string>("");
   const [initialDate, setInitialDate] = useState<string>('');
   const [finalDate, setFinalDate] = useState<string>('');
-  const [selected, setSelected]  = useState();
 
   // Implementação da interface de filtro
   useImperativeHandle(ref, () => ({
@@ -89,7 +88,7 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
             }
           }}
           title=""
-          value={selected}
+          // value={selected}
         />
       ) : props.dateBetween ? (
         <>
