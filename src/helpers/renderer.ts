@@ -2,3 +2,5 @@ export const domainTiposCarga = ["CARGA GERAL", "COMBUSTÍVEL", "CONTÊINER", "G
 export const domainTypesOperation = ["CARGA", "DESCARGA"];
 export const domainTypeVehicle = ["TRUCK", "CARRETA", "BITREM"]
 export const domainPaymentTypes = ["BUMERANGUE", "CARROSSEL", "FATURADO", "CARTAO DE CRÉDITO", "CARTAO DE DEBITO", "CARTAO MANUAL CRÉDITO", "CARTAO MANUAL DEBITO", "PIX", "DINHEIRO"];
+export const domainActive = ["SIM", "NÃO"];
+export const domainTypeOperationPorto = ["ESTADIA", "TRIAGEM", "CARROSSEL"];

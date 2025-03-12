@@ -65,6 +65,84 @@ const IdentifyVehicle: React.FC = () => {
 
   const { setStatus } = useStatus();
 
+  const onPaymentInvoiced = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      console.log("Entrou");
+
+      let currentRow: any = sessionStorage.getItem("@triagem");
+
+      if (currentRow) {
+        currentRow = JSON.parse(currentRow);
+      }
+
+      const id_operacao_patio =
+        sessionStorage.getItem("id_operacao_patio") ||
+        currentRow.id_operacao_patio;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("userId");
+
+      console.log("Payment Entrou");
+
+      const dataTicket = await getPaymentTicket();
+
+      console.log("Data Ticket ", dataTicket);
+
+      const body = {
+        id_operacao_patio,
+        tipo_pagamento: 3,
+        desconto: 0.0,
+        quantia_paga: dataTicket?.valor_a_pagar,
+        valor_total: dataTicket?.valor_a_pagar, //Desconto
+        data_hora_pagamento: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+        tempo_base_triagem:
+          dataTicket && dataTicket.comercialCustoTriagem !== null
+            ? dataTicket?.comercialCustoTriagem.tempo_base_triagem
+            : null,
+        custo_base_triagem:
+          dataTicket && dataTicket.comercialCustoTriagem !== null
+            ? dataTicket.comercialCustoTriagem.custo_base_triagem
+            : null,
+        custo_hora_extra:
+          dataTicket && dataTicket.comercialCustoEstadia !== null
+            ? dataTicket.comercialCustoEstadia.custo_hora
+            : null,
+        custo_meia_diaria:
+          dataTicket && dataTicket.comercialCustoEstadia !== null
+            ? dataTicket.comercialCustoEstadia.custo_meia_diaria
+            : null,
+        custo_diaria:
+          dataTicket && dataTicket.comercialCustoEstadia !== null
+            ? dataTicket.comercialCustoEstadia.custo_diaria
+            : null,
+        id_usuario_historico: userId,
+        status: 11,
+      };
+
+      console.log("Payment Body", body);
+
+      const response = await api.post(
+        "/operacaopatio/adicionarPagamento",
+        body,
+        {
+          headers: {
+            Host: "https://api2.sulog.com.br",
+          },
+        }
+      );
+      if (response.status === 200) {
+        FrontendNotification("Triagem faturada com sucesso!", "success");
+        setStatus(4);
+      }
+
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
+  }, []);
+
   const onUpdateAutorizacao = useCallback(
     async (
       values: FormValues,
@@ -88,7 +166,7 @@ const IdentifyVehicle: React.FC = () => {
               : null,
           autorizacao_faturar:
             values.cnpj_transportadora !== null ? true : false,
-          status: isInvoiced ? 11 : 10,
+          status: 10,
           id_usuario_historico: idUser,
         };
 
@@ -99,7 +177,7 @@ const IdentifyVehicle: React.FC = () => {
 
         if (response.status === 200) {
           if (isInvoiced) {
-            setStatus(4);
+            onPaymentInvoiced();
           } else {
             setStatus(3);
           }
@@ -136,7 +214,6 @@ const IdentifyVehicle: React.FC = () => {
         idOperacaoPatio && idOperacaoPatio.length > 0
           ? idOperacaoPatio
           : currentRow.id_operacao_patio;
-      
 
       const body = {
         id_operacao_patio: id,
@@ -158,8 +235,6 @@ const IdentifyVehicle: React.FC = () => {
         "/operacaopatio/confirmVehicleIdentity",
         body
       );
-
-
 
       if (response.status === 200) {
         sessionStorage.setItem("id_operacao_patio", response.data);
@@ -345,6 +420,37 @@ const IdentifyVehicle: React.FC = () => {
     setRowData(currentRow);
   }, []);
 
+  const getPaymentTicket = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      let getDataTriagem: any = sessionStorage.getItem("@triagem");
+      if (getDataTriagem) {
+        getDataTriagem = JSON.parse(getDataTriagem);
+      }
+      const idOperacaoPatio = sessionStorage.getItem("id_operacao_patio");
+
+      const id =
+        idOperacaoPatio && idOperacaoPatio.length > 0
+          ? idOperacaoPatio
+          : getDataTriagem?.id_operacao_patio;
+
+      const body = {
+        id_operacao_patio: id,
+      };
+
+      const response = await api.post("/operacaopatio/custoOperacao", body);
+
+      if (response.status === 200) {
+        return response.data;
+      }
+
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
+  }, []);
+
   const isInvoicedCarrier = (values: FormValues, data: any[]) => {
     const findCarrierById = data.find(
       (item: any) =>
@@ -523,26 +629,26 @@ const IdentifyVehicle: React.FC = () => {
                           </React.Fragment>
                         ))}
 
-                        
-                            <div className="w-full mt-4">
-                              <SelectCustom
-                                data={vehicleTypes}
-                                disabled={detailVehicleMotorized.length > 0 &&
-                                  detailVehicleMotorized[0].tipo_veiculo ==
-                                    TipoVeiculo.TRUCK}
-                                onChange={(selectedOption: any) => {
-                                  formik.setFieldValue(
-                                    "tipo_veiculo",
-                                    selectedOption.value
-                                  );
-                                }}
-                                title="Tipo Veiculo"
-                                touched={formik.touched.tipo_veiculo}
-                                error={formik.errors.tipo_veiculo}
-                                value={formik.values.tipo_veiculo}
-                              />
-                            </div>
-                          
+                        <div className="w-full mt-4">
+                          <SelectCustom
+                            data={vehicleTypes}
+                            disabled={
+                              detailVehicleMotorized.length > 0 &&
+                              detailVehicleMotorized[0].tipo_veiculo ==
+                                TipoVeiculo.TRUCK
+                            }
+                            onChange={(selectedOption: any) => {
+                              formik.setFieldValue(
+                                "tipo_veiculo",
+                                selectedOption.value
+                              );
+                            }}
+                            title="Tipo Veiculo"
+                            touched={formik.touched.tipo_veiculo}
+                            error={formik.errors.tipo_veiculo}
+                            value={formik.values.tipo_veiculo}
+                          />
+                        </div>
                       </div>
                     </div>
                   </>

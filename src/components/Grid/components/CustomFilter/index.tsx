@@ -9,7 +9,7 @@ export interface CustomTextFilterModel {
 }
 
 const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
-  const [filterValue, setFilterValue] = useState<string>("");
+  const [filterValue, setFilterValue] = useState<string | number | boolean>("");
   const [initialDate, setInitialDate] = useState<string>('');
   const [finalDate, setFinalDate] = useState<string>('');
 
@@ -19,10 +19,10 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
       return params.data[props.colDef.field]
         ?.toString()
         .toLowerCase()
-        .includes(filterValue.toLowerCase());
+        // .includes(filterValue.toLowerCase());
     },
     isFilterActive() {
-      return filterValue.trim() !== "";
+      return filterValue !== "";
     },
     getModel(): any | null {
       if (!filterValue && !initialDate && !finalDate) {
@@ -30,7 +30,7 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
       }
 
       
-      let value: any = filterValue.length > 0 ? filterValue : null;
+      let value: any = String(filterValue).length > 0 ? filterValue : null;
       if (props.dateBetween) {
         value = [initialDate, finalDate];
       }
@@ -56,7 +56,7 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
   useEffect(() => {
 
     console.log(filterValue);
-    if (filterValue.length > 0 || (initialDate.length > 0 && finalDate.length > 0)) {
+    if (filterValue && String(filterValue).length > 0 || (initialDate.length > 0 && finalDate.length > 0)) {
       console.log("entrou");
       props.filterChangedCallback();
     } else {
@@ -73,7 +73,7 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
           data={props.selected.data}
           isMulti={props.selected.isMultiple}
           onChange={(selectedOption: any) => {
-            if (props.colDef.fieldName === "tipo_carga") {
+            if (!window.location.pathname.includes('triagens') && props.colDef.fieldName === "tipo_carga") {
               console.log(selectedOption);
               // setSelected(selectedOption);
               let dataCargoTypes = "{";
@@ -84,7 +84,8 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
               value = value.concat("}");
               setFilterValue(value);
             } else {
-              setFilterValue(selectedOption.value);
+              console.log("entrou select", selectedOption);
+              setFilterValue(Number(selectedOption.value));
             }
           }}
           title=""
@@ -133,8 +134,22 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
                 setFilterValue("");
                 props.filterChangedCallback();
               } else {
+                let value = "";
+                console.log(props);
 
-                setFilterValue(e.target.value);
+                if(props.colDef.fieldName === "identificadores_conteineres") {
+                  console.log("entrou8");
+                  value += "{"
+                  value += e.target.value;
+                  value += "}"
+                } else {
+                  value = e.target.value;
+                }
+
+                console.log(value)
+
+
+                setFilterValue(value);
               }
             }
           }}

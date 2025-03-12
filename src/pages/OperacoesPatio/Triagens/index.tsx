@@ -12,7 +12,14 @@ import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
-import { formatDateTimeBR, maskCnpj, renderCargoTypes } from "../../../helpers/format";
+import {
+  formatDateTimeBR,
+  getActiveTypes,
+  getCargoTypes,
+  getOperationTypesPorto,
+  maskCnpj,
+  renderCargoTypes,
+} from "../../../helpers/format";
 import { STATUS_OPERACOES_PATIO_TRIAGEM } from "../../../helpers/status";
 import { useModal } from "../../../hooks/ModalContext";
 import { useStatus } from "../../../hooks/StatusContext";
@@ -33,12 +40,12 @@ const Triagens: React.FC = () => {
       filter: true,
       type: "dateColumn",
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.value) {
+        if (params.value) {
           return formatDateTimeBR(params.value);
         }
 
-        return '---'
-      }
+        return "---";
+      },
     },
     {
       headerName: "Placa Dianteira",
@@ -55,6 +62,8 @@ const Triagens: React.FC = () => {
     {
       headerName: "Identificadores dos Contêineres",
       field: "operacao_porto_agendada.identificadores_conteineres",
+      fieldName: "identificadores_conteineres",
+      filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value.replace("{", "").replace("}", "");
@@ -65,6 +74,13 @@ const Triagens: React.FC = () => {
     {
       headerName: "Chamada Motorista",
       field: "chamada_motorista",
+      filter: true,
+      filterParams: {
+        selected: {
+          isMultiple: false,
+          data: getActiveTypes(),
+        },
+      },
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return "SIM";
@@ -76,9 +92,15 @@ const Triagens: React.FC = () => {
       headerName: "Tipo de Operação no Porto",
       field: "operacao_porto_agendada.tipo_carga",
       fieldName: "tipo_operacao_porto",
+      filter: true,
+      filterParams: {
+        selected: {
+          isMultiple: false,
+          data: getOperationTypesPorto(),
+        },
+      },
       valueFormatter: (params: ValueFormatterParams) => {
-        if(params.data) {
-
+        if (params.data) {
           if (params.data.id_operacao_porto_agendada !== null) {
             return "TRIAGEM";
           } else if (params.data.id_operacao_porto_carrossel !== null) {
@@ -87,14 +109,20 @@ const Triagens: React.FC = () => {
             return "ESTADIA";
           }
         }
-        return '---';
+        return "---";
       },
     },
     {
       headerName: "Tipo de Agendamento",
       field: "operacao_porto_agendada.tipo_carga",
-      filter: true,
       fieldName: "tipo_carga",
+      filter: true,
+      filterParams: {
+        selected: {
+          isMultiple: false,
+          data: getCargoTypes(),
+        },
+      },
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return renderCargoTypes(params.value).replaceAll(",", "");
@@ -117,7 +145,7 @@ const Triagens: React.FC = () => {
     {
       headerName: "Terminal",
       field: "operacao_porto_agendada.terminal.razao_social",
-      fieldName: 'terminal',
+      fieldName: "terminal",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
@@ -152,7 +180,7 @@ const Triagens: React.FC = () => {
     {
       headerName: "CNPJ da Transportadora",
       field: "operacao_porto_agendada.transportadora.cnpj",
-      fieldName: 'cnpj_transportadora',
+      fieldName: "cnpj_transportadora",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
@@ -164,6 +192,9 @@ const Triagens: React.FC = () => {
     {
       headerName: "Data de Saída",
       field: "entrada_veiculo.saida.data_hora",
+      filter: true,
+      fieldName: 'data',
+      type: "dateColumn",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return params.value;
@@ -171,7 +202,6 @@ const Triagens: React.FC = () => {
         return "---";
       },
     },
-    
   ]);
   const [isRemove, setIsRemove] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<ITriagens>();
@@ -269,7 +299,7 @@ const Triagens: React.FC = () => {
       )}
       {showTicket && (
         <div className="hidden">
-          <Ticket data={selectedRow} onClose={() => {}} />
+          <Ticket data={selectedRow} onClose={() => setShowTicket(!showTicket)} />
         </div>
       )}
 
@@ -315,7 +345,10 @@ const Triagens: React.FC = () => {
                 action: (data: ITriagens) => {
                   setSelectedRow(data);
                   sessionStorage.setItem("@triagem", JSON.stringify(data));
-                  sessionStorage.setItem("id_operacao_patio", JSON.stringify(data.id_operacao_patio));
+                  sessionStorage.setItem(
+                    "id_operacao_patio",
+                    JSON.stringify(data.id_operacao_patio)
+                  );
                   setStatus(1);
                   openModal();
                 },
@@ -329,7 +362,10 @@ const Triagens: React.FC = () => {
                 action: (data: ITriagens) => {
                   setSelectedRow(data);
                   sessionStorage.setItem("@triagem", JSON.stringify(data));
-                  sessionStorage.setItem("id_operacao_patio", JSON.stringify(data.id_operacao_patio));
+                  sessionStorage.setItem(
+                    "id_operacao_patio",
+                    JSON.stringify(data.id_operacao_patio)
+                  );
                   setStatus(2);
                   openModal();
                 },
@@ -355,6 +391,10 @@ const Triagens: React.FC = () => {
                 action: (data: any) => {
                   setSelectedRow(data);
                   sessionStorage.setItem("@triagem", JSON.stringify(data));
+                  sessionStorage.setItem(
+                    "id_operacao_patio",
+                    JSON.stringify(data.id_operacao_patio)
+                  );
                   setStatus(3);
                   openModal();
                 },
@@ -370,6 +410,10 @@ const Triagens: React.FC = () => {
                   setShowTicket(false);
                   setShowTicket(true);
                   sessionStorage.setItem("@triagem", JSON.stringify(row));
+                  sessionStorage.setItem(
+                    "id_operacao_patio",
+                    JSON.stringify(row.id_operacao_patio)
+                  );
                 },
                 status: [11, 12, 13, 14, 15, 16],
                 icon: () => {
