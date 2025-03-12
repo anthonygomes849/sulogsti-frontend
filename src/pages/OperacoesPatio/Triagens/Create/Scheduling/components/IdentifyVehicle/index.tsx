@@ -16,7 +16,6 @@ import Checkbox from "../../../../../../../components/Checkbox";
 import { FrontendNotification } from "../../../../../../../shared/Notification";
 import CreateVeiculos from "../../../../../../Cadastro/Veiculos/components/Create";
 import { ITriagens } from "../../../../types/types";
-import { IPaymentTicket } from "../Payment/types/types";
 import formValidator from "./validators/formValidator";
 import formValidator2 from "./validators/formValidator2";
 
@@ -45,7 +44,6 @@ const IdentifyVehicle: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showCreateVehicle, setShowCreateVehicle] = useState<boolean>(false);
   const [rowData, setRowData] = useState<ITriagens>();
-  const [dataTicket, setDataTicket] = useState<IPaymentTicket>();
 
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
