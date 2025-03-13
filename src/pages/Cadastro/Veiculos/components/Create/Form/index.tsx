@@ -76,21 +76,21 @@ const Form: React.FC<Props> = (props: Props) => {
           if (response.status === 200) {
             props.onConfirm();
           } else {
-            FrontendNotification("Erro ao cadastrar o veiculo!", "error");
+            FrontendNotification("Erro ao salvar o veiculo!", "error");
           }
         } else {
           const response = await api.post("/cadastrar/veiculos", body);
           if (response.status === 200) {
             props.onConfirm();
           } else {
-            FrontendNotification("Erro ao cadastrar o veiculo!", "error");
+            FrontendNotification("Erro ao salvar o veiculo!", "error");
           }
         }
 
         setLoading(false);
       } catch {
         setLoading(false);
-        FrontendNotification("Erro ao cadastrar o veiculo!", "error");
+        FrontendNotification("Erro ao salvar o veiculo!", "error");
       }
     },
     []
