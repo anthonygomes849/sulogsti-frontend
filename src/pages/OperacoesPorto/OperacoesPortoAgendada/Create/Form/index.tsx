@@ -72,6 +72,11 @@ const Form: React.FC<Props> = (props: Props) => {
 
         getIndentificadorConteiner += "}";
 
+        const conteiners = getIndentificadorConteiner.slice(0, -2) + "}";
+
+        console.log(conteiners);
+        
+
         const body = {
           id_operacao_porto_agendada: row?.id_operacao_porto_agendada,
           data_agendamento_terminal: format(new Date(values.data_agendamento_terminal), 'yyyy-MM-dd HH:mm:ss', {
@@ -85,7 +90,7 @@ const Form: React.FC<Props> = (props: Props) => {
           id_terminal: values.id_terminal,
           tipo_carga: Number(values.tipo_carga),
           tipo_operacao: Number(values.tipo_operacao),
-          identificadores_conteineres: getIndentificadorConteiner.length > 2 ? getIndentificadorConteiner : null,
+          identificadores_conteineres: getIndentificadorConteiner.length > 2 ? conteiners.replaceAll('-', '') : null,
           ativo: true,
           id_usuario_historico: userId,
           origem: 1,
@@ -216,7 +221,9 @@ const Form: React.FC<Props> = (props: Props) => {
   const formik = useFormik({
     initialValues,
     validationSchema: formValidator,
-    onSubmit: (values: FormValues) => handleSubmit(values, props.selectedRow, conteiners),
+    onSubmit: (values: FormValues) => {
+      handleSubmit(values, props.selectedRow, conteiners)
+    },
   });
 
   useEffect(() => {
