@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify";
 import InputCustom from "../../../../../components/InputCustom";
 import SelectCustom from "../../../../../components/SelectCustom";
 import Loading from "../../../../../core/common/Loading";
+import { validateCPF } from "../../../../../helpers/format";
 import api from "../../../../../services/api";
 import { FrontendNotification } from "../../../../../shared/Notification";
 import {
@@ -81,6 +82,9 @@ const Form: React.FC<Props> = (props: Props) => {
           id_usuario_historico: userId,
         };
 
+        if(validateCPF(values.cpf)) {
+
+
         if (props.isEdit) {
           const response = await api.post("/editar/motoristas", body);
 
@@ -97,6 +101,11 @@ const Form: React.FC<Props> = (props: Props) => {
             FrontendNotification('Erro ao salvar o motorista!', 'error');
           }
         }
+
+      } else {
+        FrontendNotification('CPF inválido', 'error');
+      }
+
 
         setLoading(false);
 
