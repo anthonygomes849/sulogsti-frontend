@@ -2,10 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import api from "../../../../../../services/api";
 
 import { useFormik } from "formik";
+import { ToastContainer } from "react-toastify";
 import InputCustom from "../../../../../../components/InputCustom";
 import RadioGroupCustom from "../../../../../../components/RadioGroup";
 import SelectCustom from "../../../../../../components/SelectCustom";
 import Loading from "../../../../../../core/common/Loading";
+import { FrontendNotification } from "../../../../../../shared/Notification";
 import { IVeiculos } from "../../../types/types";
 import formValidator from "../validators/formValidator";
 
@@ -69,16 +71,26 @@ const Form: React.FC<Props> = (props: Props) => {
         };
 
         if (props.isEdit) {
-          await api.post("/editar/veiculos", body);
+          const response = await api.post("/editar/veiculos", body);
+
+          if (response.status === 200) {
+            props.onConfirm();
+          } else {
+            FrontendNotification("Erro ao cadastrar o veiculo!", "error");
+          }
         } else {
-          await api.post("/cadastrar/veiculos", body);
+          const response = await api.post("/cadastrar/veiculos", body);
+          if (response.status === 200) {
+            props.onConfirm();
+          } else {
+            FrontendNotification("Erro ao cadastrar o veiculo!", "error");
+          }
         }
 
         setLoading(false);
-
-        props.onConfirm();
       } catch {
         setLoading(false);
+        FrontendNotification("Erro ao cadastrar o veiculo!", "error");
       }
     },
     []
@@ -146,6 +158,7 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
+      <ToastContainer />
       <div className="grid grid-cols-2 gap-3 mb-4 p-5">
         <div>
           <InputCustom

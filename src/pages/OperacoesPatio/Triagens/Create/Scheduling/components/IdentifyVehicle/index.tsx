@@ -90,6 +90,7 @@ const IdentifyVehicle: React.FC = () => {
 
       console.log("Data Ticket ", dataTicket);
 
+
       const body = {
         id_operacao_patio,
         tipo_pagamento: 3,

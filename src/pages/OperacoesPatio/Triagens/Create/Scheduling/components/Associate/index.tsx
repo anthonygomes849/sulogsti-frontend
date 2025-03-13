@@ -83,7 +83,7 @@ const Associate: React.FC = () => {
           response.data.id_operacao_patio
         );
 
-        sessionStorage.setItem('@triagem', JSON.stringify(response.data));
+        // sessionStorage.setItem('@triagem', JSON.stringify(response.data));
 
         setStatus(1);
       } else {

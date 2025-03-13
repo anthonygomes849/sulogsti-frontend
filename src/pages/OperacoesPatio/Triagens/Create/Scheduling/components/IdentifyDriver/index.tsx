@@ -24,7 +24,7 @@ interface FormValues {
 
 const IdentifyDriver: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [listDriver, setListDriver] = useState([]);
+  const [, setListDriver] = useState([]);
   const [detailDriver, setDetailDriver] = useState<IMotorista[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchDriver, setSearchDriver] = useState();

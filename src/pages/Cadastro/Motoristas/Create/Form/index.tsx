@@ -1,9 +1,11 @@
 import { useFormik } from "formik";
 import React, { useCallback, useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
 import InputCustom from "../../../../../components/InputCustom";
 import SelectCustom from "../../../../../components/SelectCustom";
 import Loading from "../../../../../core/common/Loading";
 import api from "../../../../../services/api";
+import { FrontendNotification } from "../../../../../shared/Notification";
 import {
   CategoriaCNH,
   City,
@@ -80,16 +82,27 @@ const Form: React.FC<Props> = (props: Props) => {
         };
 
         if (props.isEdit) {
-          await api.post("/editar/motoristas", body);
+          const response = await api.post("/editar/motoristas", body);
+
+          if(response.status === 200) {
+            props.onConfirm();
+          } else {
+            FrontendNotification('Erro ao salvar o motorista!', 'error');
+          }
         } else {
-          await api.post("/cadastrar/motoristas", body);
+          const response = await api.post("/cadastrar/motoristas", body);
+          if(response.status === 200) {
+            props.onConfirm();
+          } else {
+            FrontendNotification('Erro ao salvar o motorista!', 'error');
+          }
         }
 
         setLoading(false);
 
-        props.onConfirm();
       } catch {
         setLoading(false);
+        FrontendNotification('Erro ao salvar o motorista!', 'error');
       }
     },
     []
@@ -232,6 +245,7 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
+      <ToastContainer />
       <div className="overflow-y-scroll max-w-full max-h-[550px] p-5">
         <div className="grid grid-cols-3 gap-3 mb-2">
           <div>
