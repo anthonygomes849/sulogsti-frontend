@@ -388,10 +388,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners1: e.target.value,
+                      conteiners1: value,
                     })
                   }
                   value={conteiners.conteiners1}
@@ -405,10 +405,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners2: e.target.value,
+                      conteiners2: value,
                     })
                   }
                   value={conteiners.conteiners2}
@@ -422,10 +422,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners3: e.target.value,
+                      conteiners3: value,
                     })
                   }
                   value={conteiners.conteiners3}
@@ -439,10 +439,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners4: e.target.value,
+                      conteiners4: value,
                     })
                   }
                   value={conteiners.conteiners4}

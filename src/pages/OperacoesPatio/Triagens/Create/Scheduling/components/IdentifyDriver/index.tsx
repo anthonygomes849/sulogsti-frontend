@@ -26,6 +26,8 @@ const IdentifyDriver: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [listDriver, setListDriver] = useState([]);
   const [detailDriver, setDetailDriver] = useState<IMotorista[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchDriver, setSearchDriver] = useState();
 
   const selectRef: any = useRef(null);
 
@@ -170,6 +172,9 @@ const IdentifyDriver: React.FC = () => {
         });
 
         setListDriver(mappingResponse);
+        setLoading(false);
+
+        return mappingResponse;
       }
       setLoading(false);
     } catch {
@@ -191,6 +196,12 @@ const IdentifyDriver: React.FC = () => {
       }
     },
   });
+
+  useEffect(() => {
+    if (searchQuery.length >= 3) {
+      onSearchDriver(searchQuery);
+    }
+  }, [searchQuery]);
 
   useEffect(() => {
     onLoadFormValues();
@@ -220,21 +231,22 @@ const IdentifyDriver: React.FC = () => {
             <div className="flex items-center w-full">
               <div className="w-full">
                 <SelectCustom
+                  async
                   selectRef={selectRef}
-                  data={listDriver}
+                  data={onSearchDriver}
                   onChange={(selectedOption: any) => {
+                    setSearchDriver(selectedOption);
                     formik.setFieldValue("id_motorista", selectedOption.value);
                     formik.setFieldValue("cpf_motorista", selectedOption.cpf);
                   }}
                   onInputChange={(value) => {
-                    if (value.length >= 3) {
-                      onSearchDriver(value);
-                    }
+                    setSearchQuery(value);
                   }}
                   title="CPF do Motorista"
                   touched={formik.touched.id_motorista}
                   error={formik.errors.id_motorista}
                   value={formik.values.cpf_motorista}
+                  defaultValue={searchDriver}
                 />
               </div>
               <button

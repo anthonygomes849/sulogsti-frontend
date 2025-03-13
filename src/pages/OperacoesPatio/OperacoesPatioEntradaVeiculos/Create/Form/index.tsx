@@ -94,6 +94,8 @@ const Form: React.FC<Props> = (props: Props) => {
 
         getIndentificadorConteiner += "}";
 
+        const conteiners = getIndentificadorConteiner.slice(0, -2) + "}";
+
         const body = {
           id_operacao_patio_entrada_veiculo:
             row?.id_operacao_patio_entrada_veiculo,
@@ -108,7 +110,7 @@ const Form: React.FC<Props> = (props: Props) => {
           numero_partes_nao_motorizada: values.numero_partes_nao_motorizada,
           identificadores_conteineres:
             getIndentificadorConteiner.length > 2
-              ? getIndentificadorConteiner
+              ? conteiners
               : null,
           id_operacao_patio_cancela: values.id_operacao_patio_cancela,
           id_operacao_patio_cancela_saida:
@@ -343,10 +345,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners1: e.target.value,
+                      conteiners1: value,
                     })
                   }
                   value={conteiners.conteiners1}
@@ -360,10 +362,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners2: e.target.value,
+                      conteiners2: value,
                     })
                   }
                   value={conteiners.conteiners2}
@@ -377,10 +379,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners3: e.target.value,
+                      conteiners3: value,
                     })
                   }
                   value={conteiners.conteiners3}
@@ -394,10 +396,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners4: e.target.value,
+                      conteiners4: value,
                     })
                   }
                   value={conteiners.conteiners4}
