@@ -427,26 +427,6 @@ const Form: React.FC<Props> = (props: Props) => {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-1"></div>
-        {/* <div className="grid grid-cols-2 gap-2 mb-3">
-          <div className="">
-            <div>
-              <SelectCustom
-                data={cancelasEntrada}
-                onChange={(selectedOption: any) => {
-                  formik.setFieldValue(
-                    "id_operacao_patio_cancela",
-                    selectedOption.value
-                  );
-                }}
-                title="Cancela Entrada"
-                touched={formik.touched.id_operacao_patio_cancela}
-                error={formik.errors.id_operacao_patio_cancela}
-                disabled={props.isView}
-                value={formik.values.id_operacao_patio_cancela}
-              />
-            </div>
-          </div>
-        </div> */}
         <div className="mb-4">
           <span className="text-sm font-bold">Saída</span>
           <div className="w-full h-[1px] bg-[#ccc] mt-2" />

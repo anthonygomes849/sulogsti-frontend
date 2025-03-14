@@ -62,18 +62,18 @@ const Form: React.FC<Props> = (props: Props) => {
 
         const body = {
           id_motorista: row?.id_motorista,
-          cpf: values.cpf,
+          cpf: values.cpf.replaceAll('.', '').replace('-', ''),
           nome: values.nome,
           endereco: values.endereco.length > 0 ? values.endereco : null,
           complemento:
             values.complemento.length > 0 ? values.complemento : null,
-          numero: values.numero ? values.numero : "",
+          numero: values.numero ? Number(values.numero) : null,
           cep: values.cep.length > 0 ? values.cep : null,
           id_bairro: values.id_bairro ? values.id_bairro : null,
           id_cidade: values.id_cidade ? values.id_cidade : null,
           id_estado: values.id_estado,
-          celular: values.celular,
-          numero_cnh: values.numero_cnh,
+          celular: values.celular.replaceAll('(', '').replaceAll(')', '').replace(' ', '').replace('-', ''),
+          numero_cnh: values.numero_cnh.replaceAll('.', '').replace('-', ''),
           categoria_cnh: values.categoria_cnh,
           data_expiracao_cnh: values.data_expiracao_cnh,
           ativo: true,
