@@ -29,7 +29,7 @@ interface FormValues {
 }
 
 const Associate: React.FC = () => {
-  const [entradaVeiculo, setEntradaVeiculo] = useState([]);
+  const [, setEntradaVeiculo] = useState([]);
   const [operacaoPortoAgendada, setOperacaoPortoAgendada] = useState([]);
   const [operacaoPortoCarrossel, setOperacaoPortoCarrossel] = useState([]);
   const [serachQueryEntrada, setSearchQueryEntrada] = useState<string>("");
