@@ -7,6 +7,8 @@ import InputCustom from "../../../../../components/InputCustom";
 import SelectCustom from "../../../../../components/SelectCustom";
 import Loading from "../../../../../core/common/Loading";
 import api from "../../../../../services/api";
+import { FrontendNotification } from "../../../../../shared/Notification";
+import { TipoVeiculo } from "../../../../Cadastro/Veiculos/types/types";
 import { IOperacoesPatioEntradaVeiculos } from "../types/types";
 import formValidator from "../validators/formValidator";
 
@@ -39,6 +41,7 @@ const Form: React.FC<Props> = (props: Props) => {
     conteiners3: "",
     conteiners4: "",
   });
+  const [vehicleTypes, setVehicleTypes] = useState<any[]>([]);
 
   const onCreateTriagens = useCallback(async (idEntradaVeiculo: number) => {
     try {
@@ -109,9 +112,7 @@ const Form: React.FC<Props> = (props: Props) => {
               : null,
           numero_partes_nao_motorizada: values.numero_partes_nao_motorizada,
           identificadores_conteineres:
-            getIndentificadorConteiner.length > 2
-              ? conteiners
-              : null,
+            getIndentificadorConteiner.length > 2 ? conteiners : null,
           id_operacao_patio_cancela: values.id_operacao_patio_cancela,
           id_operacao_patio_cancela_saida:
             values.id_operacao_patio_cancela_saida.length > 0
@@ -125,7 +126,13 @@ const Form: React.FC<Props> = (props: Props) => {
         };
 
         if (props.isEdit) {
-          await api.post("/editar/entradaSaidaVeiculos", body);
+          const response = await api.post("/editar/entradaSaidaVeiculos", body);
+
+          if (response.status === 200) {
+            props.onConfirm();
+          } else {
+            FrontendNotification("Erro ao salvar a entrada!", "error");
+          }
         } else {
           const response = await api.post(
             "/cadastrar/entradaSaidaVeiculos",
@@ -133,18 +140,20 @@ const Form: React.FC<Props> = (props: Props) => {
           );
 
           if (response.status === 200) {
-            onCreateTriagens(response.data.id_operacao_patio_entrada_veiculo);
+            await onCreateTriagens(
+              response.data.id_operacao_patio_entrada_veiculo
+            );
+            props.onConfirm();
+          } else {
+            FrontendNotification("Erro ao salvar a entrada!", "error");
           }
         }
 
-        
-        setTimeout(() => {
-          props.onConfirm();
-        }, 3000);
-        
         setLoading(false);
       } catch {
         setLoading(false);
+        FrontendNotification("Erro ao salvar a entrada!", "error");
+
       }
     },
     []
@@ -193,6 +202,17 @@ const Form: React.FC<Props> = (props: Props) => {
       setLoading(false);
     }
   }, []);
+
+  const getVehicleTypes = useCallback(() => {
+      const data = Object.values(TipoVeiculo).map((value: any, index: number) => {
+        return {
+          value: `${index}`,
+          label: value,
+        };
+      });
+  
+      setVehicleTypes(data);
+    }, []);
 
   const onLoadFormValues = useCallback(
     (row?: IOperacoesPatioEntradaVeiculos) => {
@@ -258,7 +278,8 @@ const Form: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     getCancelasEntradas();
     getCancelasSaida();
-  }, [getCancelasEntradas, getCancelasSaida]);
+    getVehicleTypes();
+  }, [getCancelasEntradas, getCancelasSaida, getVehicleTypes]);
 
   useEffect(() => {
     if (props.isView || props.isEdit) {
@@ -313,15 +334,16 @@ const Form: React.FC<Props> = (props: Props) => {
         </div>
         <div className="grid grid-cols-3 gap-3 mb-2">
           <div>
-            <InputCustom
-              title="Número das Partes Não Motorizadas"
-              type="number"
-              placeholder="0"
-              onChange={formik.handleChange("numero_partes_nao_motorizada")}
-              value={formik.values.numero_partes_nao_motorizada}
+          <SelectCustom
+              data={vehicleTypes}
+              onChange={(selectedOption: any) => {
+                formik.setFieldValue("numero_partes_nao_motorizada", selectedOption.value);
+              }}
+              title="Tipo do Veículo"
               touched={formik.touched.numero_partes_nao_motorizada}
               error={formik.errors.numero_partes_nao_motorizada}
               disabled={props.isView}
+              value={formik.values.numero_partes_nao_motorizada}
             />
           </div>
           <div>
