@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import CalendarIcon from "../../../../../../../assets/images/calendarIcon.svg";
 import CalendarIconActive from "../../../../../../../assets/images/calendarIconActive.svg";
@@ -32,6 +32,9 @@ const Associate: React.FC = () => {
   const [entradaVeiculo, setEntradaVeiculo] = useState([]);
   const [operacaoPortoAgendada, setOperacaoPortoAgendada] = useState([]);
   const [operacaoPortoCarrossel, setOperacaoPortoCarrossel] = useState([]);
+  const [serachQueryEntrada, setSearchQueryEntrada] = useState<string>("");
+
+  const selectRef: any = useRef(null);
 
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
@@ -88,18 +91,16 @@ const Associate: React.FC = () => {
         setStatus(1);
       } else {
         setLoading(false);
-        FrontendNotification('Erro ao associar a entrada a triagem', "error");
+        FrontendNotification("Erro ao associar a entrada a triagem", "error");
       }
       setLoading(false);
-      
-      
     } catch {
       setLoading(false);
-      FrontendNotification('Erro ao associar a entrada a triagem', "error");
+      FrontendNotification("Erro ao associar a entrada a triagem", "error");
     }
   }, []);
 
-  const getOperacoesPatioEntradaVeiculo = useCallback(async () => {
+  const getOperacoesPatioEntradaVeiculo = useCallback(async (value: string) => {
     try {
       setLoading(true);
 
@@ -108,6 +109,7 @@ const Associate: React.FC = () => {
         order_direction: "desc",
         qtd_por_pagina: 100,
         triagem: "sim",
+        placa_dianteira: value
       };
 
       const response = await api.post("/listar/entradaSaidaVeiculos", body);
@@ -130,6 +132,8 @@ const Associate: React.FC = () => {
       setEntradaVeiculo(mappingResponse);
 
       setLoading(false);
+
+      return mappingResponse;
     } catch {
       setLoading(false);
     }
@@ -219,7 +223,13 @@ const Associate: React.FC = () => {
   });
 
   useEffect(() => {
-    getOperacoesPatioEntradaVeiculo();
+    console.log(serachQueryEntrada.length);
+    if (serachQueryEntrada.length > 3) {
+      getOperacoesPatioEntradaVeiculo(serachQueryEntrada);
+    }
+  }, [serachQueryEntrada]);
+
+  useEffect(() => {
     getOperacaoPortoAgendada();
     getOperacoesPortoCarrossel();
   }, []);
@@ -244,12 +254,17 @@ const Associate: React.FC = () => {
           <div className="grid grid-cols-3 gap-3 mb-4 mt-4">
             <div>
               <SelectCustom
-                data={entradaVeiculo}
+                async
+                selectRef={selectRef}
+                data={getOperacoesPatioEntradaVeiculo}
                 onChange={(selectedOption: any) => {
                   formik.setFieldValue(
                     "id_operacao_entrada_veiculo",
                     selectedOption.value
                   );
+                }}
+                onInputChange={(value) => {
+                  setSearchQueryEntrada(value);
                 }}
                 title="Entrada Associada à Triagem"
                 touched={formik.touched.id_operacao_entrada_veiculo}

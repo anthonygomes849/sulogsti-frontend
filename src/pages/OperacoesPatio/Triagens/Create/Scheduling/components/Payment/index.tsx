@@ -180,12 +180,17 @@ const Payment: React.FC<Props> = (props: Props) => {
         return {
           value: `${index + 1}`,
           label: value,
-          isDisabled: index <= 6,
+          isDisabled: index <= 4,
+          isHide: index <= 2,
         };
       }
     );
 
-    setPaymentTypes(data);
+    const filteredData = data.filter((item: any) => !item.isHide);
+
+    console.log(filteredData);
+
+    setPaymentTypes(filteredData);
   }, []);
 
   // if (window.PaykitCheckout) {

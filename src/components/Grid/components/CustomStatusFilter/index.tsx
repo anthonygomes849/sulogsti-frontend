@@ -66,6 +66,17 @@ const CustomStatusFilter = forwardRef<IFilterReactComp, any>((props: any, ref) =
           </div>
         </Listbox.Button>
         <Listbox.Options className="w-full mt-1 bg-white border rounded-md shadow-lg h-[220px] overflow-scroll">
+        <Listbox.Option
+              // key={item.value}
+              value=""
+              className="flex items-center gap-2 px-4 p-2 py-2 cursor-pointer hover:bg-gray-100 "
+            >
+              <span
+                className="w-4 h-4 rounded-full"
+                style={{ backgroundColor: '#CCC' }}
+              />
+              Selecione uma opção
+            </Listbox.Option>
           {props.status.map((item: any) => (
             <Listbox.Option
               // key={item.value}
