@@ -12,7 +12,6 @@ import {
 import { useStatus } from "../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../services/api";
 import { FrontendNotification } from "../../../../../../../shared/Notification";
-import Create from "../../../../../../Cadastro/Motoristas/Create";
 import { IMotorista } from "../../../../../../Cadastro/Motoristas/Create/types/types";
 import formValidator from "./validators/formValidator";
 
@@ -29,7 +28,6 @@ const IdentifyDriver: React.FC = () => {
   const [detailDriver, setDetailDriver] = useState<IMotorista[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchDriver, setSearchDriver] = useState();
-  const [showCreateDriver, setShowCreateDriver]  = useState<boolean>(false);
 
   const selectRef: any = useRef(null);
 
@@ -81,7 +79,7 @@ const IdentifyDriver: React.FC = () => {
       );
 
       if (response.status === 200) {
-        sessionStorage.setItem("id_operacao_patio", response.data.id_operacao_patio);
+        sessionStorage.setItem("id_operacao_patio", response.data);
         setStatus(2);
       } else {
         FrontendNotification("Erro ao identificar o motorista", "error");
@@ -124,12 +122,7 @@ const IdentifyDriver: React.FC = () => {
           ) {
             formik.setFieldValue("id_motorista", response.data.id_motorista);
           }
-        } else {
-
-          FrontendNotification('Não foi possivel encontrar o motorista com o CPF informado!', 'warning');
         }
-      } else {
-        FrontendNotification('Não foi possivel encontrar o motorista com o CPF informado!', 'warning');
       }
 
       setLoading(false);
@@ -217,18 +210,6 @@ const IdentifyDriver: React.FC = () => {
   return (
     <>
       <ToastContainer />
-      {showCreateDriver && (
-        <Create
-          isView={false}
-          isEdit={false}
-          onClear={() => {
-            setShowCreateDriver(!showCreateDriver);
-          }}
-          onConfirm={() => {
-            setShowCreateDriver(!showCreateDriver);
-          }}
-        />
-      )}
       <motion.div
         initial="initial"
         animate="animate"
@@ -238,8 +219,6 @@ const IdentifyDriver: React.FC = () => {
       >
         <Loading loading={loading} />
         <div className="overflow-y-scroll max-h-[650px] p-5">
-          <div className="flex mb-3 mt-3">
-
           <div className="flex flex-col mb-3 mt-3">
             <span className="text-sm text-[#000] font-bold">
               Identificação de motorista
@@ -248,14 +227,6 @@ const IdentifyDriver: React.FC = () => {
               Procura do cadastro de motorista no sistema
             </span>
           </div>
-          <button
-              type="button"
-              className="w-28 h-9 ml-4 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
-              onClick={() => setShowCreateDriver(!showCreateDriver)}
-              >
-              + Adicionar
-            </button>
-              </div>
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="flex items-center w-full">
               <div className="w-full">

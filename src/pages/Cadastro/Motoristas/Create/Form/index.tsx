@@ -71,7 +71,7 @@ const Form: React.FC<Props> = (props: Props) => {
           cep: values.cep.length > 0 ? values.cep : null,
           id_bairro: values.id_bairro ? values.id_bairro : null,
           id_cidade: values.id_cidade ? values.id_cidade : null,
-          id_estado: values.id_estado,
+          id_estado: String(values.id_estado).length > 0 ? Number(values.id_estado) : null,
           celular: values.celular.replaceAll('(', '').replaceAll(')', '').replace(' ', '').replace('-', ''),
           numero_cnh: values.numero_cnh.replaceAll('.', '').replace('-', ''),
           categoria_cnh: values.categoria_cnh,
@@ -79,7 +79,7 @@ const Form: React.FC<Props> = (props: Props) => {
           ativo: true,
           tipo_parte_veiculo: true,
           status: 1,
-          id_usuario_historico: userId,
+          id_usuario_historico: Number(userId),
         };
 
         if(validateCPF(values.cpf)) {
@@ -89,6 +89,7 @@ const Form: React.FC<Props> = (props: Props) => {
           const response = await api.post("/editar/motoristas", body);
 
           if(response.status === 200) {
+            FrontendNotification('Motorista salvo com sucesso!', 'success');
             props.onConfirm();
           } else {
             FrontendNotification('Erro ao salvar o motorista!', 'error');
@@ -96,6 +97,7 @@ const Form: React.FC<Props> = (props: Props) => {
         } else {
           const response = await api.post("/cadastrar/motoristas", body);
           if(response.status === 200) {
+            FrontendNotification('Motorista salvo com sucesso!', 'success');
             props.onConfirm();
           } else {
             FrontendNotification('Erro ao salvar o motorista!', 'error');

@@ -90,7 +90,6 @@ const IdentifyVehicle: React.FC = () => {
 
       console.log("Data Ticket ", dataTicket);
 
-
       const body = {
         id_operacao_patio,
         tipo_pagamento: 3,
@@ -288,12 +287,12 @@ const IdentifyVehicle: React.FC = () => {
     }
   }, []);
 
-  const onSearchDetailVehicle = useCallback(async (values: FormValues) => {
+  const onSearchDetailVehicle = useCallback(async (values: FormValues, licensePlate?: string) => {
     try {
       setLoading(true);
 
       const body = {
-        license_plate: values.license_plate,
+        license_plate: values.license_plate.length > 0 ? values.license_plate : licensePlate,
         tipo_placa: values.tipo_placa,
       };
 
@@ -308,11 +307,6 @@ const IdentifyVehicle: React.FC = () => {
         data.push(response.data);
 
         setDetailVehicle(data);
-      } else {
-        FrontendNotification(
-          "Não foi possivel encontrar o veículo com a placa informada",
-          "error"
-        );
       }
 
       setLoading(false);
@@ -320,18 +314,19 @@ const IdentifyVehicle: React.FC = () => {
       setLoading(false);
       FrontendNotification(
         "Não foi possivel encontrar o veículo com a placa informada",
-        "error"
+        "warning"
       );
     }
   }, []);
 
   const onSearchDetailVehicleMotorized = useCallback(
-    async (values: FormValues) => {
+    async (values: FormValues, licensePlate?: string) => {
       try {
         setLoading(true);
 
+
         const body = {
-          license_plate: values.license_plate_motorized,
+          license_plate: values.license_plate_motorized.length > 0 ? values.license_plate_motorized : licensePlate,
           tipo_placa: values.tipo_placa,
         };
 
@@ -346,11 +341,6 @@ const IdentifyVehicle: React.FC = () => {
           data.push(response.data);
 
           setDetailVehicleMotorized(data);
-        } else {
-          FrontendNotification(
-            "Não foi possivel encontrar o veículo com a placa informada",
-            "warning"
-          );
         }
 
         setLoading(false);
@@ -465,6 +455,34 @@ const IdentifyVehicle: React.FC = () => {
       : false;
   };
 
+  const onLoadFormValues = useCallback(() => {
+    let getDataTriagem: any = sessionStorage.getItem("@triagem");
+    if (getDataTriagem) {
+      getDataTriagem = JSON.parse(getDataTriagem);
+    }
+
+    if (getDataTriagem && getDataTriagem.entrada_veiculos !== null) {
+      if(getDataTriagem.entrada_veiculos.placa_dianteira !== null && getDataTriagem.entrada_veiculos.placa_dianteira.length > 0) {
+
+        formik.setFieldValue(
+          "license_plate_motorized",
+          getDataTriagem.entrada_veiculos.placa_dianteira
+        );
+        onSearchDetailVehicleMotorized(formik.values, getDataTriagem.entrada_veiculos.placa_dianteira);
+      }
+
+      if(getDataTriagem.entrada_veiculos.placa_traseira !== null && getDataTriagem.entrada_veiculos.placa_traseira.length > 0) {
+
+        formik.setFieldValue(
+          "license_plate",
+          getDataTriagem.entrada_veiculos.placa_traseira
+        );
+        onSearchDetailVehicle(formik.values, getDataTriagem.entrada_veiculos.placa_traseira);
+      }
+
+    }
+  }, []);
+
   const initialValues: FormValues = {
     id_veiculo_parte_motorizada: "",
     id_veiculo_parte_nao_motorizada: "",
@@ -494,6 +512,10 @@ const IdentifyVehicle: React.FC = () => {
     getVehicleTypes();
   }, [getVehicleTypes]);
 
+  useEffect(() => {
+    onLoadFormValues();
+  }, [onLoadFormValues])
+
   return (
     <>
       <Loading loading={loading} />
@@ -501,11 +523,8 @@ const IdentifyVehicle: React.FC = () => {
         <CreateVeiculos
           isView={false}
           isEdit={false}
-          // selectedRow={null}
           onClear={() => {
             setShowCreateVehicle(!showCreateVehicle);
-            // closeModal();
-            // setIsEdit(false);
           }}
           onConfirm={() => {
             setShowCreateVehicle(!showCreateVehicle);
@@ -532,10 +551,10 @@ const IdentifyVehicle: React.FC = () => {
             </div>
             <button
               type="button"
-              className="w-24 h-9 ml-4 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+              className="w-28 h-9 ml-4 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
               onClick={() => setShowCreateVehicle(!showCreateVehicle)}
             >
-              + Veículos
+              + Adicionar
             </button>
           </div>
           <div className="w-full h-full flex">

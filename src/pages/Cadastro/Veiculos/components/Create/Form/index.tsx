@@ -47,7 +47,7 @@ const Form: React.FC<Props> = (props: Props) => {
         const body = {
           id_veiculo: row?.id_veiculo,
           placa: values.placa.replace("-", ""),
-          id_estado: values.id_estado,
+          id_estado: String(values.id_estado).length > 0 ? Number(values.id_estado) : null,
           renavam:
             String(values.renavam).replaceAll(".", "").replaceAll("-", "")
               .length > 0
@@ -74,6 +74,7 @@ const Form: React.FC<Props> = (props: Props) => {
           const response = await api.post("/editar/veiculos", body);
 
           if (response.status === 200) {
+            FrontendNotification('Veiculo salvo com sucesso!', 'success');
             props.onConfirm();
           } else {
             FrontendNotification("Erro ao salvar o veiculo!", "error");
@@ -81,6 +82,7 @@ const Form: React.FC<Props> = (props: Props) => {
         } else {
           const response = await api.post("/cadastrar/veiculos", body);
           if (response.status === 200) {
+            FrontendNotification('Veiculo salvo com sucesso!', 'success');
             props.onConfirm();
           } else {
             FrontendNotification("Erro ao salvar o veiculo!", "error");
