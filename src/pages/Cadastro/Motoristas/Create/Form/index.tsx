@@ -60,8 +60,6 @@ const Form: React.FC<Props> = (props: Props) => {
 
         const userId = urlParams.get("userId");
         
-        console.log(values.id_estado);
-
         let body: any = {
           cpf: values.cpf.replaceAll(".", "").replace("-", ""),
           nome: values.nome,
@@ -69,7 +67,7 @@ const Form: React.FC<Props> = (props: Props) => {
           complemento:
             String(values.complemento).length > 0 ? values.complemento : null,
           numero: values.numero ? Number(values.numero) : null,
-          cep: String(values.cep).length > 0 ? values.cep : null,
+          cep: String(values.cep).length > 0 ? String(values.cep).replace('-', '') : null,
           id_bairro: String(values.id_bairro).length > 0 ? values.id_bairro : null,
           id_cidade: String(values.id_cidade).length > 0 ? values.id_cidade : null,
           id_estado:
@@ -98,8 +96,6 @@ const Form: React.FC<Props> = (props: Props) => {
           };
         }
         
-        console.log(body);
-
         if (validateCPF(values.cpf)) {
           if (props.isEdit) {
             const response = await api.post("/editar/motoristas", body);
