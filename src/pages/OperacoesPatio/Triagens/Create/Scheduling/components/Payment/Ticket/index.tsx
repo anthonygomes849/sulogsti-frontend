@@ -44,8 +44,8 @@ const Ticket = (props: Props) => {
 
       const body = {
         id_operacao_patio:
-          sessionStorage.getItem("id_operacao_patio") ||
-          currentRow.id_operacao_patio,
+          Number(sessionStorage.getItem("id_operacao_patio")) ||
+          Number(currentRow.id_operacao_patio),
       };
 
       const response = await api.post("/operacaopatio/custoOperacao", body);

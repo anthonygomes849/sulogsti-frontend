@@ -59,21 +59,29 @@ const Form: React.FC<Props> = (props: Props) => {
         const urlParams = new URLSearchParams(window.location.search);
 
         const userId = urlParams.get("userId");
+        
+        console.log(values.id_estado);
 
-        const body = {
-          id_motorista: row?.id_motorista,
-          cpf: values.cpf.replaceAll('.', '').replace('-', ''),
+        let body: any = {
+          cpf: values.cpf.replaceAll(".", "").replace("-", ""),
           nome: values.nome,
-          endereco: values.endereco.length > 0 ? values.endereco : null,
+          endereco: String(values.endereco).length > 0 ? values.endereco : null,
           complemento:
-            values.complemento.length > 0 ? values.complemento : null,
+            String(values.complemento).length > 0 ? values.complemento : null,
           numero: values.numero ? Number(values.numero) : null,
-          cep: values.cep.length > 0 ? values.cep : null,
-          id_bairro: values.id_bairro ? values.id_bairro : null,
-          id_cidade: values.id_cidade ? values.id_cidade : null,
-          id_estado: String(values.id_estado).length > 0 ? Number(values.id_estado) : null,
-          celular: values.celular.replaceAll('(', '').replaceAll(')', '').replace(' ', '').replace('-', ''),
-          numero_cnh: values.numero_cnh.replaceAll('.', '').replace('-', ''),
+          cep: String(values.cep).length > 0 ? values.cep : null,
+          id_bairro: String(values.id_bairro).length > 0 ? values.id_bairro : null,
+          id_cidade: String(values.id_cidade).length > 0 ? values.id_cidade : null,
+          id_estado:
+          values.id_estado
+              ? Number(values.id_estado)
+              : null,
+          celular: values.celular
+            .replaceAll("(", "")
+            .replaceAll(")", "")
+            .replace(" ", "")
+            .replace("-", ""),
+          numero_cnh: values.numero_cnh.replaceAll(".", "").replace("-", ""),
           categoria_cnh: values.categoria_cnh,
           data_expiracao_cnh: values.data_expiracao_cnh,
           ativo: true,
@@ -82,38 +90,43 @@ const Form: React.FC<Props> = (props: Props) => {
           id_usuario_historico: Number(userId),
         };
 
-        if(validateCPF(values.cpf)) {
-
-
+        
         if (props.isEdit) {
-          const response = await api.post("/editar/motoristas", body);
+          body = {
+            ...body,
+            id_motorista: row?.id_motorista,
+          };
+        }
+        
+        console.log(body);
 
-          if(response.status === 200) {
-            FrontendNotification('Motorista salvo com sucesso!', 'success');
-            props.onConfirm();
+        if (validateCPF(values.cpf)) {
+          if (props.isEdit) {
+            const response = await api.post("/editar/motoristas", body);
+
+            if (response.status === 200) {
+              FrontendNotification("Motorista salvo com sucesso!", "success");
+              props.onConfirm();
+            } else {
+              FrontendNotification("Erro ao salvar o motorista!", "error");
+            }
           } else {
-            FrontendNotification('Erro ao salvar o motorista!', 'error');
+            const response = await api.post("/cadastrar/motoristas", body);
+            if (response.status === 200) {
+              FrontendNotification("Motorista salvo com sucesso!", "success");
+              props.onConfirm();
+            } else {
+              FrontendNotification("Erro ao salvar o motorista!", "error");
+            }
           }
         } else {
-          const response = await api.post("/cadastrar/motoristas", body);
-          if(response.status === 200) {
-            FrontendNotification('Motorista salvo com sucesso!', 'success');
-            props.onConfirm();
-          } else {
-            FrontendNotification('Erro ao salvar o motorista!', 'error');
-          }
+          FrontendNotification("CPF inválido", "error");
         }
 
-      } else {
-        FrontendNotification('CPF inválido', 'error');
-      }
-
-
         setLoading(false);
-
       } catch {
+        FrontendNotification("Erro ao salvar o motorista!", "error");
         setLoading(false);
-        FrontendNotification('Erro ao salvar o motorista!', 'error');
       }
     },
     []
@@ -154,7 +167,9 @@ const Form: React.FC<Props> = (props: Props) => {
       formik.setFieldValue("data_expiracao_cnh", data.data_expiracao_cnh);
       formik.setFieldValue("celular", data.celular);
       formik.setFieldValue("endereco", data.endereco);
-      formik.setFieldValue("id_estado", data.id_estado);
+      if(data.id_estado !== null) {
+        formik.setFieldValue("id_estado", String(data.id_estado));
+      }
       getCities(data.id_estado);
       getNeighborhood(data.id_cidade);
       formik.setFieldValue("id_cidade", data.id_cidade);
@@ -209,7 +224,6 @@ const Form: React.FC<Props> = (props: Props) => {
         setCities(mappingResponse);
 
         formik.setFieldValue("id_cidade", props.selectedRow?.id_cidade);
-
       } catch {}
     },
     [formik.values.id_estado]

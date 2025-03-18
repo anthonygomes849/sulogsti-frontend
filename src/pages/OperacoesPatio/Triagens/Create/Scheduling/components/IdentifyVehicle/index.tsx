@@ -302,11 +302,21 @@ const IdentifyVehicle: React.FC = () => {
       );
 
       if (response.status === 200) {
-        let data = [];
+        if(response.data.id_veiculo) {
 
-        data.push(response.data);
+          let data = [];
+          
+          data.push(response.data);
+          
+          setDetailVehicle(data);
 
-        setDetailVehicle(data);
+          if(licensePlate) {
+            formik.setFieldValue(
+              "id_veiculo_parte_nao_motorizada",
+              String(response.data.id_veiculo)
+            );
+          }
+        }
       }
 
       setLoading(false);
@@ -336,11 +346,25 @@ const IdentifyVehicle: React.FC = () => {
         );
 
         if (response.status === 200) {
-          let data = [];
 
-          data.push(response.data);
+          if(response.data.id_veiculo) {
 
-          setDetailVehicleMotorized(data);
+            let data = [];
+            
+            data.push(response.data);
+            
+            setDetailVehicleMotorized(data);
+            if(response.data.tipo_veiculo !== TipoVeiculo.TRUCK) {
+              formik.setFieldValue('tipo_veiculo', "2");
+            }
+
+            if(licensePlate) {
+              formik.setFieldValue(
+                "id_veiculo_parte_motorizada",
+                String(response.data.id_veiculo)
+              );
+            }
+          }
         }
 
         setLoading(false);
@@ -397,6 +421,7 @@ const IdentifyVehicle: React.FC = () => {
       return {
         value: `${index + 1}`,
         label: value,
+        isDisabled: index === 0
       };
     });
 
@@ -468,6 +493,7 @@ const IdentifyVehicle: React.FC = () => {
           "license_plate_motorized",
           getDataTriagem.entrada_veiculos.placa_dianteira
         );
+       
         onSearchDetailVehicleMotorized(formik.values, getDataTriagem.entrada_veiculos.placa_dianteira);
       }
 
@@ -539,7 +565,7 @@ const IdentifyVehicle: React.FC = () => {
         className="page"
       >
         <ToastContainer />
-        <div className="overflow-y-scroll max-h-[650px] p-5">
+        <div className="overflow-y-scroll max-h-[calc(90vh)] p-5">
           <div className="flex mb-3 mt-3">
             <div className="flex flex-col">
               <span className="text-sm text-[#000] font-bold">
@@ -834,7 +860,7 @@ const IdentifyVehicle: React.FC = () => {
                   </div>
                   {rowData &&
                     rowData.operacao_porto_agendada &&
-                    rowData.operacao_porto_agendada.tipo_carga === 3 && (
+                    rowData.operacao_porto_agendada.tipo_carga === 3 && rowData.operacao_porto_agendada.tipo_operacao === 2 && (
                       <div className="flex flex-col w-full mt-5">
                         <Checkbox
                           title="Devolução de Container Cheio"
@@ -860,7 +886,7 @@ const IdentifyVehicle: React.FC = () => {
           </div>
         </div>
       </motion.div>
-      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"

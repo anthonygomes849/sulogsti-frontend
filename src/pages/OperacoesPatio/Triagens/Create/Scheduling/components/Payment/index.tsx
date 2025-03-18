@@ -255,7 +255,7 @@ const Payment: React.FC<Props> = (props: Props) => {
         variants={pageVariants}
         className="page"
       >
-        <div className="overflow-y-scroll w-auto max-h-[650px] p-5">
+        <div className="overflow-y-scroll w-auto max-h-[calc(70vh)] p-5">
           <div className="flex flex-col mb-2 mt-3">
             <span className="text-sm text-[#000] font-bold">
               Dados de pagamento
@@ -656,7 +656,7 @@ const Payment: React.FC<Props> = (props: Props) => {
           </div>
         </div>
       </motion.div>
-      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl mt-4">
+      <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl mt-4">
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"

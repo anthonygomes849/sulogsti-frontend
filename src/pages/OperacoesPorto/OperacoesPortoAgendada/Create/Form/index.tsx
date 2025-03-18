@@ -300,7 +300,7 @@ const Form: React.FC<Props> = (props: Props) => {
     <>
       <Loading loading={loading} />
       <ToastContainer />
-      <div className="overflow-y-scroll max-h-[550px] p-5">
+      <div className="overflow-y-scroll max-h-[calc(70vh)] p-5">
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div>
             <InputCustom
@@ -525,7 +525,7 @@ const Form: React.FC<Props> = (props: Props) => {
           </div>
         </div>
       </div>
-      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000000] font-bold rounded-full mr-2"

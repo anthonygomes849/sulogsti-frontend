@@ -143,11 +143,8 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
                   value += e.target.value;
                   value += "}"
                 } else {
-                  value = e.target.value;
+                  value = String(e.target.value).toUpperCase();
                 }
-
-                console.log(value)
-
 
                 setFilterValue(value);
               }

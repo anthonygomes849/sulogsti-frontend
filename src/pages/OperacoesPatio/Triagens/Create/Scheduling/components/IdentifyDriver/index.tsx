@@ -237,7 +237,7 @@ const IdentifyDriver: React.FC = () => {
         className="page"
       >
         <Loading loading={loading} />
-        <div className="overflow-y-scroll max-h-[650px] p-5">
+        <div className="overflow-y-scroll max-h-[calc(90vh)] p-5">
           <div className="flex mb-3 mt-3">
 
           <div className="flex flex-col mb-3 mt-3">
@@ -392,7 +392,7 @@ const IdentifyDriver: React.FC = () => {
           )}
         </div>
       </motion.div>
-      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"

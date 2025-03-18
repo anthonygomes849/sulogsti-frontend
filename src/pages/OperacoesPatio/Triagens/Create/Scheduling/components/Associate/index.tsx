@@ -109,7 +109,7 @@ const Associate: React.FC = () => {
         order_direction: "desc",
         qtd_por_pagina: 100,
         triagem: "sim",
-        placa_dianteira: value
+        placa_dianteira: value.toUpperCase()
       };
 
       const response = await api.post("/listar/entradaSaidaVeiculos", body);
@@ -245,7 +245,7 @@ const Associate: React.FC = () => {
         variants={pageVariants}
         className="page"
       >
-        <div className="overflow-y-scroll max-h-[450px] p-5">
+        <div className="overflow-y-scroll max-h-[calc(80vh - 50px)] p-5">
           <div className="mb-5">
             <span className="text-sm font-bold">
               Entrada do Veículo no Pátio
@@ -349,7 +349,7 @@ const Associate: React.FC = () => {
         </div>
       </motion.div>
 
-      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
