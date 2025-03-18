@@ -186,14 +186,14 @@ const Associate: React.FC = () => {
         (item: IOperacoesPortoAgendada) => {
           return {
             label: `${formatDateTimeBR(item.data_agendamento_terminal)} | ${
-              item.terminal !== null ? item.terminal.nome_fantasia : ""
+              item.terminal !== null ? item.terminal.razao_social : ""
             } | ${item.placa_dianteira_veiculo} | ${
               item.placa_traseira_veiculo !== null
                 ? item.placa_traseira_veiculo
                 : ""
             } | ${
               item.cpf_motorista !== null ? maskedCPF(item.cpf_motorista) : ""
-            }`,
+            } | ${item.identificadores_conteineres !== null ? item.identificadores_conteineres : ""}`,
             value: item.id_operacao_porto_agendada,
           };
         }
