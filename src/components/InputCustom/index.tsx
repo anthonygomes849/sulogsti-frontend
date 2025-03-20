@@ -14,7 +14,7 @@ interface InputProps {
   style?: any;
   styleTitle?: any;
   disabled?: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (value: any) => void;
   onBlur?: () => void;
   mask?: any;
   messageTooltip?: JSX.Element;
@@ -51,6 +51,10 @@ const InputCustom: React.FC<InputProps> = (
   const Input =
     typeInput === 'mask' ? InputMask : (InputForm as React.ElementType);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value.toUpperCase());
+  }
+
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -64,7 +68,7 @@ const InputCustom: React.FC<InputProps> = (
           type={type || "text"}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          onChange={onChange}
+          onChange={handleChange}
           style={style}
           value={value}
           mask={mask}

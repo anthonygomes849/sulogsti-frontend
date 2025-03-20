@@ -46,6 +46,10 @@ export const InputForm = styled.input`
     font-size: 0.875rem;
     color: #454546;
   }
+
+  .uppercase {
+    text-transform: uppercase;
+  }
 `;
 
 export const InputMask = styled(ReactInputMask)`

@@ -193,7 +193,7 @@ const Triagens: React.FC = () => {
       headerName: "Data de Saída",
       field: "entrada_veiculo.saida.data_hora",
       filter: true,
-      fieldName: 'data',
+      fieldName: "data",
       type: "dateColumn",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
@@ -244,20 +244,35 @@ const Triagens: React.FC = () => {
     }
   }, []);
 
-  const onDelete = useCallback(async (rowId?: number) => {
+  const onDelete = useCallback(async (rowId?: number, data?: ITriagens) => {
     try {
       setLoading(true);
-      const body = {
-        id_operacao_patio: rowId,
-      };
 
-      await api.post("/deletar/operacaoPatioTriagem", body);
+      if (data && data.status > 0) {
+        const body = {
+          id_operacao_patio: rowId,
+        };
 
-      setLoading(false);
+        await api.post("/deletar/desassociarTriagem", body);
 
-      setIsRemove(false);
+        setLoading(false);
 
-      window.location.reload();
+        setIsRemove(false);
+
+        window.location.reload();
+      } else {
+        const body = {
+          id_operacao_patio: rowId,
+        };
+
+        await api.post("/deletar/operacaoPatio", body);
+
+        setLoading(false);
+
+        setIsRemove(false);
+
+        window.location.reload();
+      }
     } catch {
       setLoading(false);
     }
@@ -271,7 +286,9 @@ const Triagens: React.FC = () => {
       {isRemove && (
         <ModalDelete
           onCancel={() => setIsRemove(!isRemove)}
-          onConfirm={() => onDelete(selectedRow?.id_operacao_patio)}
+          onConfirm={() =>
+            onDelete(selectedRow?.id_operacao_patio, selectedRow)
+          }
           row={selectedRow?.entrada_veiculo.placa_dianteira}
         />
       )}
@@ -299,7 +316,10 @@ const Triagens: React.FC = () => {
       )}
       {showTicket && (
         <div className="hidden">
-          <Ticket data={selectedRow} onClose={() => setShowTicket(!showTicket)} />
+          <Ticket
+            data={selectedRow}
+            onClose={() => setShowTicket(!showTicket)}
+          />
         </div>
       )}
 

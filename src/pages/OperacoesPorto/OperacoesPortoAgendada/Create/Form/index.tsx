@@ -2,11 +2,14 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useFormik } from "formik";
 import React, { useCallback, useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
 import { Label } from "reactstrap";
 import InputCustom from "../../../../../components/InputCustom";
 import SelectCustom from "../../../../../components/SelectCustom";
 import Loading from "../../../../../core/common/Loading";
+import { validateCPF } from "../../../../../helpers/format";
 import api from "../../../../../services/api";
+import { FrontendNotification } from "../../../../../shared/Notification";
 import { ITerminal } from "../../../../Cadastro/Terminal/Create/types/types";
 import {
   CargaType,
@@ -50,7 +53,11 @@ const Form: React.FC<Props> = (props: Props) => {
   });
 
   const handleSubmit = useCallback(
-    async (values: FormValues, row?: IOperacoesPortoAgendada, listConteiners?: any) => {
+    async (
+      values: FormValues,
+      row?: IOperacoesPortoAgendada,
+      listConteiners?: any
+    ) => {
       try {
         setLoading(true);
 
@@ -72,37 +79,77 @@ const Form: React.FC<Props> = (props: Props) => {
 
         getIndentificadorConteiner += "}";
 
-        const body = {
-          id_operacao_porto_agendada: row?.id_operacao_porto_agendada,
-          data_agendamento_terminal: format(new Date(values.data_agendamento_terminal), 'yyyy-MM-dd HH:mm:ss', {
-            locale: ptBR
-          }),
-          cpf_motorista: String(values.cpf_motorista).replaceAll('.', '').replace('-', ''),
-          placa_dianteira_veiculo: values.placa_dianteira_veiculo.replace('-', ''),
-          placa_traseira_veiculo: values.placa_traseira_veiculo.length > 0 ? values.placa_traseira_veiculo.replace('-', '') : null,
-          tolerancia_inicio_agendamento: values.tolerancia_inicial,
-          tolerancia_fim_agendamento: values.tolerancia_final,
-          id_terminal: values.id_terminal,
-          tipo_carga: Number(values.tipo_carga),
-          tipo_operacao: Number(values.tipo_operacao),
-          identificadores_conteineres: getIndentificadorConteiner.length > 2 ? getIndentificadorConteiner : null,
-          ativo: true,
-          id_usuario_historico: userId,
-          origem: 1,
-          status: 1,
-        };
+        const conteiners = getIndentificadorConteiner.slice(0, -2) + "}";
 
-        if(props.isEdit) {
-          await api.post("/editar/operacaoPortoAgendada", body);
+        console.log(conteiners);
+
+        if (validateCPF(values.cpf_motorista)) {
+          const body = {
+            id_operacao_porto_agendada: row?.id_operacao_porto_agendada,
+            data_agendamento_terminal: format(
+              new Date(values.data_agendamento_terminal),
+              "yyyy-MM-dd HH:mm:ss",
+              {
+                locale: ptBR,
+              }
+            ),
+            cpf_motorista: String(values.cpf_motorista)
+              .replaceAll(".", "")
+              .replace("-", ""),
+            placa_dianteira_veiculo: values.placa_dianteira_veiculo.replace(
+              "-",
+              ""
+            ),
+            placa_traseira_veiculo:
+              values.placa_traseira_veiculo.length > 0
+                ? values.placa_traseira_veiculo.replace("-", "")
+                : null,
+            tolerancia_inicio_agendamento: values.tolerancia_inicial,
+            tolerancia_fim_agendamento: values.tolerancia_final,
+            id_terminal: values.id_terminal,
+            tipo_carga: Number(values.tipo_carga),
+            tipo_operacao: Number(values.tipo_operacao),
+            identificadores_conteineres:
+              getIndentificadorConteiner.length > 2
+                ? conteiners.replaceAll("-", "")
+                : null,
+            ativo: true,
+            id_usuario_historico: userId,
+            origem: 1,
+            status: 1,
+          };
+
+          if (props.isEdit) {
+            const response = await api.post(
+              "/editar/operacaoPortoAgendada",
+              body
+            );
+
+            if (response.status === 200) {
+              props.onConfirm();
+            } else {
+              FrontendNotification("Erro ao salvar o agendamento!", "error");
+            }
+          } else {
+            const response = await api.post(
+              "/cadastrar/operacaoPortoAgendada",
+              body
+            );
+
+            if (response.status === 200) {
+              props.onConfirm();
+            } else {
+              FrontendNotification("Erro ao salvar o agendamento!", "error");
+            }
+          }
         } else {
-          await api.post("/cadastrar/operacaoPortoAgendada", body);
+          FrontendNotification("CPF inválido", "error");
         }
 
         setLoading(false);
-
-        props.onConfirm();
       } catch {
         setLoading(false);
+        FrontendNotification("Erro ao salvar o agendamento!", "error");
       }
     },
     []
@@ -164,28 +211,44 @@ const Form: React.FC<Props> = (props: Props) => {
     const data = row;
 
     if (data) {
-      formik.setFieldValue("data_agendamento_terminal", data.data_agendamento_terminal);
-      formik.setFieldValue("placa_dianteira_veiculo", data.placa_dianteira_veiculo);
-      formik.setFieldValue("placa_traseira_veiculo", data.placa_traseira_veiculo);
-      formik.setFieldValue("tolerancia_inicial", data.tolerancia_inicio_agendamento);
+      formik.setFieldValue(
+        "data_agendamento_terminal",
+        data.data_agendamento_terminal
+      );
+      formik.setFieldValue(
+        "placa_dianteira_veiculo",
+        data.placa_dianteira_veiculo
+      );
+      formik.setFieldValue(
+        "placa_traseira_veiculo",
+        data.placa_traseira_veiculo
+      );
+      formik.setFieldValue(
+        "tolerancia_inicial",
+        data.tolerancia_inicio_agendamento
+      );
       formik.setFieldValue("tolerancia_final", data.tolerancia_fim_agendamento);
       formik.setFieldValue("id_terminal", data.id_terminal);
       formik.setFieldValue("tipo_carga", data.tipo_carga);
       formik.setFieldValue("cpf_motorista", data.cpf_motorista);
       formik.setFieldValue("cnpj_transportadora", data.cnpj_transportadora);
 
-      if(data.identificadores_conteineres !== null && data.identificadores_conteineres.length > 0) {
-        const getConteineres = data.identificadores_conteineres.replace('{', '').replace('}', '');
+      if (
+        data.identificadores_conteineres !== null &&
+        data.identificadores_conteineres.length > 0
+      ) {
+        const getConteineres = data.identificadores_conteineres
+          .replace("{", "")
+          .replace("}", "");
 
-        const mappingConteiners = getConteineres.split(',');
+        const mappingConteiners = getConteineres.split(",");
 
         setConteiners({
-          conteiners1: mappingConteiners[0] ? mappingConteiners[0] : '',
-          conteiners2: mappingConteiners[1] ? mappingConteiners[1] : '',
-          conteiners3: mappingConteiners[2] ? mappingConteiners[2] : '',
-          conteiners4: mappingConteiners[3] ? mappingConteiners[3] : '',
+          conteiners1: mappingConteiners[0] ? mappingConteiners[0] : "",
+          conteiners2: mappingConteiners[1] ? mappingConteiners[1] : "",
+          conteiners3: mappingConteiners[2] ? mappingConteiners[2] : "",
+          conteiners4: mappingConteiners[3] ? mappingConteiners[3] : "",
         });
-
       }
 
       // formik.setFieldValue("placa_dianteira", data.placa_dianteira);
@@ -216,7 +279,9 @@ const Form: React.FC<Props> = (props: Props) => {
   const formik = useFormik({
     initialValues,
     validationSchema: formValidator,
-    onSubmit: (values: FormValues) => handleSubmit(values, props.selectedRow, conteiners),
+    onSubmit: (values: FormValues) => {
+      handleSubmit(values, props.selectedRow, conteiners);
+    },
   });
 
   useEffect(() => {
@@ -234,7 +299,8 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
-      <div className="overflow-y-scroll max-h-[550px] p-5">
+      <ToastContainer />
+      <div className="overflow-y-scroll max-h-[calc(70vh)] p-5">
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div>
             <InputCustom
@@ -275,8 +341,6 @@ const Form: React.FC<Props> = (props: Props) => {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3 mb-4">
-          
-
           <div>
             <SelectCustom
               data={terminais}
@@ -318,10 +382,11 @@ const Form: React.FC<Props> = (props: Props) => {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3 mb-2">
-          
           <div>
             <InputCustom
               title="CPF Motorista"
+              typeInput="mask"
+              mask="999.999.999-99"
               placeholder=""
               onChange={formik.handleChange("cpf_motorista")}
               value={formik.values.cpf_motorista}
@@ -359,7 +424,6 @@ const Form: React.FC<Props> = (props: Props) => {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 mb-2">
-          
           <div>
             <Label
               style={{
@@ -381,10 +445,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners1: e.target.value,
+                      conteiners1: value,
                     })
                   }
                   value={conteiners.conteiners1}
@@ -398,10 +462,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners2: e.target.value,
+                      conteiners2: value,
                     })
                   }
                   value={conteiners.conteiners2}
@@ -415,10 +479,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners3: e.target.value,
+                      conteiners3: value,
                     })
                   }
                   value={conteiners.conteiners3}
@@ -432,10 +496,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners4: e.target.value,
+                      conteiners4: value,
                     })
                   }
                   value={conteiners.conteiners4}
@@ -461,7 +525,7 @@ const Form: React.FC<Props> = (props: Props) => {
           </div>
         </div>
       </div>
-      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000000] font-bold rounded-full mr-2"

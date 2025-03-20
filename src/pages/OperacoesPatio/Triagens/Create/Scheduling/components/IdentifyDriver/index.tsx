@@ -12,6 +12,7 @@ import {
 import { useStatus } from "../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../services/api";
 import { FrontendNotification } from "../../../../../../../shared/Notification";
+import Create from "../../../../../../Cadastro/Motoristas/Create";
 import { IMotorista } from "../../../../../../Cadastro/Motoristas/Create/types/types";
 import formValidator from "./validators/formValidator";
 
@@ -24,8 +25,11 @@ interface FormValues {
 
 const IdentifyDriver: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [listDriver, setListDriver] = useState([]);
+  const [, setListDriver] = useState([]);
   const [detailDriver, setDetailDriver] = useState<IMotorista[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchDriver, setSearchDriver] = useState();
+  const [showCreateDriver, setShowCreateDriver]  = useState<boolean>(false);
 
   const selectRef: any = useRef(null);
 
@@ -42,6 +46,7 @@ const IdentifyDriver: React.FC = () => {
   };
 
   const { setStatus } = useStatus();
+
 
   const handleSubmit = useCallback(async (values: FormValues) => {
     try {
@@ -77,7 +82,7 @@ const IdentifyDriver: React.FC = () => {
       );
 
       if (response.status === 200) {
-        sessionStorage.setItem("id_operacao_patio", response.data);
+        sessionStorage.setItem("id_operacao_patio", response.data.id_operacao_patio);
         setStatus(2);
       } else {
         FrontendNotification("Erro ao identificar o motorista", "error");
@@ -120,7 +125,12 @@ const IdentifyDriver: React.FC = () => {
           ) {
             formik.setFieldValue("id_motorista", response.data.id_motorista);
           }
+        } else {
+
+          FrontendNotification('Não foi possivel encontrar o motorista com o CPF informado!', 'warning');
         }
+      } else {
+        FrontendNotification('Não foi possivel encontrar o motorista com o CPF informado!', 'warning');
       }
 
       setLoading(false);
@@ -170,6 +180,9 @@ const IdentifyDriver: React.FC = () => {
         });
 
         setListDriver(mappingResponse);
+        setLoading(false);
+
+        return mappingResponse;
       }
       setLoading(false);
     } catch {
@@ -193,12 +206,30 @@ const IdentifyDriver: React.FC = () => {
   });
 
   useEffect(() => {
+    if (searchQuery.length >= 3) {
+      onSearchDriver(searchQuery);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
     onLoadFormValues();
   }, [onLoadFormValues]);
 
   return (
     <>
       <ToastContainer />
+      {showCreateDriver && (
+        <Create
+          isView={false}
+          isEdit={false}
+          onClear={() => {
+            setShowCreateDriver(!showCreateDriver);
+          }}
+          onConfirm={() => {
+            setShowCreateDriver(!showCreateDriver);
+          }}
+        />
+      )}
       <motion.div
         initial="initial"
         animate="animate"
@@ -207,7 +238,9 @@ const IdentifyDriver: React.FC = () => {
         className="page"
       >
         <Loading loading={loading} />
-        <div className="overflow-y-scroll max-h-[650px] p-5">
+        <div className="overflow-y-scroll max-h-[calc(90vh)] p-5">
+          <div className="flex mb-3 mt-3">
+
           <div className="flex flex-col mb-3 mt-3">
             <span className="text-sm text-[#000] font-bold">
               Identificação de motorista
@@ -216,25 +249,34 @@ const IdentifyDriver: React.FC = () => {
               Procura do cadastro de motorista no sistema
             </span>
           </div>
+          <button
+              type="button"
+              className="w-28 h-9 ml-4 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+              onClick={() => setShowCreateDriver(!showCreateDriver)}
+              >
+              + Adicionar
+            </button>
+              </div>
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="flex items-center w-full">
               <div className="w-full">
                 <SelectCustom
+                  async
                   selectRef={selectRef}
-                  data={listDriver}
+                  data={onSearchDriver}
                   onChange={(selectedOption: any) => {
+                    setSearchDriver(selectedOption);
                     formik.setFieldValue("id_motorista", selectedOption.value);
                     formik.setFieldValue("cpf_motorista", selectedOption.cpf);
                   }}
                   onInputChange={(value) => {
-                    if (value.length >= 3) {
-                      onSearchDriver(value);
-                    }
+                    setSearchQuery(value);
                   }}
                   title="CPF do Motorista"
                   touched={formik.touched.id_motorista}
                   error={formik.errors.id_motorista}
                   value={formik.values.cpf_motorista}
+                  defaultValue={searchDriver}
                 />
               </div>
               <button
@@ -351,7 +393,15 @@ const IdentifyDriver: React.FC = () => {
           )}
         </div>
       </motion.div>
-      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
+          onClick={() => setStatus(0)}
+          style={{ border: '1px solid #DBDEDF' }}
+        >
+          Voltar
+        </button>
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"

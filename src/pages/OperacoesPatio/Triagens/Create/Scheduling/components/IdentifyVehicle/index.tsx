@@ -65,6 +65,36 @@ const IdentifyVehicle: React.FC = () => {
 
   const { setStatus } = useStatus();
 
+  const onHandleBack = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      let currentRow: any = sessionStorage.getItem("@triagem");
+
+      if (currentRow) {
+        currentRow = JSON.parse(currentRow);
+      }
+
+      const id_operacao_patio =
+        sessionStorage.getItem("id_operacao_patio") ||
+        currentRow.id_operacao_patio;
+
+      const body = {
+        id_operacao_patio
+      };
+
+      const response = await api.post('/operacaopatio/deleteIdMotorista', body);
+
+      if(response.status === 200) {
+        setStatus(1);
+      }
+
+      setLoading(false);
+    }catch{
+      setLoading(false);
+    }
+  }, []);
+
   const onPaymentInvoiced = useCallback(async () => {
     try {
       setLoading(true);
@@ -287,12 +317,12 @@ const IdentifyVehicle: React.FC = () => {
     }
   }, []);
 
-  const onSearchDetailVehicle = useCallback(async (values: FormValues) => {
+  const onSearchDetailVehicle = useCallback(async (values: FormValues, licensePlate?: string) => {
     try {
       setLoading(true);
 
       const body = {
-        license_plate: values.license_plate,
+        license_plate: values.license_plate.length > 0 ? values.license_plate : licensePlate,
         tipo_placa: values.tipo_placa,
       };
 
@@ -302,16 +332,21 @@ const IdentifyVehicle: React.FC = () => {
       );
 
       if (response.status === 200) {
-        let data = [];
+        if(response.data.id_veiculo) {
 
-        data.push(response.data);
+          let data = [];
+          
+          data.push(response.data);
+          
+          setDetailVehicle(data);
 
-        setDetailVehicle(data);
-      } else {
-        FrontendNotification(
-          "Não foi possivel encontrar o veículo com a placa informada",
-          "error"
-        );
+          if(licensePlate) {
+            formik.setFieldValue(
+              "id_veiculo_parte_nao_motorizada",
+              String(response.data.id_veiculo)
+            );
+          }
+        }
       }
 
       setLoading(false);
@@ -319,18 +354,19 @@ const IdentifyVehicle: React.FC = () => {
       setLoading(false);
       FrontendNotification(
         "Não foi possivel encontrar o veículo com a placa informada",
-        "error"
+        "warning"
       );
     }
   }, []);
 
   const onSearchDetailVehicleMotorized = useCallback(
-    async (values: FormValues) => {
+    async (values: FormValues, licensePlate?: string) => {
       try {
         setLoading(true);
 
+
         const body = {
-          license_plate: values.license_plate_motorized,
+          license_plate: values.license_plate_motorized.length > 0 ? values.license_plate_motorized : licensePlate,
           tipo_placa: values.tipo_placa,
         };
 
@@ -340,16 +376,25 @@ const IdentifyVehicle: React.FC = () => {
         );
 
         if (response.status === 200) {
-          let data = [];
 
-          data.push(response.data);
+          if(response.data.id_veiculo) {
 
-          setDetailVehicleMotorized(data);
-        } else {
-          FrontendNotification(
-            "Não foi possivel encontrar o veículo com a placa informada",
-            "warning"
-          );
+            let data = [];
+            
+            data.push(response.data);
+            
+            setDetailVehicleMotorized(data);
+            if(response.data.tipo_veiculo !== TipoVeiculo.TRUCK) {
+              formik.setFieldValue('tipo_veiculo', "2");
+            }
+
+            if(licensePlate) {
+              formik.setFieldValue(
+                "id_veiculo_parte_motorizada",
+                String(response.data.id_veiculo)
+              );
+            }
+          }
         }
 
         setLoading(false);
@@ -406,6 +451,7 @@ const IdentifyVehicle: React.FC = () => {
       return {
         value: `${index + 1}`,
         label: value,
+        isDisabled: index === 0
       };
     });
 
@@ -464,6 +510,35 @@ const IdentifyVehicle: React.FC = () => {
       : false;
   };
 
+  const onLoadFormValues = useCallback(() => {
+    let getDataTriagem: any = sessionStorage.getItem("@triagem");
+    if (getDataTriagem) {
+      getDataTriagem = JSON.parse(getDataTriagem);
+    }
+
+    if (getDataTriagem && getDataTriagem.entrada_veiculos !== null) {
+      if(getDataTriagem.entrada_veiculos.placa_dianteira !== null && getDataTriagem.entrada_veiculos.placa_dianteira.length > 0) {
+
+        formik.setFieldValue(
+          "license_plate_motorized",
+          getDataTriagem.entrada_veiculos.placa_dianteira
+        );
+       
+        onSearchDetailVehicleMotorized(formik.values, getDataTriagem.entrada_veiculos.placa_dianteira);
+      }
+
+      if(getDataTriagem.entrada_veiculos.placa_traseira !== null && getDataTriagem.entrada_veiculos.placa_traseira.length > 0) {
+
+        formik.setFieldValue(
+          "license_plate",
+          getDataTriagem.entrada_veiculos.placa_traseira
+        );
+        onSearchDetailVehicle(formik.values, getDataTriagem.entrada_veiculos.placa_traseira);
+      }
+
+    }
+  }, []);
+
   const initialValues: FormValues = {
     id_veiculo_parte_motorizada: "",
     id_veiculo_parte_nao_motorizada: "",
@@ -493,6 +568,10 @@ const IdentifyVehicle: React.FC = () => {
     getVehicleTypes();
   }, [getVehicleTypes]);
 
+  useEffect(() => {
+    onLoadFormValues();
+  }, [onLoadFormValues])
+
   return (
     <>
       <Loading loading={loading} />
@@ -500,11 +579,8 @@ const IdentifyVehicle: React.FC = () => {
         <CreateVeiculos
           isView={false}
           isEdit={false}
-          // selectedRow={null}
           onClear={() => {
             setShowCreateVehicle(!showCreateVehicle);
-            // closeModal();
-            // setIsEdit(false);
           }}
           onConfirm={() => {
             setShowCreateVehicle(!showCreateVehicle);
@@ -519,7 +595,7 @@ const IdentifyVehicle: React.FC = () => {
         className="page"
       >
         <ToastContainer />
-        <div className="overflow-y-scroll max-h-[650px] p-5">
+        <div className="overflow-y-scroll max-h-[calc(90vh)] p-5">
           <div className="flex mb-3 mt-3">
             <div className="flex flex-col">
               <span className="text-sm text-[#000] font-bold">
@@ -531,10 +607,10 @@ const IdentifyVehicle: React.FC = () => {
             </div>
             <button
               type="button"
-              className="w-24 h-9 ml-4 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+              className="w-28 h-9 ml-4 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
               onClick={() => setShowCreateVehicle(!showCreateVehicle)}
             >
-              + Veículos
+              + Adicionar
             </button>
           </div>
           <div className="w-full h-full flex">
@@ -814,7 +890,7 @@ const IdentifyVehicle: React.FC = () => {
                   </div>
                   {rowData &&
                     rowData.operacao_porto_agendada &&
-                    rowData.operacao_porto_agendada.tipo_carga === 3 && (
+                    rowData.operacao_porto_agendada.tipo_carga === 3 && rowData.operacao_porto_agendada.tipo_operacao === 2 && (
                       <div className="flex flex-col w-full mt-5">
                         <Checkbox
                           title="Devolução de Container Cheio"
@@ -840,7 +916,15 @@ const IdentifyVehicle: React.FC = () => {
           </div>
         </div>
       </motion.div>
-      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
+          onClick={() => onHandleBack()}
+          style={{ border: '1px solid #DBDEDF' }}
+        >
+          Voltar
+        </button>
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"

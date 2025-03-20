@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import CalendarIcon from "../../../../../../../assets/images/calendarIcon.svg";
 import CalendarIconActive from "../../../../../../../assets/images/calendarIconActive.svg";
@@ -29,9 +29,13 @@ interface FormValues {
 }
 
 const Associate: React.FC = () => {
-  const [entradaVeiculo, setEntradaVeiculo] = useState([]);
+  const [, setEntradaVeiculo] = useState([]);
   const [operacaoPortoAgendada, setOperacaoPortoAgendada] = useState([]);
   const [operacaoPortoCarrossel, setOperacaoPortoCarrossel] = useState([]);
+  const [serachQueryEntrada, setSearchQueryEntrada] = useState<string>("");
+  const [isAssociate, setIsAssociate] = useState(false);
+
+  const selectRef: any = useRef(null);
 
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
@@ -56,7 +60,7 @@ const Associate: React.FC = () => {
 
   const { setStatus } = useStatus();
 
-  const onSubmit = useCallback(async (values: FormValues) => {
+  const onSubmit = useCallback(async (values: FormValues, isAssociate: boolean) => {
     try {
       setLoading(true);
 
@@ -83,21 +87,26 @@ const Associate: React.FC = () => {
           response.data.id_operacao_patio
         );
 
-        setStatus(1);
+        sessionStorage.setItem('@triagem', JSON.stringify(response.data));
+
+        if(isAssociate) { 
+          window.location.reload();
+        } else {
+
+          setStatus(1);
+        }
       } else {
         setLoading(false);
-        FrontendNotification('Erro ao associar a entrada a triagem', "error");
+        FrontendNotification("Erro ao associar a entrada a triagem", "error");
       }
       setLoading(false);
-      
-      
     } catch {
       setLoading(false);
-      FrontendNotification('Erro ao associar a entrada a triagem', "error");
+      FrontendNotification("Erro ao associar a entrada a triagem", "error");
     }
   }, []);
 
-  const getOperacoesPatioEntradaVeiculo = useCallback(async () => {
+  const getOperacoesPatioEntradaVeiculo = useCallback(async (value: string) => {
     try {
       setLoading(true);
 
@@ -106,6 +115,7 @@ const Associate: React.FC = () => {
         order_direction: "desc",
         qtd_por_pagina: 100,
         triagem: "sim",
+        placa_dianteira: value.toUpperCase()
       };
 
       const response = await api.post("/listar/entradaSaidaVeiculos", body);
@@ -128,6 +138,8 @@ const Associate: React.FC = () => {
       setEntradaVeiculo(mappingResponse);
 
       setLoading(false);
+
+      return mappingResponse;
     } catch {
       setLoading(false);
     }
@@ -180,14 +192,14 @@ const Associate: React.FC = () => {
         (item: IOperacoesPortoAgendada) => {
           return {
             label: `${formatDateTimeBR(item.data_agendamento_terminal)} | ${
-              item.terminal !== null ? item.terminal.nome_fantasia : ""
+              item.terminal !== null ? item.terminal.razao_social : ""
             } | ${item.placa_dianteira_veiculo} | ${
               item.placa_traseira_veiculo !== null
                 ? item.placa_traseira_veiculo
                 : ""
             } | ${
               item.cpf_motorista !== null ? maskedCPF(item.cpf_motorista) : ""
-            }`,
+            } | ${item.identificadores_conteineres !== null ? item.identificadores_conteineres : ""}`,
             value: item.id_operacao_porto_agendada,
           };
         }
@@ -212,12 +224,18 @@ const Associate: React.FC = () => {
     initialValues,
     validationSchema: formValidator,
     onSubmit: (values: FormValues) => {
-      onSubmit(values);
+      onSubmit(values, isAssociate);
     },
   });
 
   useEffect(() => {
-    getOperacoesPatioEntradaVeiculo();
+    console.log(serachQueryEntrada.length);
+    if (serachQueryEntrada.length > 3) {
+      getOperacoesPatioEntradaVeiculo(serachQueryEntrada);
+    }
+  }, [serachQueryEntrada]);
+
+  useEffect(() => {
     getOperacaoPortoAgendada();
     getOperacoesPortoCarrossel();
   }, []);
@@ -233,7 +251,7 @@ const Associate: React.FC = () => {
         variants={pageVariants}
         className="page"
       >
-        <div className="overflow-y-scroll max-h-[450px] p-5">
+        <div className="overflow-y-scroll max-h-[calc(80vh - 50px)] p-5">
           <div className="mb-5">
             <span className="text-sm font-bold">
               Entrada do Veículo no Pátio
@@ -242,12 +260,17 @@ const Associate: React.FC = () => {
           <div className="grid grid-cols-3 gap-3 mb-4 mt-4">
             <div>
               <SelectCustom
-                data={entradaVeiculo}
+                async
+                selectRef={selectRef}
+                data={getOperacoesPatioEntradaVeiculo}
                 onChange={(selectedOption: any) => {
                   formik.setFieldValue(
                     "id_operacao_entrada_veiculo",
                     selectedOption.value
                   );
+                }}
+                onInputChange={(value) => {
+                  setSearchQueryEntrada(value);
                 }}
                 title="Entrada Associada à Triagem"
                 touched={formik.touched.id_operacao_entrada_veiculo}
@@ -332,7 +355,18 @@ const Associate: React.FC = () => {
         </div>
       </motion.div>
 
-      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <button
+          type="button"
+          className="w-36 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
+          onClick={() => {
+            setIsAssociate(true);
+            formik.handleSubmit();
+          }}
+          style={{ border: '1px solid #DBDEDF' }}
+        >
+          Entrou no Pátio
+        </button>
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
