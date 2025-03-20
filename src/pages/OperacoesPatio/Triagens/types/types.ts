@@ -17,4 +17,5 @@ export interface ITriagens {
     tipo_veiculo: number;
   },
   pagamento?: any[];
+  status: number;
 }

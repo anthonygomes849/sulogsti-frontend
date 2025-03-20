@@ -65,6 +65,36 @@ const IdentifyVehicle: React.FC = () => {
 
   const { setStatus } = useStatus();
 
+  const onHandleBack = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      let currentRow: any = sessionStorage.getItem("@triagem");
+
+      if (currentRow) {
+        currentRow = JSON.parse(currentRow);
+      }
+
+      const id_operacao_patio =
+        sessionStorage.getItem("id_operacao_patio") ||
+        currentRow.id_operacao_patio;
+
+      const body = {
+        id_operacao_patio
+      };
+
+      const response = await api.post('/operacaopatio/deleteIdMotorista', body);
+
+      if(response.status === 200) {
+        setStatus(1);
+      }
+
+      setLoading(false);
+    }catch{
+      setLoading(false);
+    }
+  }, []);
+
   const onPaymentInvoiced = useCallback(async () => {
     try {
       setLoading(true);
@@ -887,6 +917,14 @@ const IdentifyVehicle: React.FC = () => {
         </div>
       </motion.div>
       <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
+          onClick={() => onHandleBack()}
+          style={{ border: '1px solid #DBDEDF' }}
+        >
+          Voltar
+        </button>
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"

@@ -47,6 +47,7 @@ const IdentifyDriver: React.FC = () => {
 
   const { setStatus } = useStatus();
 
+
   const handleSubmit = useCallback(async (values: FormValues) => {
     try {
       setLoading(true);
@@ -393,6 +394,14 @@ const IdentifyDriver: React.FC = () => {
         </div>
       </motion.div>
       <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
+          onClick={() => setStatus(0)}
+          style={{ border: '1px solid #DBDEDF' }}
+        >
+          Voltar
+        </button>
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"

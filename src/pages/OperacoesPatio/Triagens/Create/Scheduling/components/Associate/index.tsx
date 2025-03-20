@@ -33,6 +33,7 @@ const Associate: React.FC = () => {
   const [operacaoPortoAgendada, setOperacaoPortoAgendada] = useState([]);
   const [operacaoPortoCarrossel, setOperacaoPortoCarrossel] = useState([]);
   const [serachQueryEntrada, setSearchQueryEntrada] = useState<string>("");
+  const [isAssociate, setIsAssociate] = useState(false);
 
   const selectRef: any = useRef(null);
 
@@ -59,7 +60,7 @@ const Associate: React.FC = () => {
 
   const { setStatus } = useStatus();
 
-  const onSubmit = useCallback(async (values: FormValues) => {
+  const onSubmit = useCallback(async (values: FormValues, isAssociate: boolean) => {
     try {
       setLoading(true);
 
@@ -88,7 +89,12 @@ const Associate: React.FC = () => {
 
         sessionStorage.setItem('@triagem', JSON.stringify(response.data));
 
-        setStatus(1);
+        if(isAssociate) { 
+          window.location.reload();
+        } else {
+
+          setStatus(1);
+        }
       } else {
         setLoading(false);
         FrontendNotification("Erro ao associar a entrada a triagem", "error");
@@ -218,7 +224,7 @@ const Associate: React.FC = () => {
     initialValues,
     validationSchema: formValidator,
     onSubmit: (values: FormValues) => {
-      onSubmit(values);
+      onSubmit(values, isAssociate);
     },
   });
 
@@ -350,6 +356,17 @@ const Associate: React.FC = () => {
       </motion.div>
 
       <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <button
+          type="button"
+          className="w-36 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
+          onClick={() => {
+            setIsAssociate(true);
+            formik.handleSubmit();
+          }}
+          style={{ border: '1px solid #DBDEDF' }}
+        >
+          Entrou no Pátio
+        </button>
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"

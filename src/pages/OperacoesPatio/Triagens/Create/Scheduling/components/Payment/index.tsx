@@ -17,6 +17,7 @@ import {
   renderPaymentTypes,
   renderVehicleTypes,
 } from "../../../../../../../helpers/format";
+import { useStatus } from "../../../../../../../hooks/StatusContext";
 import { FrontendNotification } from "../../../../../../../shared/Notification";
 import Ticket from "./Ticket";
 import formValidator from "./validators/formValidator";
@@ -56,6 +57,38 @@ const Payment: React.FC<Props> = (props: Props) => {
     animate: { opacity: 1, x: 0, transition: { duration: 0.8 } },
     exit: { opacity: 0, x: 100, transition: { duration: 0.5 } },
   };
+
+  const { setStatus } = useStatus();
+
+  const onHandleBack = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      let currentRow: any = sessionStorage.getItem("@triagem");
+
+      if (currentRow) {
+        currentRow = JSON.parse(currentRow);
+      }
+
+      const id_operacao_patio =
+        sessionStorage.getItem("id_operacao_patio") ||
+        currentRow.id_operacao_patio;
+
+      const body = {
+        id_operacao_patio
+      };
+
+      const response = await api.post('/operacaopatio/deleteIdVeiculoAutorizacao', body);
+
+      if(response.status === 200) {
+        setStatus(2);
+      }
+
+      setLoading(false);
+    }catch{
+      setLoading(false);
+    }
+  }, [])
 
   const handleSubmit = useCallback(
     async (values: FormValues, dataTicket?: IPaymentTicket) => {
@@ -659,7 +692,15 @@ const Payment: React.FC<Props> = (props: Props) => {
       <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl mt-4">
         <button
           type="button"
-          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
+          onClick={() => onHandleBack()}
+          style={{ border: '1px solid #DBDEDF' }}
+        >
+          Voltar
+        </button>
+        <button
+          type="button"
+          className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2 shadow-md"
           onClick={() => formik.handleSubmit()}
         >
           Finalizar
