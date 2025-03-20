@@ -88,7 +88,7 @@ const Payment: React.FC<Props> = (props: Props) => {
     }catch{
       setLoading(false);
     }
-  }, [])
+  }, []);
 
   const handleSubmit = useCallback(
     async (values: FormValues, dataTicket?: IPaymentTicket) => {
