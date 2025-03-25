@@ -5,6 +5,7 @@ import IdentifyDriver from "./components/IdentifyDriver";
 import IdentifyVehicle from "./components/IdentifyVehicle";
 import Invoiced from "./components/Invocied";
 import Payment from "./components/Payment";
+import ListPayment from "./components/Payment/components/ListPayment";
 
 // import { Container } from './styles';
 interface Props {
@@ -30,6 +31,8 @@ const Scheduling: React.FC<Props> = (props: Props) => {
         return <IdentifyVehicle />;
       case 3:
         return <Payment onClose={props.onClose} />;
+      case 3.5:
+        return <ListPayment />
       case 4:
         return <Invoiced onClose={props.onClose} />
       default:
