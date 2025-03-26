@@ -158,7 +158,7 @@ const ListPayment: React.FC = () => {
 
       console.log("Passou", body);
 
-      const response = await api.post("/operacaopatio/estorno", body);
+      await api.post("/operacaopatio/estorno", body);
 
       setLoading(false);
 

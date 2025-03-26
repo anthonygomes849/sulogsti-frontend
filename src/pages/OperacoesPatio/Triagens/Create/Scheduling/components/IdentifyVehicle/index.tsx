@@ -413,13 +413,22 @@ const IdentifyVehicle: React.FC = () => {
     try {
       setLoading(true);
 
+      let currentRow: any = sessionStorage.getItem("@triagem");
+
+      if (currentRow) {
+        currentRow = JSON.parse(currentRow);
+      }
+
       const body = {
         qtd_por_pagina: 100,
         order_by: "data_historico",
         order_direction: "desc",
+        id_operacao_porto_carrossel: currentRow?.operacao_porto_carrossel?.id_operacao_porto_carrossel
       };
 
-      const response = await api.post("/listar/transportadoras", body);
+      const url = currentRow && currentRow.operacao_porto_carrossel !== null ? '/listar/operacaoPortoCarrosselTransportadoras' : '/listar/transportadoras'
+
+      const response = await api.post(url, body);
 
       if (response.status === 200) {
         let mappingResponse = response.data.data.map((item: any) => {
@@ -445,6 +454,7 @@ const IdentifyVehicle: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
 
   const getVehicleTypes = useCallback(() => {
     const data = Object.values(TipoVeiculo).map((value: any, index: number) => {
