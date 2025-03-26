@@ -323,7 +323,7 @@ const IdentifyVehicle: React.FC = () => {
 
       const body = {
         license_plate: values.license_plate.length > 0 ? values.license_plate : licensePlate,
-        tipo_placa: values.tipo_placa,
+        tipo_placa: 2,
       };
 
       const response = await api.post(

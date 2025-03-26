@@ -293,6 +293,8 @@ const Triagens: React.FC = () => {
 
       {isRemove && (
         <ModalDelete
+          title={selectedRow && selectedRow.status > 0 ? "Deseja cancelar a triagem?" : ""}
+          message={selectedRow && selectedRow.status > 0 ? "Por favor, confirme que você deseja cancelar o seguinte registro:" : ""}
           onCancel={() => setIsRemove(!isRemove)}
           onConfirm={() =>
             onDelete(selectedRow?.id_operacao_patio, selectedRow)

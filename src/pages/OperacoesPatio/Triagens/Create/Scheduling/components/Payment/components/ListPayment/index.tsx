@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./styles.css";
 // import { Container } from './styles';
 import { ValueFormatterParams } from "ag-grid-community";
@@ -20,6 +20,7 @@ import {
 import { STATUS_PAGAMENTO } from "../../../../../../../../../helpers/status";
 import { useStatus } from "../../../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../../../services/api";
+import { ITriagens } from "../../../../../../types/types";
 import Info from "./components/Info";
 
 const ListPayment: React.FC = () => {
@@ -30,7 +31,8 @@ const ListPayment: React.FC = () => {
   const [isRemove, setIsRemove] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [update, setUpdate] = useState<boolean>(false);
-  const [gridApi, setGridApi] = useState<any>();
+  const [gridApi, setGridApi] = useState<any>(null);
+  const [currentRow, setCurrentRow] = useState<ITriagens>();
 
   const defaultColumns = [
     {
@@ -138,6 +140,39 @@ const ListPayment: React.FC = () => {
 
       console.log(cols);
 
+      setGridApi(params.api);
+    } catch {}
+  }, []);
+
+  const onDelete = useCallback(async (rowId?: number) => {
+    try {
+      setLoading(true);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("userId");
+
+      const body = {
+        id_operacao_patio_pagamento: rowId,
+        id_usuario_historico: userId,
+      };
+
+      console.log("Passou", body);
+
+      const response = await api.post("/operacaopatio/estorno", body);
+
+      setLoading(false);
+
+      setIsRemove(false);
+
+      setUpdate(false);
+      setUpdate(true);
+    } catch {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (gridApi) {
       const dataSource = {
         getRows: async (params: any) => {
           try {
@@ -149,6 +184,8 @@ const ListPayment: React.FC = () => {
             if (currentRow) {
               currentRow = JSON.parse(currentRow);
             }
+
+            setCurrentRow(currentRow);
 
             const id_operacao_patio =
               sessionStorage.getItem("id_operacao_patio") ||
@@ -172,45 +209,9 @@ const ListPayment: React.FC = () => {
         },
       };
 
-      // params.api.setGridOption('datasource', dataSource)
-
-      params.api.sizeColumnsToFit();
-
-      params.api.setDatasource(dataSource);
-
-      setGridApi(params.api);
-    } catch {}
-  }, [update]);
-
-  const onDelete = useCallback(async (rowId?: number) => {
-    try {
-      setLoading(true);
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get("userId");
-
-        const body = {
-          id_operacao_patio_pagamento: rowId,
-          id_usuario_historico: userId
-        };
-
-        await api.post("/operacaopatio/estorno", body);
-
-        setLoading(false);
-
-        setIsRemove(false);
-
-        setUpdate(true);
-
-        setUpdate(false);
-
-        onGridReady({ api: gridApi });
-
-
-    } catch {
-      setLoading(false);
+      gridApi.setDatasource(dataSource);
     }
-  }, []);
+  }, [gridApi, update]);
 
   return (
     <div className="overflow-y-scroll w-auto max-h-[calc(80vh)] p-3">
@@ -218,10 +219,10 @@ const ListPayment: React.FC = () => {
 
       {isRemove && (
         <ModalDelete
+          title="Deseja estornar o pagamento?"
+          message="Por favor, confirme que você deseja estornar o seguinte registro:"
           onCancel={() => setIsRemove(!isRemove)}
-          onConfirm={() =>
-            onDelete(selectedRow?.id_operacao_patio_pagamento)
-          }
+          onConfirm={() => onDelete(selectedRow?.id_operacao_patio_pagamento)}
           row={selectedRow?.id_operacao_patio_pagamento}
         />
       )}
@@ -232,14 +233,16 @@ const ListPayment: React.FC = () => {
           onClose={() => setIsView(!isView)}
         />
       )}
-      <div className="w-full h-full flex justify-end">
-        <button
-          className="flex items-center justify-center h-10 w-36 bg-[#062D4E] text-[#FFFFFF] text-sm font-light border-none rounded-full"
-          onClick={() => setStatus(3)}
-        >
-          Adicionar <img src={PlusButtonIcon} alt="" className="ml-2" />
-        </button>
-      </div>
+      {currentRow && currentRow.status < 11 && (
+        <div className="w-full h-full flex justify-end">
+          <button
+            className="flex items-center justify-center h-10 w-36 bg-[#062D4E] text-[#FFFFFF] text-sm font-light border-none rounded-full"
+            onClick={() => setStatus(3)}
+          >
+            Adicionar <img src={PlusButtonIcon} alt="" className="ml-2" />
+          </button>
+        </div>
+      )}
       <div className="ag-theme-quartz h-96 mt-4">
         <AgGridReact
           ref={gridRef}
