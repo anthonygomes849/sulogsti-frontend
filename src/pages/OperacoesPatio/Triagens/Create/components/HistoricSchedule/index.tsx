@@ -13,8 +13,8 @@ interface Props {
 
 const HistoricSchedule: React.FC<Props> = (props: Props) => {
   return (
-    <div className="w-full p-3 flex items-center">
-      {props.data.map((item: ITimeline) => (
+    <div className="w-full min-h-12 p-3 flex items-center">
+      {props.status !== 3.5 && props.data.map((item: ITimeline) => (
         <div className="flex items-center w-auto h-full">
           <div className="flex w-max max-w-80 items-center">
             <div

@@ -6,13 +6,15 @@ import CloseModalIcon from "../../assets/images/closeIcon.svg";
 import { DialogFooter, DialogHeader } from "../ui/dialog";
 
 interface Props {
+  title?: string;
+  message?: string;
   isOpen?: boolean;
   onCancel?: any;
   onConfirm?: any;
   row?: string;
 }
 
-const ModalDelete: React.FC<Props> = ({ onConfirm, onCancel, row }: Props) => {
+const ModalDelete: React.FC<Props> = ({ title, message, onConfirm, onCancel, row }: Props) => {
   const BootstrapDialog = styled(Dialog)(() => ({
     "& .MuiPaper-root": {
       borderRadius: "10px",
@@ -55,7 +57,7 @@ const ModalDelete: React.FC<Props> = ({ onConfirm, onCancel, row }: Props) => {
           className="text-xl text-[#000] font-bold"
           id="customized-dialog-title"
         >
-          Deseja remover o registro?
+          {title && title.length > 0 ? title : 'Deseja remover o registro?'}
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -75,7 +77,7 @@ const ModalDelete: React.FC<Props> = ({ onConfirm, onCancel, row }: Props) => {
       <DialogContent>
         <>
           <div className="flex items-center justify-start p-5">
-            <span className="text-base font-light text-[#495055] w-[73%]">Por favor, confirme que você deseja remover o seguinte registro: <b className="text-base font-bold text-[#495055]">{row}</b></span>
+            <span className="text-base font-light text-[#495055] w-[73%]">{message && message.length > 0 ? message : 'Por favor, confirme que você deseja remover o seguinte registro:'} <b className="text-base font-bold text-[#495055]">{row}</b></span>
           </div>
           <div className="w-full h-[1px] bg-[#ccc]" />
         </>
@@ -90,10 +92,10 @@ const ModalDelete: React.FC<Props> = ({ onConfirm, onCancel, row }: Props) => {
             Cancelar
           </Button>
           <Button
-            className="w-20 h-8 rounded-full bg-[#0C4A85] text-sm text-[#fff] font-bold"
+            className="w-24 h-8 rounded-full bg-[#0C4A85] text-sm text-[#fff] font-bold"
             onClick={onConfirm}
           >
-            Remover
+            Confirmar
           </Button>
         </div>
       </DialogFooter>

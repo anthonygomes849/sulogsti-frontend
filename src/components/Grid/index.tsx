@@ -61,7 +61,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
                           id={"btnDelete"}
                         >
                           <Tooltip title={button.label}>
-                            <img src={button.icon(params.data)} alt="" />
+                            <img className="w-[22px] h-[22px]" src={button.icon(params.data)} alt="" />
                           </Tooltip>
                         </div>
                       )}
@@ -174,12 +174,20 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
               // será um filtro por período.
               let newFilter: any = params.filterModel[customFilter];
 
+              console.log(newFilter);
+
               if (newFilter.field === "data_historico") {
                 if (newFilter.value.length > 0) {
                   filters["data_inicial"] = newFilter.value[0];
                   filters["data_final"] = newFilter.value[1];
                 }
-              } else {
+              } else if (newFilter.field.includes("data")) {
+                if (newFilter.value.length > 0) {
+                  filters[`${newFilter.field}1`] = newFilter.value[0];
+                  filters[`${newFilter.field}2`] = newFilter.value[1];
+                }
+              } 
+              else {
                 console.log(newFilter.field);
                 let field = newFilter.field;
                 // if(new === "placa_dianteira_veiculo" || customFilter === "placa_traseira_veiculo") {
