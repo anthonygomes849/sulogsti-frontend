@@ -287,6 +287,23 @@ const Ticket = (props: Props) => {
                       })}
                     </span>
                   </div>
+                  {item.valor_hora_extra > 0 && (
+                    <div className="w-full flex items-center justify-between mb-4">
+                      <span className="text-sm text-[#000] font-bold">
+                        Hora Extra:
+                      </span>
+                      <div
+                        className="w-full ml-2 mr-2"
+                        style={{ border: "1px dashed #ccc" }}
+                      />
+                      <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                        {item.valor_hora_extra.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </span>
+                    </div>
+                  )}
                   <div className="w-full flex items-center justify-between mb-4">
                     <span className="text-sm text-[#000] font-bold">
                       Estadia:

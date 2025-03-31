@@ -92,7 +92,8 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
           onChange={(selectedOption: any) => {
             if (
               !window.location.pathname.includes("triagens") &&
-              props.colDef.fieldName === "tipo_carga"
+              props.colDef.fieldName === "tipo_carga" &&
+              props.selected.isMultiple
             ) {
               console.log(selectedOption);
               // setSelected(selectedOption);
