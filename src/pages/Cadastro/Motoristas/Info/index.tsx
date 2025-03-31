@@ -91,7 +91,7 @@ const Info: React.FC<Props> = (props: Props) => {
           </div>
         </div>
         <div className="w-full grid grid-cols-1 gap-2 gap-y-6 mt-4">
-        <div className="flex flex-col w-full">
+          <div className="flex flex-col w-full">
             <span className="text-sm text-[#1E2121] font-semibold mb-1">
               Data Modificação
             </span>

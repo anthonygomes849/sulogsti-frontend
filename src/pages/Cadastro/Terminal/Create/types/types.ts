@@ -1,3 +1,9 @@
+
+export type Options = {
+  value: string | number;
+  label: string;
+};
+
 export interface ITerminal {
   id_terminal: number;
   cnpj: string;

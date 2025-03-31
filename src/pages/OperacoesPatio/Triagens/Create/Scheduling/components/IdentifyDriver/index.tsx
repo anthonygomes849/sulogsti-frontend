@@ -15,6 +15,8 @@ import { FrontendNotification } from "../../../../../../../shared/Notification";
 import Create from "../../../../../../Cadastro/Motoristas/Create";
 import { IMotorista } from "../../../../../../Cadastro/Motoristas/Create/types/types";
 import formValidator from "./validators/formValidator";
+import edit from '../../../../../../../assets/images/edit.svg';
+import deleteIcon from '../../../../../../../assets/images/deleteIcon.svg';
 
 // import { Container } from './styles';
 
@@ -30,6 +32,8 @@ const IdentifyDriver: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchDriver, setSearchDriver] = useState();
   const [showCreateDriver, setShowCreateDriver]  = useState<boolean>(false);
+  const [showUpdatePhone, setShowUpdatePhone]  = useState<boolean>(false);
+  const [textPhone, setTextPhone]  = useState<string>('');
 
   const selectRef: any = useRef(null);
 
@@ -107,11 +111,13 @@ const IdentifyDriver: React.FC = () => {
 
       if (response.status === 200) {
         if (response.data) {
-          let data = [];
+          const data = [];
 
           data.push(response.data);
 
           setDetailDriver(data);
+
+          setTextPhone(response.data.celular);
 
           let getDataTriagem: any = sessionStorage.getItem("@triagem");
           if (getDataTriagem) {
@@ -124,6 +130,7 @@ const IdentifyDriver: React.FC = () => {
             response.data
           ) {
             formik.setFieldValue("id_motorista", response.data.id_motorista);
+
           }
         } else {
 
@@ -189,6 +196,34 @@ const IdentifyDriver: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
+  const onUpdatePhone = useCallback(async (id_motorista: number, value: string) => {
+    try {
+      setLoading(true);
+
+      console.log(value);
+
+      const body = {
+        celular: value,
+        id_motorista: id_motorista,
+      };
+
+      const response = await api.post(`/operacaopatio/trocaTelefone`, body);
+
+      if(response.status === 200){
+        FrontendNotification('Telefone alterado com sucesso!', 'success');
+        setShowUpdatePhone(!showUpdatePhone);
+        onSearchDetailDriver(formik.values.cpf_motorista);
+
+      } else {
+        FrontendNotification('Erro ao alterar o telefone!', 'error');
+      }
+
+      setLoading(false);
+    }catch{
+      setLoading(false);
+    }
+  }, [])
 
   const initialValues: FormValues = {
     id_motorista: "",
@@ -344,11 +379,25 @@ const IdentifyDriver: React.FC = () => {
                         <span className="text-sm text-[#1E2121] font-bold mt-2">
                           Celular
                         </span>
+                        <div className="flex items-center">
+                          {!showUpdatePhone ? (
+                              <>
+
                         <span className="text-sm text-[#1E2121] font-light mt-1">
                           {item.celular && item.celular.length > 0
                             ? maskedPhone(item.celular)
                             : "---"}
+
                         </span>
+                              <img className="ml-2 cursor-pointer" src={edit} alt="" onClick={() => setShowUpdatePhone(!showUpdatePhone)} />
+                              </>
+                          ): (
+                              <div className="flex items-center">
+                                <input type="text" className="w-full h-9" value={textPhone} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextPhone(e.target.value)} onBlur={() => onUpdatePhone(formik.values.id_motorista, textPhone)} />
+                        <img className="ml-2 cursor-pointer" src={deleteIcon} alt="" onClick={() => setShowUpdatePhone(!showUpdatePhone)} />
+                              </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex flex-col items-start">
                         <span className="text-sm text-[#1E2121] font-bold mt-2">

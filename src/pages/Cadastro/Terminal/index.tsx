@@ -6,7 +6,7 @@ import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
 import {
-  formatDateBR,
+  formatDateTimeBR,
   maskCnpj,
   maskedPhone,
   renderCargoTypes,
@@ -183,43 +183,16 @@ const Terminal: React.FC = () => {
       },
     },
     {
-      field: "data_inativacao",
-      headerName: "Data Inativação",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return "---";
-      },
-    },
-    {
-      field: "dias_inativacao",
-      headerName: "Dias de Inativação",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return "---";
-      },
-    },
-    {
-      field: "motivo_inativacao",
-      headerName: "Motivo da Inativação",
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (params.value) {
-          return params.value;
-        }
-        return "---";
-      },
-    },
-    {
       field: "data_historico",
       headerName: "Data de Modificação",
       filter: true,
       cellDataType: "date",
+      filterParams: {
+        dateBetween: true,
+      },
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
-          return formatDateBR(params.value);
+          return formatDateTimeBR(params.value);
         }
         return '----';
       },
@@ -233,7 +206,7 @@ const Terminal: React.FC = () => {
 
   const { isModalOpen, openModal, closeModal } = useModal();
 
-  const gridRef = useRef<any>();
+  const gridRef = useRef(null);
 
   const onDelete = useCallback(async (rowId?: number) => {
     try {
@@ -299,17 +272,17 @@ const Terminal: React.FC = () => {
             filters={[]}
             pagination
             path="/listar/terminais"
-            onDelete={(data: any) => {
+            onDelete={(data: ITerminal) => {
               setIsRemove(!isRemove);
               setSelectedRow(data);
             }}
             status={[]}
-            onView={(data: any) => {
+            onView={(data: ITerminal) => {
               setSelectedRow(data);
               setIsView(!isView);
               // openModal();
             }}
-            onUpdate={(data: any) => {
+            onUpdate={(data: ITerminal) => {
               setSelectedRow(data);
               setIsEdit(!isEdit);
               openModal();

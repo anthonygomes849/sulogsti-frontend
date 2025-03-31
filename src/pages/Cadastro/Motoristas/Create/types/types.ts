@@ -7,6 +7,7 @@ export enum CategoriaCNH {
   E = "E"
 }
 
+
 export interface IMotorista {
   id_motorista: number;
   cpf: string;

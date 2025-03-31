@@ -2,6 +2,7 @@ import React from "react";
 import Select, { StylesConfig } from "react-select";
 import AsyncSelect from "react-select/async";
 import { Error } from "../InputCustom/styles";
+import {Options} from "../../pages/Cadastro/Terminal/Create/types/types.ts";
 
 interface Props {
   data: any;
@@ -40,8 +41,8 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
     },
   };
 
-  const defaultValue = !props.async
-    ? props.data.find((item: any) => item.value == props.value)
+  const defaultValue = !props.async && !props.isMulti
+    ? props.data.find((item: Options) => item.value == props.value)
     : props.defaultValue;
 
   return (
