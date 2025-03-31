@@ -111,3 +111,10 @@ export const STATUS_OPERACAO_PATIO_SERVICOS = [
     icon: "#676767"
   },
 ];
+
+export const STATUS_PAGAMENTO = [
+  { id: 0, label: "Ativo", color: "#006400", icon: "#228b22" },
+  { id: 1, label: "Estornado", color: "#d4564f", icon: "#DC0000" },
+  { id: 2, label: "Inativo", color: '#9A9A9A',
+    icon: "#676767" },
+];

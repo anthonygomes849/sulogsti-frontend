@@ -1,9 +1,12 @@
 import { useFormik } from "formik";
 import React, { useCallback, useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
 import InputCustom from "../../../../../components/InputCustom";
 import SelectCustom from "../../../../../components/SelectCustom";
 import Loading from "../../../../../core/common/Loading";
+import { validateCPF } from "../../../../../helpers/format";
 import api from "../../../../../services/api";
+import { FrontendNotification } from "../../../../../shared/Notification";
 import {
   CategoriaCNH,
   City,
@@ -56,39 +59,69 @@ const Form: React.FC<Props> = (props: Props) => {
         const urlParams = new URLSearchParams(window.location.search);
 
         const userId = urlParams.get("userId");
-
-        const body = {
-          id_motorista: row?.id_motorista,
-          cpf: values.cpf,
+        
+        let body: any = {
+          cpf: values.cpf.replaceAll(".", "").replace("-", ""),
           nome: values.nome,
-          endereco: values.endereco.length > 0 ? values.endereco : null,
+          endereco: String(values.endereco).length > 0 ? values.endereco : null,
           complemento:
-            values.complemento.length > 0 ? values.complemento : null,
-          numero: values.numero ? values.numero : "",
-          cep: values.cep.length > 0 ? values.cep : null,
-          id_bairro: values.id_bairro ? values.id_bairro : null,
-          id_cidade: values.id_cidade ? values.id_cidade : null,
-          id_estado: values.id_estado,
-          celular: values.celular,
-          numero_cnh: values.numero_cnh,
+            String(values.complemento).length > 0 ? values.complemento : null,
+          numero: values.numero ? Number(values.numero) : null,
+          cep: String(values.cep).length > 0 ? String(values.cep).replace('-', '') : null,
+          id_bairro: String(values.id_bairro).length > 0 ? values.id_bairro : null,
+          id_cidade: String(values.id_cidade).length > 0 ? values.id_cidade : null,
+          id_estado:
+          values.id_estado
+              ? Number(values.id_estado)
+              : null,
+          celular: values.celular
+            .replaceAll("(", "")
+            .replaceAll(")", "")
+            .replace(" ", "")
+            .replace("-", ""),
+          numero_cnh: values.numero_cnh.replaceAll(".", "").replace("-", ""),
           categoria_cnh: values.categoria_cnh,
           data_expiracao_cnh: values.data_expiracao_cnh,
           ativo: true,
           tipo_parte_veiculo: true,
           status: 1,
-          id_usuario_historico: userId,
+          id_usuario_historico: Number(userId),
         };
 
+        
         if (props.isEdit) {
-          await api.post("/editar/motoristas", body);
+          body = {
+            ...body,
+            id_motorista: row?.id_motorista,
+          };
+        }
+        
+        if (validateCPF(values.cpf)) {
+          if (props.isEdit) {
+            const response = await api.post("/editar/motoristas", body);
+
+            if (response.status === 200) {
+              FrontendNotification("Motorista salvo com sucesso!", "success");
+              props.onConfirm();
+            } else {
+              FrontendNotification("Erro ao salvar o motorista!", "error");
+            }
+          } else {
+            const response = await api.post("/cadastrar/motoristas", body);
+            if (response.status === 200) {
+              FrontendNotification("Motorista salvo com sucesso!", "success");
+              props.onConfirm();
+            } else {
+              FrontendNotification("Erro ao salvar o motorista!", "error");
+            }
+          }
         } else {
-          await api.post("/cadastrar/motoristas", body);
+          FrontendNotification("CPF inválido", "error");
         }
 
         setLoading(false);
-
-        props.onConfirm();
       } catch {
+        FrontendNotification("Erro ao salvar o motorista!", "error");
         setLoading(false);
       }
     },
@@ -130,7 +163,9 @@ const Form: React.FC<Props> = (props: Props) => {
       formik.setFieldValue("data_expiracao_cnh", data.data_expiracao_cnh);
       formik.setFieldValue("celular", data.celular);
       formik.setFieldValue("endereco", data.endereco);
-      formik.setFieldValue("id_estado", data.id_estado);
+      if(data.id_estado !== null) {
+        formik.setFieldValue("id_estado", String(data.id_estado));
+      }
       getCities(data.id_estado);
       getNeighborhood(data.id_cidade);
       formik.setFieldValue("id_cidade", data.id_cidade);
@@ -185,7 +220,6 @@ const Form: React.FC<Props> = (props: Props) => {
         setCities(mappingResponse);
 
         formik.setFieldValue("id_cidade", props.selectedRow?.id_cidade);
-
       } catch {}
     },
     [formik.values.id_estado]
@@ -232,6 +266,7 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
+      <ToastContainer />
       <div className="overflow-y-scroll max-w-full max-h-[550px] p-5">
         <div className="grid grid-cols-3 gap-3 mb-2">
           <div>

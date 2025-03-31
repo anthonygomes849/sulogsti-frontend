@@ -7,5 +7,5 @@ export default object().shape({
   categoria_cnh: string().required('Este campo é obrigatório!'),
   data_expiracao_cnh: string().required('Este campo é obrigatório!'),
   celular: string().required('Este campo é obrigatório!'),
-  id_estado: string().required('Este campo é obrigatório!'),
+  // id_estado: string().required('Este campo é obrigatório!'),
 })

@@ -7,6 +7,8 @@ import InputCustom from "../../../../../components/InputCustom";
 import SelectCustom from "../../../../../components/SelectCustom";
 import Loading from "../../../../../core/common/Loading";
 import api from "../../../../../services/api";
+import { FrontendNotification } from "../../../../../shared/Notification";
+import { TipoVeiculo } from "../../../../Cadastro/Veiculos/types/types";
 import { IOperacoesPatioEntradaVeiculos } from "../types/types";
 import formValidator from "../validators/formValidator";
 
@@ -39,6 +41,7 @@ const Form: React.FC<Props> = (props: Props) => {
     conteiners3: "",
     conteiners4: "",
   });
+  const [vehicleTypes, setVehicleTypes] = useState<any[]>([]);
 
   const onCreateTriagens = useCallback(async (idEntradaVeiculo: number) => {
     try {
@@ -94,6 +97,8 @@ const Form: React.FC<Props> = (props: Props) => {
 
         getIndentificadorConteiner += "}";
 
+        const conteiners = getIndentificadorConteiner.slice(0, -2) + "}";
+
         const body = {
           id_operacao_patio_entrada_veiculo:
             row?.id_operacao_patio_entrada_veiculo,
@@ -107,9 +112,7 @@ const Form: React.FC<Props> = (props: Props) => {
               : null,
           numero_partes_nao_motorizada: values.numero_partes_nao_motorizada,
           identificadores_conteineres:
-            getIndentificadorConteiner.length > 2
-              ? getIndentificadorConteiner
-              : null,
+            getIndentificadorConteiner.length > 2 ? conteiners : null,
           id_operacao_patio_cancela: values.id_operacao_patio_cancela,
           id_operacao_patio_cancela_saida:
             values.id_operacao_patio_cancela_saida.length > 0
@@ -123,7 +126,13 @@ const Form: React.FC<Props> = (props: Props) => {
         };
 
         if (props.isEdit) {
-          await api.post("/editar/entradaSaidaVeiculos", body);
+          const response = await api.post("/editar/entradaSaidaVeiculos", body);
+
+          if (response.status === 200) {
+            props.onConfirm();
+          } else {
+            FrontendNotification("Erro ao salvar a entrada!", "error");
+          }
         } else {
           const response = await api.post(
             "/cadastrar/entradaSaidaVeiculos",
@@ -131,18 +140,20 @@ const Form: React.FC<Props> = (props: Props) => {
           );
 
           if (response.status === 200) {
-            onCreateTriagens(response.data.id_operacao_patio_entrada_veiculo);
+            await onCreateTriagens(
+              response.data.id_operacao_patio_entrada_veiculo
+            );
+            props.onConfirm();
+          } else {
+            FrontendNotification("Erro ao salvar a entrada!", "error");
           }
         }
 
-        
-        setTimeout(() => {
-          props.onConfirm();
-        }, 3000);
-        
         setLoading(false);
       } catch {
         setLoading(false);
+        FrontendNotification("Erro ao salvar a entrada!", "error");
+
       }
     },
     []
@@ -191,6 +202,17 @@ const Form: React.FC<Props> = (props: Props) => {
       setLoading(false);
     }
   }, []);
+
+  const getVehicleTypes = useCallback(() => {
+      const data = Object.values(TipoVeiculo).map((value: any, index: number) => {
+        return {
+          value: `${index}`,
+          label: value,
+        };
+      });
+  
+      setVehicleTypes(data);
+    }, []);
 
   const onLoadFormValues = useCallback(
     (row?: IOperacoesPatioEntradaVeiculos) => {
@@ -256,7 +278,8 @@ const Form: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     getCancelasEntradas();
     getCancelasSaida();
-  }, [getCancelasEntradas, getCancelasSaida]);
+    getVehicleTypes();
+  }, [getCancelasEntradas, getCancelasSaida, getVehicleTypes]);
 
   useEffect(() => {
     if (props.isView || props.isEdit) {
@@ -267,7 +290,7 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
-      <div className="overflow-y-scroll max-h-[550px] p-5">
+      <div className="overflow-y-scroll max-h-[calc(80vh-80px)] p-5">
         <div className="mb-3">
           <span className="text-sm font-bold">Entrada</span>
           <div className="w-full h-[1px] bg-[#ccc] mt-2" />
@@ -315,15 +338,16 @@ const Form: React.FC<Props> = (props: Props) => {
         </div>
         <div className="grid grid-cols-3 gap-3 mb-2">
           <div>
-            <InputCustom
-              title="Número das Partes Não Motorizadas"
-              type="number"
-              placeholder="0"
-              onChange={formik.handleChange("numero_partes_nao_motorizada")}
-              value={formik.values.numero_partes_nao_motorizada}
+          <SelectCustom
+              data={vehicleTypes}
+              onChange={(selectedOption: any) => {
+                formik.setFieldValue("numero_partes_nao_motorizada", selectedOption.value);
+              }}
+              title="Tipo do Veículo"
               touched={formik.touched.numero_partes_nao_motorizada}
               error={formik.errors.numero_partes_nao_motorizada}
               disabled={props.isView}
+              value={formik.values.numero_partes_nao_motorizada}
             />
           </div>
           <div>
@@ -347,10 +371,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners1: e.target.value,
+                      conteiners1: value,
                     })
                   }
                   value={conteiners.conteiners1}
@@ -364,10 +388,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners2: e.target.value,
+                      conteiners2: value,
                     })
                   }
                   value={conteiners.conteiners2}
@@ -381,10 +405,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners3: e.target.value,
+                      conteiners3: value,
                     })
                   }
                   value={conteiners.conteiners3}
@@ -398,10 +422,10 @@ const Form: React.FC<Props> = (props: Props) => {
                   typeInput="mask"
                   mask="aaaa-9999999"
                   placeholder="AAAA0000000"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(value: string) =>
                     setConteiners({
                       ...conteiners,
-                      conteiners4: e.target.value,
+                      conteiners4: value,
                     })
                   }
                   value={conteiners.conteiners4}
@@ -429,26 +453,6 @@ const Form: React.FC<Props> = (props: Props) => {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-1"></div>
-        {/* <div className="grid grid-cols-2 gap-2 mb-3">
-          <div className="">
-            <div>
-              <SelectCustom
-                data={cancelasEntrada}
-                onChange={(selectedOption: any) => {
-                  formik.setFieldValue(
-                    "id_operacao_patio_cancela",
-                    selectedOption.value
-                  );
-                }}
-                title="Cancela Entrada"
-                touched={formik.touched.id_operacao_patio_cancela}
-                error={formik.errors.id_operacao_patio_cancela}
-                disabled={props.isView}
-                value={formik.values.id_operacao_patio_cancela}
-              />
-            </div>
-          </div>
-        </div> */}
         <div className="mb-4">
           <span className="text-sm font-bold">Saída</span>
           <div className="w-full h-[1px] bg-[#ccc] mt-2" />
@@ -484,7 +488,7 @@ const Form: React.FC<Props> = (props: Props) => {
           </div>
         </div>
       </div>
-      <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
+      <div className="sticky bottom-0 z-[999999999px] w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000000] font-bold rounded-full mr-2"

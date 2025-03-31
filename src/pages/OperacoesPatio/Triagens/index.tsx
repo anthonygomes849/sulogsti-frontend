@@ -3,6 +3,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import CallDriverActiveIcon from "../../../assets/images/CallDriverActiveIcon.svg";
 import CallDriverIcon from "../../../assets/images/callDriverIcon.svg";
+import IconPayment from "../../../assets/images/iconPayment.svg";
 import IdentifyDriverIcon from "../../../assets/images/identifyDriverIcon.svg";
 import IdentifyVehicleIcon from "../../../assets/images/identifyVehicleIcon.svg";
 import PaymentIcon from "../../../assets/images/paymentIcon.svg";
@@ -37,7 +38,11 @@ const Triagens: React.FC = () => {
     {
       headerName: "Data de Entrada",
       field: "entrada_veiculo.data_hora",
+      fieldName: "data_hora",
       filter: true,
+      filterParams: {
+        dateBetween: true,
+      },
       type: "dateColumn",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
@@ -192,8 +197,11 @@ const Triagens: React.FC = () => {
     {
       headerName: "Data de Saída",
       field: "entrada_veiculo.saida.data_hora",
+      fieldName: "data_hora_saida",
       filter: true,
-      fieldName: 'data',
+      filterParams: {
+        dateBetween: true,
+      },
       type: "dateColumn",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
@@ -244,20 +252,35 @@ const Triagens: React.FC = () => {
     }
   }, []);
 
-  const onDelete = useCallback(async (rowId?: number) => {
+  const onDelete = useCallback(async (rowId?: number, data?: ITriagens) => {
     try {
       setLoading(true);
-      const body = {
-        id_operacao_patio: rowId,
-      };
 
-      await api.post("/deletar/operacaoPatioTriagem", body);
+      if (data && data.status > 0) {
+        const body = {
+          id_operacao_patio: rowId,
+        };
 
-      setLoading(false);
+        await api.post("/deletar/desassociarTriagem", body);
 
-      setIsRemove(false);
+        setLoading(false);
 
-      window.location.reload();
+        setIsRemove(false);
+
+        window.location.reload();
+      } else {
+        const body = {
+          id_operacao_patio: rowId,
+        };
+
+        await api.post("/deletar/operacaoPatio", body);
+
+        setLoading(false);
+
+        setIsRemove(false);
+
+        window.location.reload();
+      }
     } catch {
       setLoading(false);
     }
@@ -270,8 +293,12 @@ const Triagens: React.FC = () => {
 
       {isRemove && (
         <ModalDelete
+          title={selectedRow && selectedRow.status > 0 ? "Deseja cancelar a triagem?" : ""}
+          message={selectedRow && selectedRow.status > 0 ? "Por favor, confirme que você deseja cancelar o seguinte registro:" : ""}
           onCancel={() => setIsRemove(!isRemove)}
-          onConfirm={() => onDelete(selectedRow?.id_operacao_patio)}
+          onConfirm={() =>
+            onDelete(selectedRow?.id_operacao_patio, selectedRow)
+          }
           row={selectedRow?.entrada_veiculo.placa_dianteira}
         />
       )}
@@ -299,7 +326,10 @@ const Triagens: React.FC = () => {
       )}
       {showTicket && (
         <div className="hidden">
-          <Ticket data={selectedRow} onClose={() => setShowTicket(!showTicket)} />
+          <Ticket
+            data={selectedRow}
+            onClose={() => setShowTicket(!showTicket)}
+          />
         </div>
       )}
 
@@ -395,13 +425,30 @@ const Triagens: React.FC = () => {
                     "id_operacao_patio",
                     JSON.stringify(data.id_operacao_patio)
                   );
-                  setStatus(3);
+                  setStatus(3.5);
                   openModal();
                 },
                 status: [10],
                 icon: () => {
                   return PaymentIcon;
                 },
+              },
+              {
+                label: 'Listar Pagamento',
+                action: (data: any) => {
+                  setSelectedRow(data);
+                  sessionStorage.setItem("@triagem", JSON.stringify(data));
+                  sessionStorage.setItem(
+                    "id_operacao_patio",
+                    JSON.stringify(data.id_operacao_patio)
+                  );
+                  setStatus(3.5);
+                  openModal();
+                },
+                status: [11],
+                icon: () => {
+                  return IconPayment;
+                }
               },
               {
                 label: "Comprovante",

@@ -34,77 +34,79 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       headerName: "",
       pinned: "right",
       cellRenderer: (params: CustomCellRendererProps) => {
-        return (
-          <div className="flex w-full h-full items-center justify-center">
-            {props.customButtons &&
-              props.customButtons.map((button: CustomButtons) => {
-                let showButtonStatus = false;
-                if (params.data) {
-                  if (button.status.length > 0) {
-                    const findButtonStatus = button.status.find(
-                      (item) => item == params.data.status
-                    );
+        console.log(params.data);
+        if (params.data) {
+          return (
+            <div className="flex w-full h-full items-center justify-center">
+              {props.customButtons &&
+                props.customButtons.map((button: CustomButtons) => {
+                  let showButtonStatus = false;
+                  if (params.data) {
+                    if (button.status.length > 0) {
+                      const findButtonStatus = button.status.find(
+                        (item) => item == params.data.status
+                      );
 
-                    if (findButtonStatus != undefined) {
-                      showButtonStatus = true;
+                      if (findButtonStatus != undefined) {
+                        showButtonStatus = true;
+                      }
                     }
                   }
-                }
-                return (
-                  <>
-                    {showButtonStatus && (
-                      <div
-                        className="flex cursor-pointer items-center justify-center h-full mr-4"
-                        onClick={() => button.action(params.data)}
-                        id={"btnDelete"}
-                      >
-                        <Tooltip title={button.label}>
-
-
-                        <img src={button.icon(params.data)} alt="" />
-                        </Tooltip>
-                      </div>
-                    )}
-                  </>
-                );
-              })}
-            {usePermissions("CONHECER") && (
-              <button
-                className="mr-4"
-                onClick={() => {
-                  addBreadcrumb("Conhecer");
-                  props.onView(params.data);
-                }}
-              >
-                <img src={InfoIcon} style={{ width: 16, height: 16 }} />
-              </button>
-            )}
-            {/* {hasPermissions("CONHECER") && (
-            )} */}
-            {usePermissions("SALVAR") && !window.location.pathname.includes('triagens') && (
-              <>
+                  return (
+                    <>
+                      {showButtonStatus && (
+                        <div
+                          className="flex cursor-pointer items-center justify-center h-full mr-4"
+                          onClick={() => button.action(params.data)}
+                          id={"btnDelete"}
+                        >
+                          <Tooltip title={button.label}>
+                            <img className="w-[22px] h-[22px]" src={button.icon(params.data)} alt="" />
+                          </Tooltip>
+                        </div>
+                      )}
+                    </>
+                  );
+                })}
+              {usePermissions("CONHECER") && (
                 <button
                   className="mr-4"
                   onClick={() => {
-                    addBreadcrumb("Editar");
-                    props.onUpdate(params.data);
+                    addBreadcrumb("Conhecer");
+                    props.onView(params.data);
                   }}
                 >
-                  <img src={EditIcon} style={{ width: 16, height: 16 }} />
+                  <img src={InfoIcon} style={{ width: 16, height: 16 }} />
                 </button>
-              </>
-            )}
-            {usePermissions("REMOVER") && (
-              <button
-                onClick={() => {
-                  props.onDelete(params.data);
-                }}
-              >
-                <img src={DeleteIcon} style={{ width: 16, height: 16 }} />
-              </button>
-            )}
-          </div>
-        );
+              )}
+              {/* {hasPermissions("CONHECER") && (
+            )} */}
+              {usePermissions("SALVAR") &&
+                !window.location.pathname.includes("triagens") && (
+                  <>
+                    <button
+                      className="mr-4"
+                      onClick={() => {
+                        addBreadcrumb("Editar");
+                        props.onUpdate(params.data);
+                      }}
+                    >
+                      <img src={EditIcon} style={{ width: 16, height: 16 }} />
+                    </button>
+                  </>
+                )}
+              {usePermissions("REMOVER") && params.data.status <= 10 && (
+                <button
+                  onClick={() => {
+                    props.onDelete(params.data);
+                  }}
+                >
+                  <img src={DeleteIcon} style={{ width: 16, height: 16 }} />
+                </button>
+              )}
+            </div>
+          );
+        }
       },
     },
   ];
@@ -114,10 +116,11 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   const onGridReady = useCallback(async (params: any) => {
     let cols: any[] = [];
 
+    console.log(params);
+
     defaultColumns.forEach((defaultColumn: any) => {
       cols.unshift(defaultColumn);
     });
-
 
     if (props.isShowStatus) {
       cols.unshift({
@@ -126,7 +129,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         headerName: "Status",
         filter: CustomStatusFilter,
         filterParams: {
-          status: props.status
+          status: props.status,
         },
         // width: 310,
         cellStyle: { textAlign: "center" },
@@ -145,7 +148,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         column.headerName = column.headerName;
       }
 
-      if(column.filter) {
+      if (column.filter) {
         column.filter = CustomFilter;
       }
 
@@ -171,19 +174,30 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
               // será um filtro por período.
               let newFilter: any = params.filterModel[customFilter];
 
+              console.log(newFilter);
+
               if (newFilter.field === "data_historico") {
                 if (newFilter.value.length > 0) {
                   filters["data_inicial"] = newFilter.value[0];
                   filters["data_final"] = newFilter.value[1];
                 }
-              } else {
+              } else if (newFilter.field.includes("data")) {
+                if (newFilter.value.length > 0) {
+                  filters[`${newFilter.field}1`] = newFilter.value[0];
+                  filters[`${newFilter.field}2`] = newFilter.value[1];
+                }
+              } 
+              else {
                 console.log(newFilter.field);
                 let field = newFilter.field;
                 // if(new === "placa_dianteira_veiculo" || customFilter === "placa_traseira_veiculo") {
                 //   field = "placa";
                 // }
-                
-                const vauleFilter = field === "status" ? Number(newFilter.value) : newFilter.value;
+
+                const vauleFilter =
+                  field === "status"
+                    ? Number(newFilter.value)
+                    : newFilter.value;
 
                 filters[`${field}`] = newFilter.filter || vauleFilter;
                 console.log(filters);
@@ -217,7 +231,6 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
     // params.api.setGridOption('datasource', dataSource)
 
     params.api.sizeColumnsToFit();
-
 
     params.api.setDatasource(dataSource);
 

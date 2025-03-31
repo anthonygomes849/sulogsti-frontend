@@ -2,6 +2,7 @@ import { IFilterReactComp } from "ag-grid-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import DeleteIcon from "../../../../assets/images/deleteIcon.svg";
 import SelectCustom from "../../../SelectCustom";
 
 export interface CustomTextFilterModel {
@@ -10,18 +11,19 @@ export interface CustomTextFilterModel {
 
 const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
   const [filterValue, setFilterValue] = useState<string | number | boolean>("");
-  const [initialDate, setInitialDate] = useState<string>('');
-  const [finalDate, setFinalDate] = useState<string>('');
+  const [initialDate, setInitialDate] = useState<string>("");
+  const [finalDate, setFinalDate] = useState<string>("");
 
   // Implementação da interface de filtro
   useImperativeHandle(ref, () => ({
     doesFilterPass(params) {
-      return params.data[props.colDef.field]
-        ?.toString()
-        .toLowerCase()
-        // .includes(filterValue.toLowerCase());
+      return params.data[props.colDef.field]?.toString().toLowerCase();
+      // .includes(filterValue.toLowerCase());
     },
     isFilterActive() {
+      if (props.dateBetween) {
+        return initialDate.length > 0 && finalDate.length > 0;
+      }
       return filterValue !== "";
     },
     getModel(): any | null {
@@ -29,7 +31,6 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
         return null; // Remove o filtro do AG Grid
       }
 
-      
       let value: any = String(filterValue).length > 0 ? filterValue : null;
       if (props.dateBetween) {
         value = [initialDate, finalDate];
@@ -38,7 +39,7 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
       const fieldName = props.colDef.fieldName || props.colDef.field;
 
       console.log(value);
-    
+
       return { value, field: fieldName };
     },
     setModel(model: CustomTextFilterModel | null) {
@@ -54,13 +55,11 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
   }));
 
   useEffect(() => {
-
-    console.log(filterValue);
-    if (filterValue && String(filterValue).length > 0 || (initialDate.length > 0 && finalDate.length > 0)) {
-      console.log("entrou");
+    if (
+      (filterValue && String(filterValue).length > 0) ||
+      (initialDate.length > 0 && finalDate.length > 0)
+    ) {
       props.filterChangedCallback();
-    } else {
-      props.filterChangedCallback(); // Força o grid a remover o filtro
     }
   }, [filterValue, initialDate, finalDate]);
 
@@ -68,12 +67,33 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
 
   return (
     <div className="w-full h-full rounded-sm p-4 relative">
+      <div className="flex justify-end mr-2 mb-4">
+        <button
+          className="flex items-center justify-center border-none bg-transparent text-[#EA004C] text-sm font-bold"
+          onClick={() => {
+            setFilterValue("");
+            setInitialDate("");
+            setFinalDate("");
+
+            if (props.api) {
+              props.api.onFilterChanged();
+            }
+            // setSelected(undefined);
+          }}
+        >
+          <img src={DeleteIcon} alt="" className="mr-2" />
+          Limpar Filtros
+        </button>
+      </div>
       {props.selected ? (
         <SelectCustom
           data={props.selected.data}
           isMulti={props.selected.isMultiple}
           onChange={(selectedOption: any) => {
-            if (!window.location.pathname.includes('triagens') && props.colDef.fieldName === "tipo_carga") {
+            if (
+              !window.location.pathname.includes("triagens") &&
+              props.colDef.fieldName === "tipo_carga"
+            ) {
               console.log(selectedOption);
               // setSelected(selectedOption);
               let dataCargoTypes = "{";
@@ -92,7 +112,7 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
           // value={selected}
         />
       ) : props.dateBetween ? (
-        <>
+        <div className="flex items-center justify-center">
           <input
             onChange={(e: any) => {
               const dateColumn = format(e.target.value, "yyyy-MM-dd HH:mm", {
@@ -101,9 +121,10 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
 
               setInitialDate(dateColumn);
             }}
+            value={initialDate}
             placeholder="Pesquisar..."
             type="datetime-local"
-            className="w-full h-8 rounded-full p-2 shadow-lg border-[#DBDEDF] border-2 mb-2"
+            className="w-full h-8 rounded-full p-2 shadow-lg border-[#DBDEDF] border-2 mr-2"
           />
           <input
             onChange={(e: any) => {
@@ -113,11 +134,12 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
 
               setFinalDate(dateColumn);
             }}
+            value={finalDate}
             placeholder="Pesquisar..."
             type="datetime-local"
             className="w-full h-8 rounded-full p-2 shadow-lg border-[#DBDEDF] border-2"
           />
-        </>
+        </div>
       ) : (
         <input
           onChange={(e: any) => {
@@ -129,27 +151,28 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
               setFilterValue(dateColumn);
             } else {
               console.log(e.target.value.length);
-              if(e.target.value.length == 0) {
-                console.log("entrou");
+              if (e.target.value.length == 0) {
                 setFilterValue("");
-                props.filterChangedCallback();
+                setTimeout(() => {
+                  props.filterChangedCallback();
+                }, 0);
               } else {
                 let value = "";
                 console.log(props);
 
-                if(props.colDef.fieldName === "identificadores_conteineres") {
+                if (props.colDef.fieldName === "identificadores_conteineres") {
                   console.log("entrou8");
-                  value += "{"
+                  value += "{";
                   value += e.target.value;
-                  value += "}"
+                  value += "}";
                 } else {
-                  value = e.target.value;
+                  value = String(e.target.value).toUpperCase();
                 }
 
-                console.log(value)
-
-
                 setFilterValue(value);
+                setTimeout(() => {
+                  props.filterChangedCallback();
+                }, 0);
               }
             }
           }}

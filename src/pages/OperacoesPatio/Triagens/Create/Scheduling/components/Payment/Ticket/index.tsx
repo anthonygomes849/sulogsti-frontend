@@ -44,8 +44,8 @@ const Ticket = (props: Props) => {
 
       const body = {
         id_operacao_patio:
-          sessionStorage.getItem("id_operacao_patio") ||
-          currentRow.id_operacao_patio,
+          Number(sessionStorage.getItem("id_operacao_patio")) ||
+          Number(currentRow.id_operacao_patio),
       };
 
       const response = await api.post("/operacaopatio/custoOperacao", body);
@@ -150,9 +150,7 @@ const Ticket = (props: Props) => {
                 <div className="w-full flex items-center mb-1">
                   <span className="text-sm text-[#000] font-bold">Placa:</span>
                   <span className="text-sm text-[#000] font-normal ml-1">
-                    {item.veiculo !== null
-                      ? item.veiculo.placa
-                      : "---"}
+                    {item.veiculo !== null ? item.veiculo.placa : "---"}
                   </span>
                 </div>
                 <div className="w-full flex items-center mb-1">
@@ -261,95 +259,107 @@ const Ticket = (props: Props) => {
                   </span>
                 </div>
               </div>
-              <div
+                <div
                 className="w-full flex flex-col items-center justify-center mt-3 p-4"
                 style={{ borderBottom: "2px dashed #000" }}
-              >
-                <div className="w-full flex items-center justify-between mb-1">
-                  <span className="text-sm text-[#000] font-bold">
-                    Triagem:
-                  </span>
-                  <div
-                    className="w-full ml-2 mr-2"
-                    style={{ border: "1px dashed #ccc" }}
-                  />
-                  <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                    {item.valor_total_triagem.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </span>
-                </div>
-                <div className="w-full flex items-center justify-between mb-4">
-                  <span className="text-sm text-[#000] font-bold">
-                    Estadia:
-                  </span>
-                  <div
-                    className="w-full ml-2 mr-2"
-                    style={{ border: "1px dashed #ccc" }}
-                  />
-                  <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                    {item.valor_total_estadia.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </span>
-                </div>
-                <div className="w-full flex items-center justify-between mb-1">
-                  <span className="w-[70%] text-sm text-[#000] font-bold">
-                    Valor Pago:
-                  </span>
-                  <div
-                    className="w-full ml-2 mr-2"
-                    style={{ border: "1px dashed #ccc" }}
-                  />
-                  <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                    {item.valor_pago.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </span>
-                </div>
-                <div className="w-full flex items-center justify-between mb-4">
-                  <span className="w-[70%] text-sm text-[#000] font-bold">
-                    Falta Pagar:
-                  </span>
-                  <div
-                    className="w-full mr-2"
-                    style={{ border: "1px dashed #ccc" }}
-                  />
-                  <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                    {item.valor_a_pagar
-                      ? item.valor_a_pagar.toLocaleString("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
-                        })
-                      : `R$ 0.00`}
-                  </span>
-                </div>
+                >
+                {item.operacaoPatio &&
+                item.operacaoPatio.pagamento &&
+                item.operacaoPatio.pagamento.length > 0 &&
+                item.operacaoPatio.pagamento[
+                  item.operacaoPatio.pagamento.length - 1
+                ].tipo_pagamento === 3 ? (
+                  <></>
+                ) : (
+                  <>
+                  <div className="w-full flex items-center justify-between mb-1">
+                    <span className="text-sm text-[#000] font-bold">
+                      Triagem:
+                    </span>
+                    <div
+                      className="w-full ml-2 mr-2"
+                      style={{ border: "1px dashed #ccc" }}
+                    />
+                    <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                      {item.valor_total_triagem.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </span>
+                  </div>
+                  <div className="w-full flex items-center justify-between mb-4">
+                    <span className="text-sm text-[#000] font-bold">
+                      Estadia:
+                    </span>
+                    <div
+                      className="w-full ml-2 mr-2"
+                      style={{ border: "1px dashed #ccc" }}
+                    />
+                    <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                      {item.valor_total_estadia.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </span>
+                  </div>
+                  <div className="w-full flex items-center justify-between mb-1">
+                    <span className="w-[70%] text-sm text-[#000] font-bold">
+                      Valor Pago:
+                    </span>
+                    <div
+                      className="w-full ml-2 mr-2"
+                      style={{ border: "1px dashed #ccc" }}
+                    />
+                    <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                      {item.valor_pago.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </span>
+                  </div>
+                  <div className="w-full flex items-center justify-between mb-4">
+                    <span className="w-[70%] text-sm text-[#000] font-bold">
+                      Falta Pagar:
+                    </span>
+                    <div
+                      className="w-full mr-2"
+                      style={{ border: "1px dashed #ccc" }}
+                    />
+                    <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                      {item.valor_a_pagar
+                        ? item.valor_a_pagar.toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          })
+                        : `R$ 0.00`}
+                    </span>
+                  </div>
+                  </>
 
-                <div className="w-full flex flex-col items-center justify-between mb-1">
-                  <span className="text-sm text-[#000] font-bold">
-                    Tipo de pagamento:
-                  </span>
-                  {item.operacaoPatio &&
-                  item.operacaoPatio.pagamento &&
-                  item.operacaoPatio.pagamento.length > 0 ? (
-                    <>
-                      {item.operacaoPatio.pagamento.map((item: any) => (
-                        <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
-                          {renderPaymentTypes(item.tipo_pagamento)}
-                        </span>
-                      ))}
-                    </>
-                  ) : (
-                    "---"
-                  )}
-                  {/* <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
+                )}
+
+                  <div className="w-full flex flex-col items-center justify-between mb-1">
+                    <span className="text-sm text-[#000] font-bold">
+                      Tipo de pagamento:
+                    </span>
+                    {item.operacaoPatio &&
+                    item.operacaoPatio.pagamento &&
+                    item.operacaoPatio.pagamento.length > 0 ? (
+                      <>
+                        {item.operacaoPatio.pagamento.map((item: any) => (
+                          <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
+                            {renderPaymentTypes(item.tipo_pagamento)}
+                          </span>
+                        ))}
+                      </>
+                    ) : (
+                      "---"
+                    )}
+                    {/* <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
                     CRÉDITO
                   </span> */}
+                  </div>
                 </div>
-              </div>
 
               <div className="w-full flex flex-col items-center justify-center mt-3 p-4">
                 <div className="w-full flex items-center justify-between mb-1">
