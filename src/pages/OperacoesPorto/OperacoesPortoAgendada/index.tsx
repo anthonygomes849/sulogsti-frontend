@@ -64,19 +64,19 @@ const OperacoesPortoAgendada: React.FC = () => {
       },
     },
     {
-      field: "terminal.tipos_carga",
+      field: "tipo_carga",
       fieldName: "tipo_carga",
       headerName: "Tipo de Carga",
       filter: true,
       filterParams: {
         selected: {
-          isMultiple: true,
+          isMultiple: false,
           data: getCargoTypes()
         }
       },
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
-          return String(renderCargoTypes(params.value))
+          return String(renderCargoTypes(params.value).replace(",", " "));
         }
         return "---";
       },
@@ -97,6 +97,11 @@ const OperacoesPortoAgendada: React.FC = () => {
         }
         return "---";
       },
+    },
+    {
+      field: "identificadores_conteineres",
+      filter: true,
+      headerName: "Identificadores Conteineres",
     },
     {
       field: "tolerancia_inicio_agendamento",

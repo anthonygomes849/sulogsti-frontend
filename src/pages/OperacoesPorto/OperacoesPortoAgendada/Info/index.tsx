@@ -60,6 +60,22 @@ const Info: React.FC<Props> = (props: Props) => {
               {props.data && props.data.placa_dianteira_veiculo ? props.data.placa_dianteira_veiculo : '---'}
             </span>
           </div>
+          <div className="flex flex-col w-full">
+            <span className="text-sm text-[#1E2121] font-semibold mb-1">
+              Placa Traseira
+            </span>
+            <span className="text-sm text-[#666666] font-normal">
+              {props.data && props.data.placa_traseira_veiculo ? props.data.placa_traseira_veiculo : '---'}
+            </span>
+          </div>
+          <div className="flex flex-col w-full">
+            <span className="text-sm text-[#1E2121] font-semibold mb-1">
+              Identificadores Conteineres
+            </span>
+            <span className="text-sm text-[#666666] font-normal">
+              {props.data && props.data.identificadores_conteineres ? props.data.identificadores_conteineres : '---'}
+            </span>
+          </div>
 
           <div className="flex flex-col w-full">
             <span className="text-sm text-[#1E2121] font-semibold mb-1">

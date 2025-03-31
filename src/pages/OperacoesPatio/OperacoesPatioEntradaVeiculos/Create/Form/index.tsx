@@ -312,6 +312,8 @@ const Form: React.FC<Props> = (props: Props) => {
             <InputCustom
               title="Placa Dianteira"
               placeholder="AAA-0000 OU AAA-0A00"
+              typeInput="mask"
+              mask="aaa-9*99"
               onChange={formik.handleChange("placa_dianteira")}
               value={formik.values.placa_dianteira}
               touched={formik.touched.placa_dianteira}
@@ -323,6 +325,8 @@ const Form: React.FC<Props> = (props: Props) => {
             <InputCustom
               title="Placa Traseira"
               placeholder="AAA-0000 OU AAA-0A00"
+              typeInput="mask"
+              mask="aaa-9*99"
               onChange={formik.handleChange("placa_traseira")}
               value={formik.values.placa_traseira}
               touched={formik.touched.placa_traseira}

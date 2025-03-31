@@ -116,7 +116,7 @@ const Form: React.FC<Props> = (props: Props) => {
             ativo: true,
             id_usuario_historico: userId,
             origem: 1,
-            status: 1,
+            status: 0,
           };
 
           if (props.isEdit) {
