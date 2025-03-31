@@ -12,7 +12,30 @@ import Triagens from "../pages/OperacoesPatio/Triagens";
 import OperacoesPortoAgendada from "../pages/OperacoesPorto/OperacoesPortoAgendada";
 import PrivateRoute from "./privateRoute";
 import Route from "./route";
+import Transportadoras from "../pages/Cadastro/Transportadoras";
 
+/**
+ * `router` is a configuration object used to define the routes for a React application, utilizing the `createBrowserRouter` function.
+ * This configuration includes multiple routes corresponding to different paths and their respective components. Some routes are wrapped with
+ * a `PrivateRoute` component to restrict access to authenticated users.
+ *
+ * Route definitions:
+ * - `/`: Displays the `Login` component.
+ * - `/redefinicaoSenha`: Displays the `RedefinicaoSenha` component.
+ * - `/cadastros/veiculos`: Protected route displaying `ListVeiculo` for authenticated users.
+ * - `/cadastros/motoristas`: Protected route displaying `ListMotorista` for authenticated users.
+ * - `/cadastros/transportadoras`: Protected route displaying `Transportadoras` for authenticated users.
+ * - `/cadastros/motoristas/adicionar`: Protected route displaying `ListMotorista` for authenticated users when adding drivers.
+ * - `/cadastros/mensalistas`: Protected route displaying `ListMensalista`.
+ * - `/cadastros/terminais`: Protected route displaying the `Terminal` component.
+ * - `/operacoes_patio/servicos`: Protected route displaying `ListOperacoesPatioServicos`.
+ * - `/configuracoes/tipos_servicos`: Protected route displaying `ListTipoServico`.
+ * - `/operacoes_patio/entrada_saida_veiculos`: Protected route displaying `OperacoesPatioEntradaVeiculos`.
+ * - `/operacoes_patio/triagens`: Protected route displaying `Triagens`.
+ * - `/operacoes_porto/agendada`: Protected route displaying `OperacoesPortoAgendada`.
+ *
+ * Components wrapped with `PrivateRoute` indicate that user authentication is required to access those routes.
+ */
 const router = createBrowserRouter([
   {
     path: '',
@@ -47,6 +70,14 @@ const router = createBrowserRouter([
     )
   },
   {
+    path: '/cadastros/transportadoras',
+    element: (
+        <PrivateRoute>
+          <Transportadoras />
+        </PrivateRoute>
+    )
+  },
+  {
     path: '/cadastros/motoristas/adicionar',
     element: (
       <PrivateRoute>
@@ -60,6 +91,14 @@ const router = createBrowserRouter([
       <PrivateRoute>
         <ListMensalista />
       </PrivateRoute>
+    )
+  },
+  {
+    path: '/cadastros/terminais',
+    element: (
+        <PrivateRoute>
+          <Terminal />
+        </PrivateRoute>
     )
   },
   {
@@ -78,14 +117,7 @@ const router = createBrowserRouter([
       </PrivateRoute>
     )
   },
-  {
-    path: '/cadastros/terminais',
-    element: (
-      <PrivateRoute>
-        <Terminal />
-      </PrivateRoute>
-    )
-  },
+
   {
     path: '/operacoes_patio/entrada_saida_veiculos',
     element: (

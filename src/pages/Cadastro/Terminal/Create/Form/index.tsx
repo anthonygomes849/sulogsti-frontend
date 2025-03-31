@@ -9,17 +9,19 @@ import {
   BillingPeriod,
   CargaType,
   ITerminal,
-  Neighborhood,
+  Neighborhood, Options,
   PeriodPayment,
 } from "../types/types";
+import formValidator from "./validators/formValidator.ts";
+import {FrontendNotification} from "../../../../../shared/Notification";
 
 interface FormValues {
   cnpj: string;
-  razaoSocial: string;
-  nomeFantasia: string;
+  razao_social: string;
+  nome_fantasia: string;
   tipos_carga: string;
-  periodo_faturamento: number;
-  id_przpgto: number;
+  periodo_faturamento: string;
+  id_przpgto: string;
   endereco: string;
   id_estado: string;
   id_cidade: string;
@@ -31,7 +33,6 @@ interface FormValues {
   celular: string;
   contato: string;
   email: string;
-  ativo: boolean;
 }
 
 interface Props {
@@ -43,22 +44,81 @@ interface Props {
 }
 
 const Form: React.FC<Props> = (props: Props) => {
-  const [states, setStates] = useState<any[]>([]);
-  const [cities, setCities] = useState<any[]>([]);
-  const [neighborhood, setNeighborhood] = useState<any[]>([]);
-  const [cargoTypes, setCargoTypes] = useState<any[]>([]);
-  const [billingPeriod, setBillingPeriod] = useState<any[]>([]);
-  const [valueCargoTypes, setValueCargoTypes] = useState<any[]>([]);
-  const [periodPayment, setPeriodPayment] = useState<any[]>([]);
+  const [states, setStates] = useState<Options[]>([]);
+  const [cities, setCities] = useState<Options[]>([]);
+  const [neighborhood, setNeighborhood] = useState<Options[]>([]);
+  const [cargoTypes, setCargoTypes] = useState<Options[]>([]);
+  const [billingPeriod, setBillingPeriod] = useState<Options[]>([]);
+  const [valueCargoTypes, setValueCargoTypes] = useState<Options[]>([]);
+  const [periodPayment, setPeriodPayment] = useState<Options[]>([]);
 
-  const [loading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
+
+  const handleSubmit = useCallback(async (values: FormValues) => {
+      try {
+        setLoading(true);
+
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const userId = urlParams.get("userId");
+
+        const body = {
+          id_terminal: props.selectedRow?.id_terminal,
+          cnpj: values.cnpj.replaceAll(".", "").replaceAll("-", "").replace("/", ""),
+          razao_social: values.razao_social,
+          nome_fantasia: values.nome_fantasia,
+          periodo_faturamento: values.periodo_faturamento + 1,
+          id_przpgto: values.id_przpgto.length > 0 ? Number(values.id_przpgto) : null,
+          tipos_carga: values.tipos_carga,
+          endereco: values.endereco,
+          id_estado: values.id_estado.length > 0 ? Number(values.id_estado) : null,
+          id_cidade: values.id_cidade.length > 0 ? Number(values.id_cidade) : null,
+          id_bairro: values.id_bairro.length > 0 ? Number(values.id_bairro) : null,
+          numero: values.numero.length > 0 ? Number(values.numero) : null,
+          complemento: values.complemento.length > 0 ? values.complemento : null,
+          cep: values.cep.length > 0 ? values.cep : null,
+          celular: values.celular.length > 0 ? values.celular : null,
+          telefone: values.telefone.length > 0 ? values.telefone : null,
+          email: values.email,
+          id_usuario_historico: Number(userId),
+          ativo: true,
+          status: 0
+        }
+
+        if(props.isEdit) {
+            const response = await api.post("/editar/terminais", body);
+
+            if(response.status === 200) {
+              FrontendNotification("Terminal salvo com sucesso!", "success");
+              props.onConfirm();
+            } else {
+              FrontendNotification("Erro ao salvar o terminal!", "error");
+            }
+        } else {
+          const response = await api.post("/cadastrar/terminais", body);
+
+          if(response.status === 200) {
+            FrontendNotification("Terminal salvo com sucesso!", "success");
+            props.onConfirm();
+          } else {
+            FrontendNotification("Erro ao salvar o terminal!", "error");
+          }
+        }
+
+        setLoading(false);
+      }catch{
+        FrontendNotification("Erro ao salvar o terminal!", "error");
+        setLoading(false);
+      }
+  }, [])
 
   const initialValues: FormValues = {
     cnpj: "",
-    nomeFantasia: "",
-    razaoSocial: "",
-    periodo_faturamento: 0,
-    id_przpgto: 0,
+    nome_fantasia: "",
+    razao_social: "",
+    periodo_faturamento: "",
+    id_przpgto: "",
     tipos_carga: "",
     endereco: "",
     id_estado: "",
@@ -71,13 +131,13 @@ const Form: React.FC<Props> = (props: Props) => {
     telefone: "",
     email: "",
     contato: "",
-    ativo: true,
   };
 
   const formik = useFormik({
     initialValues,
-    // validationSchema: formValidator,
-    onSubmit: () => {
+    validationSchema: formValidator,
+    onSubmit: (values: FormValues) => {
+      handleSubmit(values);
     },
   });
 
@@ -86,24 +146,30 @@ const Form: React.FC<Props> = (props: Props) => {
 
     if (data) {
       formik.setFieldValue("cnpj", data.cnpj);
-      formik.setFieldValue("razaoSocial", data.razao_social);
-      formik.setFieldValue("nomeFantasia", data.nome_fantasia);
+      formik.setFieldValue("razao_social", data.razao_social);
+      formik.setFieldValue("nome_fantasia", data.nome_fantasia);
       formik.setFieldValue("periodo_faturamento", data.periodo_faturamento - 1);
       formik.setFieldValue("id_przpgto", data.id_przpgto);
       if (data.tipos_carga) {
-        const cargaType: any[] = data.tipos_carga
+        const cargaType = data.tipos_carga
           .replace("{", "")
           .replace("}", "")
           .split(",");
 
-        const getCargoType = cargaType.map((item: any) => {
+        const getCargaTypeLabel = (index: number) => {
+          return Object.values(CargaType)[index - 1];
+        }
+
+        const cargoTypeOptions: Options[] = cargaType.map((cargoType: string) => {
           return {
-            value: Number(item),
-            label: Object.values(CargaType)[Number(item - 1)],
+            value: String(cargoType),
+            label: getCargaTypeLabel(Number(cargoType))
           };
         });
 
-        setValueCargoTypes(getCargoType);
+        console.log(cargoTypeOptions);
+
+        setValueCargoTypes(cargoTypeOptions);
         formik.setFieldValue("tipos_carga", data.tipos_carga);
       }
       formik.setFieldValue("nomeFantasia", data.nome_fantasia);
@@ -130,7 +196,9 @@ const Form: React.FC<Props> = (props: Props) => {
       });
 
       setStates(mappingResponse);
-    } catch {}
+    } catch (error) {
+      console.error("Failed to fetch states:", error);
+    }
   }, []);
 
   const getCities = useCallback(
@@ -150,7 +218,7 @@ const Form: React.FC<Props> = (props: Props) => {
         });
 
         setCities(mappingResponse);
-      } catch {}
+      } catch { /* empty */ }
     },
     [formik.values.id_estado]
   );
@@ -172,18 +240,19 @@ const Form: React.FC<Props> = (props: Props) => {
         });
 
         setNeighborhood(mappingResponse);
-      } catch {}
+      } catch { /* empty */ }
     },
     [formik.values.id_cidade]
   );
 
   const getCargoTypes = useCallback(() => {
-    const data = Object.values(CargaType).map((value: any, index: number) => {
+    const data = Object.values(CargaType).map((value: string, index: number) => {
       return {
         value: `${index + 1}`,
         label: value,
       };
     });
+    console.log(data);
 
     setCargoTypes(data);
   }, []);
@@ -205,14 +274,14 @@ const Form: React.FC<Props> = (props: Props) => {
         setPeriodPayment(mappingResponse);
         
       }
-    }catch{}
+    }catch{ /* empty */ }
   }, [])
 
   const getBillingPeriod = useCallback(() => {
     const data = Object.values(BillingPeriod).map(
-      (value: any, index: number) => {
+      (value: string, index: number) => {
         return {
-          value: index + 1,
+          value: index,
           label: value,
         };
       }
@@ -256,10 +325,10 @@ const Form: React.FC<Props> = (props: Props) => {
             <InputCustom
               title="Razão Social"
               placeholder=""
-              onChange={formik.handleChange("razaoSocial")}
-              value={formik.values.razaoSocial}
-              touched={formik.touched.razaoSocial}
-              error={formik.errors.razaoSocial}
+              onChange={formik.handleChange("razao_social")}
+              value={formik.values.razao_social}
+              touched={formik.touched.razao_social}
+              error={formik.errors.razao_social}
               disabled={props.isView}
             />
           </div>
@@ -267,10 +336,10 @@ const Form: React.FC<Props> = (props: Props) => {
             <InputCustom
               title="Nome Fantasia"
               placeholder=""
-              onChange={formik.handleChange("nomeFantasia")}
-              value={formik.values.nomeFantasia}
-              touched={formik.touched.nomeFantasia}
-              error={formik.errors.nomeFantasia}
+              onChange={formik.handleChange("nome_fantasia")}
+              value={formik.values.nome_fantasia}
+              touched={formik.touched.nome_fantasia}
+              error={formik.errors.nome_fantasia}
               disabled={props.isView}
             />
           </div>
@@ -278,13 +347,16 @@ const Form: React.FC<Props> = (props: Props) => {
             <SelectCustom
               data={cargoTypes}
               isMulti
-              onChange={(selectedOption: any) => {
+              defaultValue={valueCargoTypes}
+              onChange={(selectedOption: Options[]) => {
                 setValueCargoTypes(selectedOption);
 
-                let dataCargoTypes = "{";
+                let dataCargoTypes: string | number = "{";
 
-                selectedOption.map((item: any) => {
-                  dataCargoTypes = dataCargoTypes.concat(item.value) + ",";
+                selectedOption.map((item: Options) => {
+                  if (typeof item.value === "string") {
+                    dataCargoTypes = String(dataCargoTypes).concat(item.value) + ",";
+                  }
                 });
 
                 let value = dataCargoTypes.replace(/,$/, "");
@@ -303,7 +375,7 @@ const Form: React.FC<Props> = (props: Props) => {
           <div>
             <SelectCustom
               data={billingPeriod}
-              onChange={(selectedOption: any) => {
+              onChange={(selectedOption: Options) => {
                 formik.setFieldValue(
                   "periodo_faturamento",
                   selectedOption.value
@@ -319,10 +391,10 @@ const Form: React.FC<Props> = (props: Props) => {
           <div>
           <SelectCustom
               data={periodPayment}
-              onChange={(selectedOption: any) => {
+              onChange={(selectedOption: Options) => {
                 formik.setFieldValue(
                   "id_przpgto",
-                  selectedOption.value
+                  String(selectedOption.value)
                 );
               }}
               title="Prazo de Pagamento"
@@ -351,9 +423,9 @@ const Form: React.FC<Props> = (props: Props) => {
           <div>
             <SelectCustom
               data={states}
-              onChange={(selectedOption: any) => {
-                formik.setFieldValue("id_estado", selectedOption.id);
-                getCities(selectedOption.id);
+              onChange={(selectedOption: Options) => {
+                formik.setFieldValue("id_estado", String(selectedOption.value));
+                getCities(String(selectedOption.value));
               }}
               title="Estado"
               touched={formik.touched.id_estado}
@@ -365,9 +437,10 @@ const Form: React.FC<Props> = (props: Props) => {
           <div>
             <SelectCustom
               data={cities}
-              onChange={(selectedOption: any) => {
-                formik.setFieldValue("id_cidade", selectedOption.id);
-                getNeighborhood(selectedOption.id);
+              onChange={(selectedOption: Options) => {
+                console.log(selectedOption);
+                formik.setFieldValue("id_cidade", String(selectedOption.value));
+                getNeighborhood(String(selectedOption.value));
               }}
               title="Cidade"
               touched={formik.touched.id_cidade}
@@ -379,10 +452,10 @@ const Form: React.FC<Props> = (props: Props) => {
           <div>
             <SelectCustom
               data={neighborhood}
-              onChange={(selectedOption: any) => {
-                formik.setFieldValue("id_bairro", selectedOption.id);
+              onChange={(selectedOption: Options) => {
+                formik.setFieldValue("id_bairro", selectedOption.value);
               }}
-              title="Cidade"
+              title="Bairro"
               touched={formik.touched.id_bairro}
               error={formik.errors.id_bairro}
               disabled={props.isView}
