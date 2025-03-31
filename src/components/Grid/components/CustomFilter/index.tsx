@@ -106,7 +106,7 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
               setFilterValue(value);
             } else {
               console.log("entrou select", selectedOption);
-              setFilterValue(selectedOption.value);
+              setFilterValue(Number(selectedOption.value));
             }
           }}
           title=""
