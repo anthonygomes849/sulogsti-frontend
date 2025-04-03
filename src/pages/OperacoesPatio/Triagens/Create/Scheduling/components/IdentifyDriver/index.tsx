@@ -393,7 +393,7 @@ const IdentifyDriver: React.FC = () => {
                               </>
                           ): (
                               <div className="flex items-center">
-                                <input type="text" className="w-full h-9" value={textPhone} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextPhone(e.target.value)} onBlur={() => onUpdatePhone(formik.values.id_motorista, textPhone)} />
+                                <input type="text" className="w-full h-9" value={textPhone} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextPhone(e.target.value)} onBlur={() => onUpdatePhone(Number(formik.values.id_motorista), textPhone)} />
                         <img className="ml-2 cursor-pointer" src={deleteIcon} alt="" onClick={() => setShowUpdatePhone(!showUpdatePhone)} />
                               </div>
                           )}

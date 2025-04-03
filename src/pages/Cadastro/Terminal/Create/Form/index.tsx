@@ -55,16 +55,18 @@ const Form: React.FC<Props> = (props: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
 
 
-  const handleSubmit = useCallback(async (values: FormValues) => {
+  const handleSubmit = useCallback(async (values: FormValues, row?: ITerminal) => {
       try {
         setLoading(true);
+
 
         const urlParams = new URLSearchParams(window.location.search);
 
         const userId = urlParams.get("userId");
 
+        console.log("entrou", values)
         const body = {
-          id_terminal: props.selectedRow?.id_terminal,
+          id_terminal: row?.id_terminal,
           cnpj: values.cnpj.replaceAll(".", "").replaceAll("-", "").replace("/", ""),
           razao_social: values.razao_social,
           nome_fantasia: values.nome_fantasia,
@@ -72,19 +74,21 @@ const Form: React.FC<Props> = (props: Props) => {
           id_przpgto: values.id_przpgto.length > 0 ? Number(values.id_przpgto) : null,
           tipos_carga: values.tipos_carga,
           endereco: values.endereco,
-          id_estado: values.id_estado.length > 0 ? Number(values.id_estado) : null,
-          id_cidade: values.id_cidade.length > 0 ? Number(values.id_cidade) : null,
-          id_bairro: values.id_bairro.length > 0 ? Number(values.id_bairro) : null,
+          id_estado: values.id_estado !== null && values.id_estado.length > 0 ? Number(values.id_estado) : null,
+          id_cidade: values.id_cidade !== null && values.id_cidade.length > 0 ? Number(values.id_cidade) : null,
+          id_bairro: values.id_bairro !== null && values.id_bairro.length > 0 ? Number(values.id_bairro) : null,
           numero: values.numero.length > 0 ? Number(values.numero) : null,
-          complemento: values.complemento.length > 0 ? values.complemento : null,
-          cep: values.cep.length > 0 ? values.cep : null,
-          celular: values.celular.length > 0 ? values.celular : null,
-          telefone: values.telefone.length > 0 ? values.telefone : null,
+          complemento: values.complemento !== null && values.complemento.length > 0 ? values.complemento : null,
+          cep: values.cep !== null && values.cep.length > 0 ? values.cep : null,
+          celular: values.celular !== null && values.celular.length > 0 ? values.celular : null,
+          telefone: values.telefone !== null && values.telefone.length > 0 ? values.telefone : null,
           email: values.email,
           id_usuario_historico: Number(userId),
           ativo: true,
           status: 0
         }
+
+
 
         if(props.isEdit) {
             const response = await api.post("/editar/terminais", body);
@@ -137,7 +141,7 @@ const Form: React.FC<Props> = (props: Props) => {
     initialValues,
     validationSchema: formValidator,
     onSubmit: (values: FormValues) => {
-      handleSubmit(values);
+      handleSubmit(values, props.selectedRow);
     },
   });
 
@@ -175,9 +179,16 @@ const Form: React.FC<Props> = (props: Props) => {
       formik.setFieldValue("nomeFantasia", data.nome_fantasia);
       formik.setFieldValue("celular", data.celular);
       formik.setFieldValue("endereco", data.endereco);
-      formik.setFieldValue("id_estado", data.id_estado);
-      formik.setFieldValue("id_bairro", data.id_bairro);
-      formik.setFieldValue("id_cidade", data.id_cidade);
+      formik.setFieldValue("id_estado", String(data.id_estado));
+      if(data.id_estado !== null) {
+        getCities(data.id_estado);
+      }
+      formik.setFieldValue("id_cidade", String(data.id_cidade));
+      if(data.id_cidade !== null) {
+        getNeighborhood(data.id_cidade);
+      }
+      formik.setFieldValue("id_bairro",String(data.id_bairro));
+      formik.setFieldValue("email", data.email);
       formik.setFieldValue("numero", data.numero);
       formik.setFieldValue("cep", data.cep);
       formik.setFieldValue("ativo", data.ativo);
