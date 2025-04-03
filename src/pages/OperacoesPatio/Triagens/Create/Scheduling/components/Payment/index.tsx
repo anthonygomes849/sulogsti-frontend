@@ -122,14 +122,19 @@ const Payment: React.FC<Props> = (props: Props) => {
         const cpfSupervisor = values.cpf_supervisor.replaceAll(".", "").replace("-", "");
         console.log(cpfSupervisor.length);
 
-        const getCpfSupervisor = await getSupervisorCpf(cpfSupervisor);
+
+        let getCpfSupervisor = null;
+
+        if(values.desconto.length > 0 && Number(values.desconto) > 0) {
+          getCpfSupervisor = await getSupervisorCpf(cpfSupervisor);
+        }
 
         if(cpfSupervisor.length === 11 && !getCpfSupervisor){
 
           FrontendNotification("CPF Supervisor inválido", "warning");
 
         } else {
-          let currentRow = sessionStorage.getItem("@triagem");
+          let currentRow: any = sessionStorage.getItem("@triagem");
 
           if (currentRow) {
             currentRow = JSON.parse(currentRow);
@@ -144,8 +149,8 @@ const Payment: React.FC<Props> = (props: Props) => {
           const userId = urlParams.get("userId");
 
 
-          const valorPago: number = Number(values.valor_pago).toFixed(2);
-          const desconto: number = Number(values.desconto).toFixed(2);
+          const valorPago: any = Number(values.valor_pago).toFixed(2);
+          const desconto: any = Number(values.desconto).toFixed(2);
 
           const body = {
             id_operacao_patio,
