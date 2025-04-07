@@ -129,7 +129,7 @@ const Payment: React.FC<Props> = (props: Props) => {
           getCpfSupervisor = await getSupervisorCpf(cpfSupervisor);
         }
 
-        if(cpfSupervisor.length === 11 && !getCpfSupervisor){
+        if(values.desconto.length > 0 && Number(values.desconto) > 0 && cpfSupervisor.length === 11 && !getCpfSupervisor){
 
           FrontendNotification("CPF Supervisor inválido", "warning");
 

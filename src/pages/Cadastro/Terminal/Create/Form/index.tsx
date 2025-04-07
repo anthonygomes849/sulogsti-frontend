@@ -14,6 +14,7 @@ import {
 } from "../types/types";
 import formValidator from "./validators/formValidator.ts";
 import {FrontendNotification} from "../../../../../shared/Notification";
+import {ToastContainer} from "react-toastify";
 
 interface FormValues {
   cnpj: string;
@@ -64,13 +65,12 @@ const Form: React.FC<Props> = (props: Props) => {
 
         const userId = urlParams.get("userId");
 
-        console.log("entrou", values)
         const body = {
           id_terminal: row?.id_terminal,
           cnpj: values.cnpj.replaceAll(".", "").replaceAll("-", "").replace("/", ""),
           razao_social: values.razao_social,
           nome_fantasia: values.nome_fantasia,
-          periodo_faturamento: values.periodo_faturamento + 1,
+          periodo_faturamento: values.periodo_faturamento.length > 0 ? Number(values.periodo_faturamento) + 1 : null,
           id_przpgto: values.id_przpgto.length > 0 ? Number(values.id_przpgto) : null,
           tipos_carga: values.tipos_carga,
           endereco: values.endereco,
@@ -79,9 +79,9 @@ const Form: React.FC<Props> = (props: Props) => {
           id_bairro: values.id_bairro !== null && values.id_bairro.length > 0 ? Number(values.id_bairro) : null,
           numero: values.numero.length > 0 ? Number(values.numero) : null,
           complemento: values.complemento !== null && values.complemento.length > 0 ? values.complemento : null,
-          cep: values.cep !== null && values.cep.length > 0 ? values.cep : null,
-          celular: values.celular !== null && values.celular.length > 0 ? values.celular : null,
-          telefone: values.telefone !== null && values.telefone.length > 0 ? values.telefone : null,
+          cep: values.cep !== null && values.cep.length > 0 ? values.cep.replace("-", "") : null,
+          celular: values.celular !== null && values.celular.length > 0 ? values.celular.replace("(", "").replace(")", "").replace("-", "").replaceAll(" ", "") : null,
+          telefone: values.telefone !== null && values.telefone.length > 0 ? values.telefone.replace("(", "").replace(")", "").replace("-", "").replaceAll(" ", "") : null,
           email: values.email,
           id_usuario_historico: Number(userId),
           ativo: true,
@@ -148,11 +148,13 @@ const Form: React.FC<Props> = (props: Props) => {
   const onLoadFormValues = useCallback((row?: ITerminal) => {
     const data = row;
 
+
     if (data) {
+    console.log(data.periodo_faturamento - 1);
       formik.setFieldValue("cnpj", data.cnpj);
       formik.setFieldValue("razao_social", data.razao_social);
       formik.setFieldValue("nome_fantasia", data.nome_fantasia);
-      formik.setFieldValue("periodo_faturamento", data.periodo_faturamento - 1);
+      formik.setFieldValue("periodo_faturamento", String(data.periodo_faturamento - 1));
       formik.setFieldValue("id_przpgto", data.id_przpgto);
       if (data.tipos_carga) {
         const cargaType = data.tipos_carga
@@ -190,7 +192,10 @@ const Form: React.FC<Props> = (props: Props) => {
       formik.setFieldValue("id_bairro",String(data.id_bairro));
       formik.setFieldValue("email", data.email);
       formik.setFieldValue("numero", data.numero);
+      formik.setFieldValue("complemento", data.complemento);
       formik.setFieldValue("cep", data.cep);
+      formik.setFieldValue("telefone", data.telefone);
+      formik.setFieldValue("contato", data.contato);
       formik.setFieldValue("ativo", data.ativo);
     }
   }, []);
@@ -289,7 +294,7 @@ const Form: React.FC<Props> = (props: Props) => {
   }, [])
 
   const getBillingPeriod = useCallback(() => {
-    const data = Object.values(BillingPeriod).map(
+    const data: Options[] = Object.values(BillingPeriod).map(
       (value: string, index: number) => {
         return {
           value: index,
@@ -297,6 +302,11 @@ const Form: React.FC<Props> = (props: Props) => {
         };
       }
     );
+
+    data.unshift({
+      value: "",
+      label: "Selecione"
+    });
 
     setBillingPeriod(data);
   }, []);
@@ -317,7 +327,9 @@ const Form: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Loading loading={loading} />
-      <div className="overflow-y-scroll max-h-[550px] p-5">
+
+      <ToastContainer />
+      <div className="overflow-y-scroll max-w-full max-h-[550px] p-5">
         <div className="grid grid-cols-2 gap-3 mb-2">
           <div>
             <InputCustom
@@ -389,7 +401,7 @@ const Form: React.FC<Props> = (props: Props) => {
               onChange={(selectedOption: Options) => {
                 formik.setFieldValue(
                   "periodo_faturamento",
-                  selectedOption.value
+                  String(selectedOption.value)
                 );
               }}
               title="Período de Faturamento"
@@ -464,7 +476,7 @@ const Form: React.FC<Props> = (props: Props) => {
             <SelectCustom
               data={neighborhood}
               onChange={(selectedOption: Options) => {
-                formik.setFieldValue("id_bairro", selectedOption.value);
+                formik.setFieldValue("id_bairro", String(selectedOption.value));
               }}
               title="Bairro"
               touched={formik.touched.id_bairro}
