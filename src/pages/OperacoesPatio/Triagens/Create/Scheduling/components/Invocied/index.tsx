@@ -91,53 +91,6 @@ const Invoiced: React.FC<Props> = (props: Props) => {
               </span>
             </div>
           </div>
-          <div className="w-full h-full flex flex-col items-center justify-center mt-5">
-            <div>
-              <span>
-                Valor horas extras:
-              </span>
-              <span className="ml-2 text-base text-[#000] font-bold">
-                {dataTicket?.valor_hora_extra.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-              </span>
-
-            </div>
-            <div>
-              <span>
-                Valor estadia:
-              </span>
-              <span className="ml-2 text-base text-[#000] font-bold">
-                {dataTicket?.valor_total_estadia.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-              </span>
-            </div>
-            <div>
-              <span>
-                Valor Triagem:
-              </span>
-              <span className="ml-2 text-base text-[#000] font-bold">
-                {dataTicket?.valor_total_triagem.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-              </span>
-            </div>
-            <div>
-              <span>
-                Valor Total:
-              </span>
-              <span className="ml-2 text-base text-[#000] font-bold">
-                {dataTicket?.valor_total.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-              </span>
-            </div>
-          </div>
         </div>
       </motion.div>
       <div className="w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
