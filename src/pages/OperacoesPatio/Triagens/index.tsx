@@ -161,7 +161,7 @@ const Triagens: React.FC = () => {
     },
     {
       headerName: "Proprietario de Carga",
-      field: "operacao_porto_carrossel.proprietarioDeCarga",
+      field: "operacao_porto_carrossel.proprietarioDeCarga.razao_social",
       filter: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
