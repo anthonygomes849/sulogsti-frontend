@@ -19,8 +19,14 @@ interface Props {
   onClose: () => void;
 }
 
+interface IBumerangue {
+  id_operacao_patio: number | null;
+  Bumerangue: boolean;
+}
+
 const Ticket = (props: Props) => {
   const [dataTicket, setDataTicket] = useState<IPaymentTicket[]>([]);
+  const [bumerangue, setBumerangue] = useState<IBumerangue>();
   const [loading, setLoading] = useState<boolean>(false);
   const printRef: any = useRef(null);
 
@@ -73,9 +79,40 @@ const Ticket = (props: Props) => {
     }
   }, [props.data]);
 
+  const getBumerangue = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      setLoading(true);
+
+      let currentRow: any = sessionStorage.getItem("@triagem");
+
+      if (currentRow) {
+        currentRow = JSON.parse(currentRow);
+      }
+
+      const body = {
+        id_operacao_patio:
+            Number(sessionStorage.getItem("id_operacao_patio")) ||
+            Number(currentRow.id_operacao_patio),
+      };
+
+      const response = await api.post("/operacaopatio/bumerangue", body);
+
+      if(response.status === 200) {
+        setBumerangue(response.data);
+      }
+
+      setLoading(false);
+    }catch{
+      setLoading(false);
+    }
+  }, [])
+
   useEffect(() => {
     getPaymentTicket();
-  }, [getPaymentTicket]);
+    getBumerangue();
+  }, [getPaymentTicket, getBumerangue]);
 
   return (
     <>
@@ -204,6 +241,13 @@ const Ticket = (props: Props) => {
                           .identificadores_conteineres
                       : "---"}
                   </span>
+                </div>
+                <div className="w-full flex items-center mb-1">
+                  {bumerangue?.Bumerangue && (
+                    <span className="text-sm text-[#000] font-bold">
+                      Devolução de Contêiner
+                    </span>
+                  )}
                 </div>
               </div>
               <div

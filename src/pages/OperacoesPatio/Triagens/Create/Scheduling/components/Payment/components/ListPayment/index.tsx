@@ -22,6 +22,8 @@ import { useStatus } from "../../../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../../../services/api";
 import { ITriagens } from "../../../../../../types/types";
 import Info from "./components/Info";
+import reversedPayment from "./components/ReversedPayment";
+import ReversedPayment from "./components/ReversedPayment";
 
 const ListPayment: React.FC = () => {
   const [columns, setColumns] = useState<any[]>([]);
@@ -33,6 +35,7 @@ const ListPayment: React.FC = () => {
   const [update, setUpdate] = useState<boolean>(false);
   const [gridApi, setGridApi] = useState<any>(null);
   const [currentRow, setCurrentRow] = useState<ITriagens>();
+  const [isReversedPayment, setIsReversedPayment] = useState<boolean>(false);
 
   const defaultColumns = [
     {
@@ -95,7 +98,7 @@ const ListPayment: React.FC = () => {
                 onClick={() => {
                   // props.onDelete(params.data);
                   setSelectedRow(params.data);
-                  setIsRemove(!isRemove);
+                  setIsReversedPayment(!isReversedPayment);
                 }}
               >
                 <img src={DeleteIcon} style={{ width: 16, height: 16 }} />
@@ -171,6 +174,7 @@ const ListPayment: React.FC = () => {
     }
   }, []);
 
+
   useEffect(() => {
     if (gridApi) {
       const dataSource = {
@@ -217,12 +221,22 @@ const ListPayment: React.FC = () => {
     <div className="overflow-y-scroll w-auto max-h-[calc(80vh)] p-3">
       <Loading loading={loading} />
 
+      {isReversedPayment && (
+          <ReversedPayment
+              onConfirm={() => {
+                setIsReversedPayment(false);
+                onDelete(selectedRow?.id_operacao_patio_pagamento)
+              }}
+              onCancel={() => setIsReversedPayment(!isReversedPayment)}
+          />
+      )}
+
       {isRemove && (
         <ModalDelete
           title="Deseja estornar o pagamento?"
           message="Por favor, confirme que você deseja estornar o seguinte registro:"
           onCancel={() => setIsRemove(!isRemove)}
-          onConfirm={() => onDelete(selectedRow?.id_operacao_patio_pagamento)}
+          onConfirm={() => setIsReversedPayment(true)}
           row={selectedRow?.id_operacao_patio_pagamento}
         />
       )}
