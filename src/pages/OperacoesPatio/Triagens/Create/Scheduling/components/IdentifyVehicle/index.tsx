@@ -459,7 +459,7 @@ const IdentifyVehicle: React.FC = () => {
   const getVehicleTypes = useCallback(() => {
     const data = Object.values(TipoVeiculo).map((value: any, index: number) => {
       return {
-        value: `${index + 1}`,
+        value: `${index}`,
         label: value,
         isDisabled: index === 0
       };
@@ -557,7 +557,7 @@ const IdentifyVehicle: React.FC = () => {
     id_transportadora: "",
     cnpj_transportadora: "",
     tipo_placa: 1,
-    tipo_veiculo: "1",
+    tipo_veiculo: "0",
     identificacao_carga: false,
   };
 

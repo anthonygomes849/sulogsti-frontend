@@ -22,7 +22,6 @@ import { useStatus } from "../../../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../../../services/api";
 import { ITriagens } from "../../../../../../types/types";
 import Info from "./components/Info";
-import reversedPayment from "./components/ReversedPayment";
 import ReversedPayment from "./components/ReversedPayment";
 
 const ListPayment: React.FC = () => {
