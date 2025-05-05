@@ -80,8 +80,8 @@ const Form: React.FC<Props> = (props: Props) => {
         const body = {
           id_mensalista: row?.id_mensalista,
           placa: values.placa.replace("-", ""),
-          cnpj: values.cnpj,
-          id_transportadora: values.id_transportadora,
+          cnpj: values.cnpj.replaceAll('.', '').replace('/', '').replace('-', ''),
+          id_transportadora: values.id_transportadora.length > 0 ? values.id_transportadora : null,
           ativo: true,
           id_usuario_historico: userId,
         };
