@@ -77,11 +77,13 @@ const Form: React.FC<Props> = (props: Props) => {
 
         const userId = urlParams.get("userId");
 
+        console.log(values.id_transportadora);
+
         const body = {
           id_mensalista: row?.id_mensalista,
           placa: values.placa.replace("-", ""),
           cnpj: values.cnpj.replaceAll('.', '').replace('/', '').replace('-', ''),
-          id_transportadora: values.id_transportadora.length > 0 ? values.id_transportadora : null,
+          id_transportadora: String(values.id_transportadora).length > 0 ? values.id_transportadora : null,
           ativo: true,
           id_usuario_historico: userId,
         };
