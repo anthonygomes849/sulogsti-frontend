@@ -2,6 +2,8 @@ import { useFormik } from "formik";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
+import deleteIcon from '../../../../../../../assets/images/deleteIcon.svg';
+import edit from '../../../../../../../assets/images/edit.svg';
 import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
 import {
@@ -15,8 +17,6 @@ import { FrontendNotification } from "../../../../../../../shared/Notification";
 import Create from "../../../../../../Cadastro/Motoristas/Create";
 import { IMotorista } from "../../../../../../Cadastro/Motoristas/Create/types/types";
 import formValidator from "./validators/formValidator";
-import edit from '../../../../../../../assets/images/edit.svg';
-import deleteIcon from '../../../../../../../assets/images/deleteIcon.svg';
 
 // import { Container } from './styles';
 
@@ -240,11 +240,15 @@ const IdentifyDriver: React.FC = () => {
     },
   });
 
-  useEffect(() => {
-    if (searchQuery.length >= 3) {
-      onSearchDriver(searchQuery);
+  const loadOptions = async (inputValue: string, callback: any) => {
+    if (inputValue.length < 3) {
+      // Não carrega nada se menos de 3 caracteres
+      callback([]);
+      return;
     }
-  }, [searchQuery]);
+  
+    return await onSearchDriver(inputValue)
+  };
 
   useEffect(() => {
     onLoadFormValues();
@@ -298,7 +302,7 @@ const IdentifyDriver: React.FC = () => {
                 <SelectCustom
                   async
                   selectRef={selectRef}
-                  data={onSearchDriver}
+                  data={loadOptions}
                   onChange={(selectedOption: any) => {
                     setSearchDriver(selectedOption);
                     formik.setFieldValue("id_motorista", selectedOption.value);

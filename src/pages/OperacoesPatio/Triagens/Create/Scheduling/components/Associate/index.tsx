@@ -120,6 +120,8 @@ const Associate: React.FC = () => {
 
       const response = await api.post("/listar/entradaSaidaVeiculos", body);
 
+      console.log(response.data.data);
+
       const mappingResponse = response.data.data.map(
         (item: IOperacoesPatioEntradaVeiculos) => {
           return {
@@ -134,6 +136,8 @@ const Associate: React.FC = () => {
           };
         }
       );
+
+      console.log(mappingResponse);
 
       setEntradaVeiculo(mappingResponse);
 
@@ -228,12 +232,15 @@ const Associate: React.FC = () => {
     },
   });
 
-  useEffect(() => {
-    console.log(serachQueryEntrada.length);
-    if (serachQueryEntrada.length > 3) {
-      getOperacoesPatioEntradaVeiculo(serachQueryEntrada);
+  const loadOptions = async (inputValue: string, callback: any) => {
+    if (inputValue.length < 3) {
+      // Não carrega nada se menos de 3 caracteres
+      callback([]);
+      return;
     }
-  }, [serachQueryEntrada]);
+  
+    return await getOperacoesPatioEntradaVeiculo(inputValue)
+  };
 
   useEffect(() => {
     getOperacaoPortoAgendada();
@@ -262,7 +269,7 @@ const Associate: React.FC = () => {
               <SelectCustom
                 async
                 selectRef={selectRef}
-                data={getOperacoesPatioEntradaVeiculo}
+                data={loadOptions}
                 onChange={(selectedOption: any) => {
                   formik.setFieldValue(
                     "id_operacao_entrada_veiculo",
@@ -270,7 +277,7 @@ const Associate: React.FC = () => {
                   );
                 }}
                 onInputChange={(value) => {
-                  setSearchQueryEntrada(value);
+                    setSearchQueryEntrada(value);
                 }}
                 title="Entrada Associada à Triagem"
                 touched={formik.touched.id_operacao_entrada_veiculo}

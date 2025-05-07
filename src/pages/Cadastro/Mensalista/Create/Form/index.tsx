@@ -77,12 +77,10 @@ const Form: React.FC<Props> = (props: Props) => {
 
         const userId = urlParams.get("userId");
 
-        console.log(values.id_transportadora);
-
         const body = {
           id_mensalista: row?.id_mensalista,
           placa: values.placa.replace("-", ""),
-          cnpj: values.cnpj.replaceAll('.', '').replace('/', '').replace('-', ''),
+          cnpj: values.cnpj.length > 0 ? values.cnpj.replaceAll('.', '').replace('/', '').replace('-', '') : null,
           id_transportadora: String(values.id_transportadora).length > 0 ? values.id_transportadora : null,
           ativo: true,
           id_usuario_historico: userId,
@@ -200,7 +198,8 @@ const Form: React.FC<Props> = (props: Props) => {
             <ChoiceBox
               data={choiceOptions}
               onChange={(value: number) => {
-                formik.setFieldValue("tipo_transportadora", value);
+                console.log(value);
+                formik.setFieldValue("tipo_transportadora", String(value));
 
                 setChoiceOptions([
                   {
