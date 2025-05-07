@@ -30,7 +30,7 @@ interface FormValues {
 
 const Associate: React.FC = () => {
   const [, setEntradaVeiculo] = useState([]);
-  const [operacaoPortoAgendada, setOperacaoPortoAgendada] = useState([]);
+  const [, setOperacaoPortoAgendada] = useState([]);
   const [operacaoPortoCarrossel, setOperacaoPortoCarrossel] = useState([]);
   const [, setSearchQueryEntrada] = useState<string>("");
   const [, setSearchQueryAgendada] = useState<string>("");
@@ -195,7 +195,7 @@ const Associate: React.FC = () => {
         placa: value.toUpperCase(),
       };
 
-      if (value.length > 4) {
+      if (value.length > 7) {
         body = {
           order_by: "data_historico",
           order_direction: "desc",
