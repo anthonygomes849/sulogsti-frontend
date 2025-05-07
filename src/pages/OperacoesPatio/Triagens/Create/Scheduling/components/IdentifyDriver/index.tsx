@@ -29,7 +29,7 @@ const IdentifyDriver: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [, setListDriver] = useState([]);
   const [detailDriver, setDetailDriver] = useState<IMotorista[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [, setSearchQuery] = useState<string>('');
   const [searchDriver, setSearchDriver] = useState();
   const [showCreateDriver, setShowCreateDriver]  = useState<boolean>(false);
   const [showUpdatePhone, setShowUpdatePhone]  = useState<boolean>(false);

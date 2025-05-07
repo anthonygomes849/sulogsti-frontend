@@ -32,7 +32,7 @@ const Associate: React.FC = () => {
   const [, setEntradaVeiculo] = useState([]);
   const [operacaoPortoAgendada, setOperacaoPortoAgendada] = useState([]);
   const [operacaoPortoCarrossel, setOperacaoPortoCarrossel] = useState([]);
-  const [serachQueryEntrada, setSearchQueryEntrada] = useState<string>("");
+  const [, setSearchQueryEntrada] = useState<string>("");
   const [isAssociate, setIsAssociate] = useState(false);
 
   const selectRef: any = useRef(null);
