@@ -20,24 +20,25 @@ import { useStatus } from "../../../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../../../services/api";
 import Info from "./components/Info";
 import ReversedPayment from "./components/ReversedPayment";
+import {ValueFormatterParams} from "ag-grid-community";
 
-const ListPayment = () => {
+const ListPayment: React.FC = () => {
   const [columns, setColumns] = useState([]);
   const [rowData, setRowData] = useState([]);
-  const [selectedRow, setSelectedRow] = useState();
+  const [selectedRow, setSelectedRow] = useState<any>();
   const [isView, setIsView] = useState(false);
   const [isRemove, setIsRemove] = useState(false);
   const [loading, setLoading] = useState(false);
   const [update, setUpdate] = useState(false);
-  const [gridApi, setGridApi] = useState(null);
-  const [currentRow, setCurrentRow] = useState();
+  const [gridApi, setGridApi] = useState<any>(null);
+  const [currentRow, setCurrentRow] = useState<any>();
   const [isReversedPayment, setIsReversedPayment] = useState(false);
 
   const defaultColumns = [
     {
       field: "data_hora_pagamento",
       headerName: "Data do pagamento",
-      valueFormatter: (params) => {
+      valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return formatDateTimeBR(params.value);
         }
@@ -48,7 +49,7 @@ const ListPayment = () => {
     {
       field: "tipo_pagamento",
       headerName: "Tipo de pagamento",
-      valueFormatter: (params) => {
+      valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return renderPaymentTypes(params.value);
         }
@@ -63,7 +64,7 @@ const ListPayment = () => {
     {
       field: "quantia_paga",
       headerName: "Valor Pago",
-      valueFormatter: (params) => {
+      valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
           return `R$ ${params.value}`;
         }
@@ -75,7 +76,7 @@ const ListPayment = () => {
       field: "",
       headerName: "",
       pinned: "right",
-      cellRenderer: (params) => {
+      cellRenderer: (params: ValueFormatterParams) => {
         if (params.data) {
           return (
             <div>
@@ -112,10 +113,10 @@ const ListPayment = () => {
 
   const gridRef = useRef(null);
 
-  const onGridReady = useCallback(async (params) => {
+  const onGridReady = useCallback(async (params: any) => {
     try {
       console.log("entrou");
-      let cols = defaultColumns;
+      let cols: any = defaultColumns;
 
       cols.unshift({
         field: "status",
@@ -128,7 +129,7 @@ const ListPayment = () => {
         // width: 310,
         cellStyle: { textAlign: "center" },
         // pinned: "left",
-        cellRenderer: (params) => {
+        cellRenderer: (params: any) => {
           if (params.data) {
             return (
               <Status data={STATUS_PAGAMENTO} status={params.data.status} />
@@ -145,7 +146,7 @@ const ListPayment = () => {
     } catch {}
   }, []);
 
-  const onDelete = useCallback(async (rowId) => {
+  const onDelete = useCallback(async (rowId: number) => {
     try {
       setLoading(true);
 
@@ -172,17 +173,18 @@ const ListPayment = () => {
     }
   }, []);
 
-  var checkouts;
-  var checkout;
-  var authSuccessMessage = 'Autenticado com sucesso.';
+  // @ts-ignore
+  let checkout: any = null;
+  let authSuccessMessage = 'Autenticado com sucesso.';
 
-  var onPaymentSuccess = function (response) {
+  const onPaymentSuccess = function (response: any) {
     console.log(response.receipt.merchantReceipt + '<br>' + response.receipt.customerReceipt);
     console.log(response);
 
     onDelete(selectedRow.id_operacao_patio_pagamento);
   };
-  var onPaymentError = function (error) {
+
+  const onPaymentError = function (error: any) {
     console.log(error);
     console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
 
@@ -191,7 +193,7 @@ const ListPayment = () => {
     }
   };
 
-  const creditPayment = (value) => {
+  const creditPayment = (value: any) => {
     var creditRequest = {
       amount: parseFloat(value),
       requestKey: null,
@@ -201,26 +203,21 @@ const ListPayment = () => {
   }
 
 
-  function debitPayment(value) {
+  function debitPayment(value: any) {
     const amount = parseFloat(value);
     checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
   }
 
-  const onAuthenticationSuccess = function (response) {
+  const onAuthenticationSuccess = function () {
     console.log(authSuccessMessage);
   };
 
-  const onAuthenticationError = function (error) {
+  const onAuthenticationError = function (error: any) {
     console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
   };
 
-  const onPendingPayments = function (response) {
-    var codesWithLinebreak = "";
-    var pendingPayments = response.details.administrativeCodes;
-
+  const onPendingPayments = function () {
     checkout = window.PaykitCheckout.undoPayments();
-
-
   };
 
   function authenticate(){
@@ -239,18 +236,18 @@ const ListPayment = () => {
     }
   }
 
-  const onPayment = (selectedRow) => {
+  const onPayment = (selectedRow: any) => {
     console.log(selectedRow);
     switch (selectedRow.tipo_pagamento) {
       case 4:
         console.log("Entrou")
         return creditPayment(selectedRow.quantia_paga)
-      case "5":
-        return debitPayment(values.valor_pago)
-      case "6":
-        return debitPayment(values.valor_pago)
-      case "7":
-        return creditPayment(values.valor_pago)
+      case 5:
+        return debitPayment(selectedRow.quantia_paga)
+      case 6:
+        return debitPayment(selectedRow.quantia_paga)
+      case 7:
+        return creditPayment(selectedRow.quantia_paga)
 
     }
   }
@@ -265,12 +262,12 @@ const ListPayment = () => {
 
     if (gridApi) {
       const dataSource = {
-        getRows: async (params) => {
+        getRows: async (params: any) => {
           try {
             // Fazer uma requisição ao servidor passando os parâmetros da página
             const page = params.endRow / 100 - 1;
 
-            let currentRow = sessionStorage.getItem("@triagem");
+            let currentRow: any = sessionStorage.getItem("@triagem");
 
             if (currentRow) {
               currentRow = JSON.parse(currentRow);

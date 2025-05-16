@@ -23,8 +23,12 @@ import Ticket from "./Ticket";
 import formValidator from "./validators/formValidator";
 import InputCustom from "../../../../../../../components/InputCustom";
 
-const Payment = ({ onClose }) => {
-  const [dataTicket, setDataTicket] = useState();
+interface Props {
+  onClose: () => void;
+}
+
+const Payment: React.FC<Props> = ({ onClose }: Props) => {
+  const [dataTicket, setDataTicket] = useState<any>();
   const [paymentTypes, setPaymentTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showTicket, setShowTicket] = useState(false);
@@ -43,7 +47,7 @@ const Payment = ({ onClose }) => {
     try {
       setLoading(true);
 
-      let currentRow = sessionStorage.getItem("@triagem");
+      let currentRow: any = sessionStorage.getItem("@triagem");
 
       if (currentRow) {
         currentRow = JSON.parse(currentRow);
@@ -69,7 +73,7 @@ const Payment = ({ onClose }) => {
     }
   }, []);
 
-  const getSupervisorCpf = useCallback(async (cpfSupervisor) => {
+  const getSupervisorCpf = useCallback(async (cpfSupervisor: string) => {
     try {
       setLoading(true);
 
@@ -89,7 +93,7 @@ const Payment = ({ onClose }) => {
   }, [])
 
   const handleSubmit = useCallback(
-    async (values, dataTicket) => {
+    async (values: any, dataTicket: any) => {
       try {
         setLoading(true);
 
@@ -111,7 +115,7 @@ const Payment = ({ onClose }) => {
           FrontendNotification("CPF Supervisor inválido", "warning");
 
         } else {
-          let currentRow = sessionStorage.getItem("@triagem");
+          let currentRow: any = sessionStorage.getItem("@triagem");
 
           if (currentRow) {
             currentRow = JSON.parse(currentRow);
@@ -126,8 +130,8 @@ const Payment = ({ onClose }) => {
           const userId = urlParams.get("userId");
 
 
-          const valorPago = Number(values.valor_pago).toFixed(2);
-          const desconto = Number(values.desconto).toFixed(2);
+          const valorPago: any = Number(values.valor_pago).toFixed(2);
+          const desconto: any = Number(values.desconto).toFixed(2);
 
           const body = {
             id_operacao_patio,
@@ -197,7 +201,7 @@ const Payment = ({ onClose }) => {
     try {
       setLoading(true);
 
-      let getDataTriagem = sessionStorage.getItem("@triagem");
+      let getDataTriagem: any = sessionStorage.getItem("@triagem");
       if (getDataTriagem) {
         getDataTriagem = JSON.parse(getDataTriagem);
       }
@@ -235,49 +239,28 @@ const Payment = ({ onClose }) => {
       }
     );
 
-    const filteredData = data.filter((item) => !item.isHide);
+    const filteredData: any = data.filter((item) => !item.isHide);
 
     console.log(filteredData);
 
     setPaymentTypes(filteredData);
   }, []);
 
-  var checkouts;
-  var checkout;
-  var authSuccessMessage = 'Autenticado com sucesso.';
-
-  function canStartMultiplePaymentsSession() {
-    return multiplePaymentsSessionInProgress === false && $('input[name="rbMultiplePayments"]:checked').val() === 'true';
-  }
-
-  var multiplePaymentsSessionInProgress = false;
+  // @ts-ignore
+  let checkout: any = null;
+  let authSuccessMessage = 'Autenticado com sucesso.';
 
 
-  function startMultiplePayments() {
-    try {
-      var numberOfPayments = parseInt(document.getElementById('txtNumberOfPayments').value);
 
-      checkout.startMultiplePayments(numberOfPayments, function () {
-        alert('Sessão multiplos pagamentos encerrada!');
-        document.getElementById('txtNumberOfPayments').value = 0;
-        handlerMultiplePaymentsElements(false);
 
-      });
-
-      multiplePaymentsSessionInProgress = true;
-      handlerMultiplePaymentsElements(true);
-    } catch (ex) {
-      alert(ex);
-    }
-  }
-
-  var onPaymentSuccess = function (response) {
+  const onPaymentSuccess = function (response: any) {
     console.log(response.receipt.merchantReceipt + '<br>' + response.receipt.customerReceipt);
     console.log(response);
 
     formik.handleSubmit();
   };
-  var onPaymentError = function (error) {
+
+  const onPaymentError = function (error: any) {
     console.log(error);
     console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
 
@@ -286,7 +269,7 @@ const Payment = ({ onClose }) => {
     }
   };
 
-  const creditPayment = (value) => {
+  const creditPayment = (value: any) => {
     var creditRequest = {
       amount: parseFloat(value),
       requestKey: null,
@@ -296,26 +279,21 @@ const Payment = ({ onClose }) => {
   }
 
 
-  function debitPayment(value) {
+  function debitPayment(value: any) {
     const amount = parseFloat(value);
     checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
   }
 
-  const onAuthenticationSuccess = function (response) {
+  const onAuthenticationSuccess = function () {
     console.log(authSuccessMessage);
   };
 
-  const onAuthenticationError = function (error) {
+  const onAuthenticationError = function (error: any) {
     console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
   };
 
-  const onPendingPayments = function (response) {
-    var codesWithLinebreak = "";
-    var pendingPayments = response.details.administrativeCodes;
-
+  const onPendingPayments = function () {
     checkout = window.PaykitCheckout.undoPayments();
-
-
   };
 
   function authenticate(){
@@ -329,14 +307,18 @@ const Payment = ({ onClose }) => {
           onAuthenticationError,
           onPendingPayments
       );
+
     } else {
       console.error("PaykitCheckout não está carregado.");
     }
+
   }
 
 
-  const onPayment = (values) => {
+  const onPayment = (values: any) => {
     const typePayment = values.tipo_pagamento;
+
+    console.log(values);
 
     switch (typePayment) {
       case "4":
@@ -378,7 +360,7 @@ const Payment = ({ onClose }) => {
       authenticatedRef.current = true;
     }
 
-    const handleBeforeUnload = (e) => {
+    const handleBeforeUnload = (e: any) => {
       e.preventDefault();
       e.returnValue = '';
     };
@@ -586,7 +568,7 @@ const Payment = ({ onClose }) => {
                     dataTicket?.operacaoPatio.pagamento &&
                     dataTicket?.operacaoPatio.pagamento.length > 0
                       ? dataTicket?.operacaoPatio.pagamento
-                          .map((item) =>
+                          .map((item: any) =>
                             formatDateTimeBR(item.data_hora_pagamento)
                           )
                           .join(",")
@@ -716,7 +698,7 @@ const Payment = ({ onClose }) => {
                         dataTicket?.operacaoPatio.pagamento.length > 0 ? (
                           <>
                             {dataTicket?.operacaoPatio.pagamento.map(
-                              (item) => (
+                              (item: any) => (
                                 <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
                                   {renderPaymentTypes(item.tipo_pagamento)}
                                 </span>
