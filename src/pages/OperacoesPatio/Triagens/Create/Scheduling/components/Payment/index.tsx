@@ -1,16 +1,20 @@
-import { motion } from "framer-motion";
-import React, {Fragment, useCallback, useEffect, useRef, useState} from "react";
-import { NumericFormat } from "react-number-format";
-import Logo from "../../../../../../../assets/images/logo-sulog-rodape.svg";
-import SelectCustom from "../../../../../../../components/SelectCustom";
-import Loading from "../../../../../../../core/common/Loading";
-import api from "../../../../../../../services/api";
-import { ITypePayment } from "./types/types";
-import './styles.css';
 import { format } from "date-fns";
 import { useFormik } from "formik";
+import { motion } from "framer-motion";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { NumericFormat } from "react-number-format";
 import { ToastContainer } from "react-toastify";
 import { Label } from "reactstrap";
+import Logo from "../../../../../../../assets/images/logo-sulog-rodape.svg";
+import InputCustom from "../../../../../../../components/InputCustom";
+import SelectCustom from "../../../../../../../components/SelectCustom";
+import Loading from "../../../../../../../core/common/Loading";
 import {
   formatDateTimeBR,
   renderCargoTypes,
@@ -18,10 +22,12 @@ import {
   renderVehicleTypes,
 } from "../../../../../../../helpers/format";
 import { useStatus } from "../../../../../../../hooks/StatusContext";
+import api from "../../../../../../../services/api";
 import { FrontendNotification } from "../../../../../../../shared/Notification";
+import "./styles.css";
 import Ticket from "./Ticket";
+import { ITypePayment } from "./types/types";
 import formValidator from "./validators/formValidator";
-import InputCustom from "../../../../../../../components/InputCustom";
 
 interface Props {
   onClose: () => void;
@@ -58,17 +64,20 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
         currentRow.id_operacao_patio;
 
       const body = {
-        id_operacao_patio
+        id_operacao_patio,
       };
 
-      const response = await api.post('/operacaopatio/deleteIdVeiculoAutorizacao', body);
+      const response = await api.post(
+        "/operacaopatio/deleteIdVeiculoAutorizacao",
+        body
+      );
 
-      if(response.status === 200) {
+      if (response.status === 200) {
         setStatus(2);
       }
 
       setLoading(false);
-    }catch{
+    } catch {
       setLoading(false);
     }
   }, []);
@@ -78,124 +87,121 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
       setLoading(true);
 
       const body = {
-        cpf: cpfSupervisor
+        cpf: cpfSupervisor,
       };
 
-      const response = await api.post('/operacaopatio/cpfSupervisor', body);
+      const response = await api.post("/operacaopatio/cpfSupervisor", body);
 
       setLoading(false);
 
       return response.data;
-
-    }catch {
+    } catch {
       setLoading(false);
     }
-  }, [])
+  }, []);
 
-  const handleSubmit = useCallback(
-    async (values: any, dataTicket: any) => {
-      try {
-        setLoading(true);
+  const handleSubmit = useCallback(async (values: any, dataTicket: any) => {
+    try {
+      setLoading(true);
 
-        console.log(values.cpf_supervisor);
-        console.log(dataTicket);
+      console.log(values.cpf_supervisor);
+      console.log(dataTicket);
 
-        const cpfSupervisor = values.cpf_supervisor.replaceAll(".", "").replace("-", "");
-        console.log(cpfSupervisor.length);
+      const cpfSupervisor = values.cpf_supervisor
+        .replaceAll(".", "")
+        .replace("-", "");
+      console.log(cpfSupervisor.length);
 
+      let getCpfSupervisor = null;
 
-        let getCpfSupervisor = null;
-
-        if(values.desconto.length > 0 && Number(values.desconto) > 0) {
-          getCpfSupervisor = await getSupervisorCpf(cpfSupervisor);
-        }
-
-        if(values.desconto.length > 0 && Number(values.desconto) > 0 && cpfSupervisor.length === 11 && !getCpfSupervisor){
-
-          FrontendNotification("CPF Supervisor inválido", "warning");
-
-        } else {
-          let currentRow: any = sessionStorage.getItem("@triagem");
-
-          if (currentRow) {
-            currentRow = JSON.parse(currentRow);
-          }
-
-          const id_operacao_patio =
-            sessionStorage.getItem("id_operacao_patio") ||
-            currentRow.id_operacao_patio;
-
-          const urlParams = new URLSearchParams(window.location.search);
-
-          const userId = urlParams.get("userId");
-
-
-          const valorPago: any = Number(values.valor_pago).toFixed(2);
-          const desconto: any = Number(values.desconto).toFixed(2);
-
-          const body = {
-            id_operacao_patio,
-            tipo_pagamento: values.tipo_pagamento,
-            desconto:
-              values.desconto.length > 0
-                ? parseFloat(values.desconto).toFixed(2)
-                : 0.0,
-            quantia_paga: values.valor_pago,
-            valor_total: Number(valorPago - desconto).toFixed(2), //Desconto
-            data_hora_pagamento: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-            tempo_base_triagem:
-              dataTicket && dataTicket.comercialCustoTriagem !== null
-                ? dataTicket?.comercialCustoTriagem.tempo_base_triagem
-                : null,
-            custo_base_triagem:
-              dataTicket && dataTicket.comercialCustoTriagem !== null
-                ? dataTicket.comercialCustoTriagem.custo_base_triagem
-                : null,
-            custo_hora_extra:
-              dataTicket && dataTicket.comercialCustoEstadia !== null
-                ? dataTicket.comercialCustoEstadia.custo_hora
-                : null,
-            custo_meia_diaria:
-              dataTicket && dataTicket.comercialCustoEstadia !== null
-                ? dataTicket.comercialCustoEstadia.custo_meia_diaria
-                : null,
-            custo_diaria:
-              dataTicket && dataTicket.comercialCustoEstadia !== null
-                ? dataTicket.comercialCustoEstadia.custo_diaria
-                : null,
-            id_usuario_historico: userId,
-            status: 11,
-          };
-
-          const response = await api.post(
-            "/operacaopatio/adicionarPagamento",
-            body,
-            {
-              headers: {
-                Host: "https://api2.sulog.com.br",
-              },
-            }
-          );
-
-          if (response.status === 200) {
-            FrontendNotification("Pagamento realizado com sucesso!", "success");
-            setShowTicket(false);
-            setShowTicket(true);
-            setTimeout(() => {
-              onClose();
-            }, 3000);
-          }
-
-        }
-
-
-        setLoading(false);
-      } catch {
-        setLoading(false);
+      if (values.desconto.length > 0 && Number(values.desconto) > 0) {
+        getCpfSupervisor = await getSupervisorCpf(cpfSupervisor);
       }
-    },
-    []
-  );
+
+      if (
+        values.desconto.length > 0 &&
+        Number(values.desconto) > 0 &&
+        cpfSupervisor.length === 11 &&
+        !getCpfSupervisor
+      ) {
+        FrontendNotification("CPF Supervisor inválido", "warning");
+      } else {
+        let currentRow: any = sessionStorage.getItem("@triagem");
+
+        if (currentRow) {
+          currentRow = JSON.parse(currentRow);
+        }
+
+        const id_operacao_patio =
+          sessionStorage.getItem("id_operacao_patio") ||
+          currentRow.id_operacao_patio;
+
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const userId = urlParams.get("userId");
+
+        const valorPago: any = Number(values.valor_pago).toFixed(2);
+        const desconto: any = Number(values.desconto).toFixed(2);
+
+        const body = {
+          id_operacao_patio,
+          tipo_pagamento: values.tipo_pagamento,
+          desconto:
+            values.desconto.length > 0
+              ? parseFloat(values.desconto).toFixed(2)
+              : 0.0,
+          quantia_paga: values.valor_pago,
+          valor_total: Number(valorPago - desconto).toFixed(2), //Desconto
+          data_hora_pagamento: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+          tempo_base_triagem:
+            dataTicket && dataTicket.comercialCustoTriagem !== null
+              ? dataTicket?.comercialCustoTriagem.tempo_base_triagem
+              : null,
+          custo_base_triagem:
+            dataTicket && dataTicket.comercialCustoTriagem !== null
+              ? dataTicket.comercialCustoTriagem.custo_base_triagem
+              : null,
+          custo_hora_extra:
+            dataTicket && dataTicket.comercialCustoEstadia !== null
+              ? dataTicket.comercialCustoEstadia.custo_hora
+              : null,
+          custo_meia_diaria:
+            dataTicket && dataTicket.comercialCustoEstadia !== null
+              ? dataTicket.comercialCustoEstadia.custo_meia_diaria
+              : null,
+          custo_diaria:
+            dataTicket && dataTicket.comercialCustoEstadia !== null
+              ? dataTicket.comercialCustoEstadia.custo_diaria
+              : null,
+          id_usuario_historico: userId,
+          status: 11,
+        };
+
+        const response = await api.post(
+          "/operacaopatio/adicionarPagamento",
+          body,
+          {
+            headers: {
+              Host: "https://api2.sulog.com.br",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          FrontendNotification("Pagamento realizado com sucesso!", "success");
+          setShowTicket(false);
+          setShowTicket(true);
+          setTimeout(() => {
+            onClose();
+          }, 3000);
+        }
+      }
+
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
+  }, []);
 
   const getPaymentTicket = useCallback(async () => {
     try {
@@ -205,9 +211,12 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
       if (getDataTriagem) {
         getDataTriagem = JSON.parse(getDataTriagem);
       }
-      const idOperacaoPatio = sessionStorage.getItem('id_operacao_patio');
+      const idOperacaoPatio = sessionStorage.getItem("id_operacao_patio");
 
-      const id = idOperacaoPatio && idOperacaoPatio.length > 0 ? idOperacaoPatio : getDataTriagem?.id_operacao_patio
+      const id =
+        idOperacaoPatio && idOperacaoPatio.length > 0
+          ? idOperacaoPatio
+          : getDataTriagem?.id_operacao_patio;
 
       const body = {
         id_operacao_patio: id,
@@ -228,16 +237,14 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
   }, []);
 
   const getPaymentTypes = useCallback(() => {
-    const data = Object.values(ITypePayment).map(
-      (value, index) => {
-        return {
-          value: `${index + 1}`,
-          label: value,
-          isDisabled: index <= 2,
-          isHide: index <= 2,
-        };
-      }
-    );
+    const data = Object.values(ITypePayment).map((value, index) => {
+      return {
+        value: `${index + 1}`,
+        label: value,
+        isDisabled: index <= 2,
+        isHide: index <= 2,
+      };
+    });
 
     const filteredData: any = data.filter((item) => !item.isHide);
 
@@ -248,13 +255,14 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
 
   // @ts-ignore
   let checkout: any = null;
-  let authSuccessMessage = 'Autenticado com sucesso.';
-
-
-
+  let authSuccessMessage = "Autenticado com sucesso.";
 
   const onPaymentSuccess = function (response: any) {
-    console.log(response.receipt.merchantReceipt + '<br>' + response.receipt.customerReceipt);
+    console.log(
+      response.receipt.merchantReceipt +
+        "<br>" +
+        response.receipt.customerReceipt
+    );
     console.log(response);
 
     formik.handleSubmit();
@@ -262,9 +270,9 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
 
   const onPaymentError = function (error: any) {
     console.log(error);
-    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
+    console.log("Código: " + error.reasonCode + "<br>" + error.reason);
 
-    if(error.reasonCode == 9) {
+    if (error.reasonCode == 9) {
       checkout = window.PaykitCheckout.undoPayments();
     }
   };
@@ -275,13 +283,20 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
       requestKey: null,
     };
 
-    checkout = window.PaykitCheckout.creditPayment(creditRequest, onPaymentSuccess, onPaymentError);
-  }
-
+    checkout = window.PaykitCheckout.creditPayment(
+      creditRequest,
+      onPaymentSuccess,
+      onPaymentError
+    );
+  };
 
   function debitPayment(value: any) {
     const amount = parseFloat(value);
-    checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
+    checkout = window.PaykitCheckout.debitPayment(
+      { amount: amount },
+      onPaymentSuccess,
+      onPaymentError
+    );
   }
 
   const onAuthenticationSuccess = function () {
@@ -289,31 +304,28 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
   };
 
   const onAuthenticationError = function (error: any) {
-    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
+    console.log("Código: " + error.reasonCode + "<br>" + error.reason);
   };
 
   const onPendingPayments = function () {
     checkout = window.PaykitCheckout.undoPayments();
   };
 
-  function authenticate(){
+  function authenticate() {
     if (window.PaykitCheckout) {
       const authenticationRequest = {
-        authenticationKey: '91749225000109',
+        authenticationKey: "91749225000109",
       };
       checkout = window.PaykitCheckout.authenticate(
-          authenticationRequest,
-          onAuthenticationSuccess,
-          onAuthenticationError,
-          onPendingPayments
+        authenticationRequest,
+        onAuthenticationSuccess,
+        onAuthenticationError,
+        onPendingPayments
       );
-
     } else {
       console.error("PaykitCheckout não está carregado.");
     }
-
   }
-
 
   const onPayment = (values: any) => {
     const typePayment = values.tipo_pagamento;
@@ -322,19 +334,17 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
 
     switch (typePayment) {
       case "4":
-        return creditPayment(values.valor_pago)
+        return creditPayment(values.valor_pago);
       case "5":
-        return debitPayment(values.valor_pago)
+        return debitPayment(values.valor_pago);
       case "6":
-        return debitPayment(values.valor_pago)
+        return debitPayment(values.valor_pago);
       case "7":
-        return creditPayment(values.valor_pago)
+        return creditPayment(values.valor_pago);
       default:
         formik.handleSubmit();
     }
-  }
-
-
+  };
 
   const initialValues = {
     tipo_pagamento: "",
@@ -362,13 +372,13 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
 
     const handleBeforeUnload = (e: any) => {
       e.preventDefault();
-      e.returnValue = '';
+      e.returnValue = "";
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 
@@ -564,15 +574,15 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
                           Pagamento:
                         </span>
                         <span className="text-sm text-[#000] font-normal ml-1">
-                        {dataTicket?.operacaoPatio &&
-                    dataTicket?.operacaoPatio.pagamento &&
-                    dataTicket?.operacaoPatio.pagamento.length > 0
-                      ? dataTicket?.operacaoPatio.pagamento
-                          .map((item: any) =>
-                            formatDateTimeBR(item.data_hora_pagamento)
-                          )
-                          .join(",")
-                      : "---"}
+                          {dataTicket?.operacaoPatio &&
+                          dataTicket?.operacaoPatio.pagamento &&
+                          dataTicket?.operacaoPatio.pagamento.length > 0
+                            ? dataTicket?.operacaoPatio.pagamento
+                                .map((item: any) =>
+                                  formatDateTimeBR(item.data_hora_pagamento)
+                                )
+                                .join(",")
+                            : "---"}
                         </span>
                       </div>
                       <div className="w-full flex items-center mb-1">
@@ -628,10 +638,13 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
                             style={{ border: "1px dashed #ccc" }}
                           />
                           <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                            {dataTicket?.valor_hora_extra.toLocaleString("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
-                            })}
+                            {dataTicket?.valor_hora_extra.toLocaleString(
+                              "pt-BR",
+                              {
+                                style: "currency",
+                                currency: "BRL",
+                              }
+                            )}
                           </span>
                         </div>
                       )}
@@ -801,11 +814,20 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
                     </span>
                   )}
                 </div>
-                {formik.values.desconto.length > 0 && Number(formik.values.desconto) > 0 && (
-                  <div className="">
-                    <InputCustom title="CPF do supervisor" typeInput="mask" mask="999.999.999-99" placeholder="" onChange={formik.handleChange("cpf_supervisor")} touched={formik.touched.cpf_supervisor} error={formik.errors.cpf_supervisor} />
-                  </div>
-                )}
+                {formik.values.desconto.length > 0 &&
+                  Number(formik.values.desconto) > 0 && (
+                    <div className="">
+                      <InputCustom
+                        title="CPF do supervisor"
+                        typeInput="mask"
+                        mask="999.999.999-99"
+                        placeholder=""
+                        onChange={formik.handleChange("cpf_supervisor")}
+                        touched={formik.touched.cpf_supervisor}
+                        error={formik.errors.cpf_supervisor}
+                      />
+                    </div>
+                  )}
               </div>
             </div>
           </div>
@@ -816,7 +838,7 @@ const Payment: React.FC<Props> = ({ onClose }: Props) => {
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
           onClick={() => onHandleBack()}
-          style={{ border: '1px solid #DBDEDF' }}
+          style={{ border: "1px solid #DBDEDF" }}
         >
           Voltar
         </button>
