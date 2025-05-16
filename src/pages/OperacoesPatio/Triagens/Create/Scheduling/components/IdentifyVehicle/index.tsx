@@ -277,12 +277,18 @@ const IdentifyVehicle: React.FC = () => {
       }
 
       setLoading(false);
-    } catch {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch(error: any) {
+      console.log(error);
       setLoading(false);
-      FrontendNotification(
-        "Erro ao realizar a identificação do veiculo!",
-        "error"
-      );
+      if(error.response && error.response.data && error.response.data.error_msg) {
+        FrontendNotification(error.response.data.error_msg, "error");
+      } else {
+        FrontendNotification(
+          "Erro ao realizar a identificação do veiculo!",
+          "error"
+        );
+      }
     }
   }, []);
 
@@ -384,8 +390,12 @@ const IdentifyVehicle: React.FC = () => {
             data.push(response.data);
             
             setDetailVehicleMotorized(data);
-            if(response.data.tipo_veiculo !== TipoVeiculo.TRUCK) {
+            if(response.data.tipo_veiculo == TipoVeiculo.TRUCK) {
+              formik.setFieldValue('tipo_veiculo', "1");
+            } else if(response.data.tipo_veiculo == TipoVeiculo.CARRETA) {
               formik.setFieldValue('tipo_veiculo', "2");
+            } else {
+              formik.setFieldValue('tipo_veiculo', "3");
             }
 
             if(licensePlate) {
@@ -557,7 +567,7 @@ const IdentifyVehicle: React.FC = () => {
     id_transportadora: "",
     cnpj_transportadora: "",
     tipo_placa: 1,
-    tipo_veiculo: "1",
+    tipo_veiculo: "0",
     identificacao_carga: false,
   };
 

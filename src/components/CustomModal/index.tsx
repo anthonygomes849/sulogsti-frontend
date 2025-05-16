@@ -58,10 +58,10 @@ const CustomModal: React.FC<Props> = (props: Props) => {
 
   return (
     <BootstrapDialog
-      onClose={() => {
-        props.onClose();
-        window.location.reload();
-      }}
+      // onClose={() => {
+      //   props.onClose();
+      //   window.location.reload();
+      // }}
       aria-labelledby="customized-dialog-title"
       open={true}
     >

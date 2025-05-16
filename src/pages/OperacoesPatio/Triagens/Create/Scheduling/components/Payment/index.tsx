@@ -21,11 +21,13 @@ import { useStatus } from "../../../../../../../hooks/StatusContext";
 import { FrontendNotification } from "../../../../../../../shared/Notification";
 import Ticket from "./Ticket";
 import formValidator from "./validators/formValidator";
+import InputCustom from "../../../../../../../components/InputCustom";
 
 interface FormValues {
   tipo_pagamento: string;
   valor_pago: string;
   desconto: string;
+  cpf_supervisor: string;
 }
 // import { Container } from './styles';
 
@@ -90,84 +92,121 @@ const Payment: React.FC<Props> = (props: Props) => {
     }
   }, []);
 
+  const getSupervisorCpf = useCallback(async (cpfSupervisor: string) => {
+    try {
+      setLoading(true);
+
+      const body = {
+        cpf: cpfSupervisor
+      };
+
+      const response = await api.post('/operacaopatio/cpfSupervisor', body);
+
+      setLoading(false);
+
+      return response.data;
+
+    }catch {
+      setLoading(false);
+    }
+  }, [])
+
   const handleSubmit = useCallback(
     async (values: FormValues, dataTicket?: IPaymentTicket) => {
       try {
         setLoading(true);
 
-        let currentRow: any = sessionStorage.getItem("@triagem");
+        console.log(values.cpf_supervisor);
+        console.log(dataTicket);
 
-        if (currentRow) {
-          currentRow = JSON.parse(currentRow);
+        const cpfSupervisor = values.cpf_supervisor.replaceAll(".", "").replace("-", "");
+        console.log(cpfSupervisor.length);
+
+
+        let getCpfSupervisor = null;
+
+        if(values.desconto.length > 0 && Number(values.desconto) > 0) {
+          getCpfSupervisor = await getSupervisorCpf(cpfSupervisor);
         }
 
-        const id_operacao_patio =
-          sessionStorage.getItem("id_operacao_patio") ||
-          currentRow.id_operacao_patio;
+        if(values.desconto.length > 0 && Number(values.desconto) > 0 && cpfSupervisor.length === 11 && !getCpfSupervisor){
 
-        const urlParams = new URLSearchParams(window.location.search);
+          FrontendNotification("CPF Supervisor inválido", "warning");
 
-        const userId = urlParams.get("userId");
+        } else {
+          let currentRow: any = sessionStorage.getItem("@triagem");
 
-        // const valorFinal = Number(values.valor_pago) + Number(values.desconto);
-
-        // const paymentFinished =
-        //   Number(dataTicket?.valor_a_pagar) > Number(valorFinal);
-        const valorPago: any = Number(values.valor_pago).toFixed(2);
-        const desconto: any = Number(values.desconto).toFixed(2);
-
-        const body = {
-          id_operacao_patio,
-          tipo_pagamento: values.tipo_pagamento,
-          desconto:
-            values.desconto.length > 0
-              ? parseFloat(values.desconto).toFixed(2)
-              : 0.0,
-          quantia_paga: values.valor_pago,
-          valor_total: Number(valorPago - desconto).toFixed(2), //Desconto
-          data_hora_pagamento: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-          tempo_base_triagem:
-            dataTicket && dataTicket.comercialCustoTriagem !== null
-              ? dataTicket?.comercialCustoTriagem.tempo_base_triagem
-              : null,
-          custo_base_triagem:
-            dataTicket && dataTicket.comercialCustoTriagem !== null
-              ? dataTicket.comercialCustoTriagem.custo_base_triagem
-              : null,
-          custo_hora_extra:
-            dataTicket && dataTicket.comercialCustoEstadia !== null
-              ? dataTicket.comercialCustoEstadia.custo_hora
-              : null,
-          custo_meia_diaria:
-            dataTicket && dataTicket.comercialCustoEstadia !== null
-              ? dataTicket.comercialCustoEstadia.custo_meia_diaria
-              : null,
-          custo_diaria:
-            dataTicket && dataTicket.comercialCustoEstadia !== null
-              ? dataTicket.comercialCustoEstadia.custo_diaria
-              : null,
-          id_usuario_historico: userId,
-          status: 11,
-        };
-
-        const response = await api.post(
-          "/operacaopatio/adicionarPagamento",
-          body,
-          {
-            headers: {
-              Host: "https://api2.sulog.com.br",
-            },
+          if (currentRow) {
+            currentRow = JSON.parse(currentRow);
           }
-        );
 
-        if (response.status === 200) {
-          FrontendNotification("Pagamento realizado com sucesso!", "success");
-          setShowTicket(false);
-          setShowTicket(true);
-          setTimeout(() => {
-            props.onClose();
-          }, 3000);
+          const id_operacao_patio =
+            sessionStorage.getItem("id_operacao_patio") ||
+            currentRow.id_operacao_patio;
+
+          const urlParams = new URLSearchParams(window.location.search);
+
+          const userId = urlParams.get("userId");
+
+
+          const valorPago: any = Number(values.valor_pago).toFixed(2);
+          const desconto: any = Number(values.desconto).toFixed(2);
+
+          const body = {
+            id_operacao_patio,
+            tipo_pagamento: values.tipo_pagamento,
+            desconto:
+              values.desconto.length > 0
+                ? parseFloat(values.desconto).toFixed(2)
+                : 0.0,
+            quantia_paga: values.valor_pago,
+            valor_total: Number(valorPago - desconto).toFixed(2), //Desconto
+            data_hora_pagamento: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+            tempo_base_triagem:
+              dataTicket && dataTicket.comercialCustoTriagem !== null
+                ? dataTicket?.comercialCustoTriagem.tempo_base_triagem
+                : null,
+            custo_base_triagem:
+              dataTicket && dataTicket.comercialCustoTriagem !== null
+                ? dataTicket.comercialCustoTriagem.custo_base_triagem
+                : null,
+            custo_hora_extra:
+              dataTicket && dataTicket.comercialCustoEstadia !== null
+                ? dataTicket.comercialCustoEstadia.custo_hora
+                : null,
+            custo_meia_diaria:
+              dataTicket && dataTicket.comercialCustoEstadia !== null
+                ? dataTicket.comercialCustoEstadia.custo_meia_diaria
+                : null,
+            custo_diaria:
+              dataTicket && dataTicket.comercialCustoEstadia !== null
+                ? dataTicket.comercialCustoEstadia.custo_diaria
+                : null,
+            id_usuario_historico: userId,
+            status: 11,
+          };
+
+          const response = await api.post(
+            "/operacaopatio/adicionarPagamento",
+            body,
+            {
+              headers: {
+                Host: "https://api2.sulog.com.br",
+              },
+            }
+          );
+
+          if (response.status === 200) {
+            FrontendNotification("Pagamento realizado com sucesso!", "success");
+            setShowTicket(false);
+            setShowTicket(true);
+            setTimeout(() => {
+              props.onClose();
+            }, 3000);
+          }
+
         }
+
 
         setLoading(false);
       } catch {
@@ -259,6 +298,7 @@ const Payment: React.FC<Props> = (props: Props) => {
     tipo_pagamento: "",
     desconto: "",
     valor_pago: "",
+    cpf_supervisor: "",
   };
 
   const formik = useFormik({
@@ -701,6 +741,11 @@ const Payment: React.FC<Props> = (props: Props) => {
                     </span>
                   )}
                 </div>
+                {formik.values.desconto.length > 0 && Number(formik.values.desconto) > 0 && (
+                  <div className="">
+                    <InputCustom title="CPF do supervisor" typeInput="mask" mask="999.999.999-99" placeholder="" onChange={formik.handleChange("cpf_supervisor")} touched={formik.touched.cpf_supervisor} error={formik.errors.cpf_supervisor} />
+                  </div>
+                )}
               </div>
             </div>
           </div>

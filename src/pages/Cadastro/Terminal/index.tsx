@@ -212,7 +212,7 @@ const Terminal: React.FC = () => {
     try {
       setLoading(true);
       const body = {
-        id_motorista: rowId,
+        id_terminal: rowId,
       };
 
       await api.post("/deletar/terminais", body);
@@ -265,7 +265,7 @@ const Terminal: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="flex w-screen">
+        <div className="flex w-[calc(100vh - 90px)]">
           <Grid
             ref={gridRef}
             columns={columns}

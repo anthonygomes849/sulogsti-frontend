@@ -112,7 +112,9 @@ const ListMensalista: React.FC = () => {
           <div className="mr-14">
             <button
               className="flex items-center justify-center h-12 w-36 bg-[#062D4E] text-[#FFFFFF] text-sm font-light border-none rounded-full"
-              onClick={() => openModal()}
+              onClick={() => {
+                openModal()
+              }}
             >
               Adicionar <img src={PlusButtonIcon} alt="" className="ml-2" />
             </button>

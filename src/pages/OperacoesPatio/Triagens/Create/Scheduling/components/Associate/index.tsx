@@ -30,9 +30,10 @@ interface FormValues {
 
 const Associate: React.FC = () => {
   const [, setEntradaVeiculo] = useState([]);
-  const [operacaoPortoAgendada, setOperacaoPortoAgendada] = useState([]);
+  const [, setOperacaoPortoAgendada] = useState([]);
   const [operacaoPortoCarrossel, setOperacaoPortoCarrossel] = useState([]);
-  const [serachQueryEntrada, setSearchQueryEntrada] = useState<string>("");
+  const [, setSearchQueryEntrada] = useState<string>("");
+  const [, setSearchQueryAgendada] = useState<string>("");
   const [isAssociate, setIsAssociate] = useState(false);
 
   const selectRef: any = useRef(null);
@@ -60,51 +61,55 @@ const Associate: React.FC = () => {
 
   const { setStatus } = useStatus();
 
-  const onSubmit = useCallback(async (values: FormValues, isAssociate: boolean) => {
-    try {
-      setLoading(true);
+  const onSubmit = useCallback(
+    async (values: FormValues, isAssociate: boolean) => {
+      try {
+        setLoading(true);
 
-      let body;
-      if (String(values.id_operacao_porto_agendada).length > 0) {
-        body = {
-          id_operacao_patio_entrada_veiculo: values.id_operacao_entrada_veiculo,
-          id_operacao_porto_agendada: values.id_operacao_porto_agendada,
-          status: 6,
-        };
-      } else {
-        body = {
-          id_operacao_patio_entrada_veiculo: values.id_operacao_entrada_veiculo,
-          id_operacao_porto_carrossel: values.id_operacao_porto_carrossel,
-          status: 6,
-        };
-      }
-
-      const response = await api.post("/editar/operacaoPatioTriagem", body);
-
-      if (response.status === 200) {
-        sessionStorage.setItem(
-          "id_operacao_patio",
-          response.data.id_operacao_patio
-        );
-
-        sessionStorage.setItem('@triagem', JSON.stringify(response.data));
-
-        if(isAssociate) { 
-          window.location.reload();
+        let body;
+        if (String(values.id_operacao_porto_agendada).length > 0) {
+          body = {
+            id_operacao_patio_entrada_veiculo:
+              values.id_operacao_entrada_veiculo,
+            id_operacao_porto_agendada: values.id_operacao_porto_agendada,
+            status: 6,
+          };
         } else {
-
-          setStatus(1);
+          body = {
+            id_operacao_patio_entrada_veiculo:
+              values.id_operacao_entrada_veiculo,
+            id_operacao_porto_carrossel: values.id_operacao_porto_carrossel,
+            status: 6,
+          };
         }
-      } else {
+
+        const response = await api.post("/editar/operacaoPatioTriagem", body);
+
+        if (response.status === 200) {
+          sessionStorage.setItem(
+            "id_operacao_patio",
+            response.data.id_operacao_patio
+          );
+
+          sessionStorage.setItem("@triagem", JSON.stringify(response.data));
+
+          if (isAssociate) {
+            window.location.reload();
+          } else {
+            setStatus(1);
+          }
+        } else {
+          setLoading(false);
+          FrontendNotification("Erro ao associar a entrada a triagem", "error");
+        }
+        setLoading(false);
+      } catch {
         setLoading(false);
         FrontendNotification("Erro ao associar a entrada a triagem", "error");
       }
-      setLoading(false);
-    } catch {
-      setLoading(false);
-      FrontendNotification("Erro ao associar a entrada a triagem", "error");
-    }
-  }, []);
+    },
+    []
+  );
 
   const getOperacoesPatioEntradaVeiculo = useCallback(async (value: string) => {
     try {
@@ -115,10 +120,12 @@ const Associate: React.FC = () => {
         order_direction: "desc",
         qtd_por_pagina: 100,
         triagem: "sim",
-        placa_dianteira: value.toUpperCase()
+        placa_dianteira: value.toUpperCase(),
       };
 
       const response = await api.post("/listar/entradaSaidaVeiculos", body);
+
+      console.log(response.data.data);
 
       const mappingResponse = response.data.data.map(
         (item: IOperacoesPatioEntradaVeiculos) => {
@@ -134,6 +141,8 @@ const Associate: React.FC = () => {
           };
         }
       );
+
+      console.log(mappingResponse);
 
       setEntradaVeiculo(mappingResponse);
 
@@ -175,16 +184,26 @@ const Associate: React.FC = () => {
     }
   }, []);
 
-  const getOperacaoPortoAgendada = useCallback(async () => {
+  const getOperacaoPortoAgendada = useCallback(async (value: string) => {
     try {
       setLoading(true);
-
-      const body = {
+      let body: any = {
         order_by: "data_historico",
         order_direction: "desc",
         qtd_por_pagina: 100,
         triagem: "sim",
+        placa: value.toUpperCase(),
       };
+
+      if (value.length > 7) {
+        body = {
+          order_by: "data_historico",
+          order_direction: "desc",
+          qtd_por_pagina: 100,
+          triagem: "sim",
+          identificadores_conteineres: value.toUpperCase(),
+        };
+      }
 
       const response = await api.post("/listar/operacaoPortoAgendada", body);
 
@@ -199,7 +218,11 @@ const Associate: React.FC = () => {
                 : ""
             } | ${
               item.cpf_motorista !== null ? maskedCPF(item.cpf_motorista) : ""
-            } | ${item.identificadores_conteineres !== null ? item.identificadores_conteineres : ""}`,
+            } | ${
+              item.identificadores_conteineres !== null
+                ? item.identificadores_conteineres
+                : ""
+            }`,
             value: item.id_operacao_porto_agendada,
           };
         }
@@ -208,6 +231,7 @@ const Associate: React.FC = () => {
       setOperacaoPortoAgendada(mappingResponse);
 
       setLoading(false);
+      return mappingResponse;
     } catch {
       setLoading(false);
     }
@@ -228,15 +252,27 @@ const Associate: React.FC = () => {
     },
   });
 
-  useEffect(() => {
-    console.log(serachQueryEntrada.length);
-    if (serachQueryEntrada.length > 3) {
-      getOperacoesPatioEntradaVeiculo(serachQueryEntrada);
+  const loadOptionsAgendada = async (inputValue: string, callback: any) => {
+    if (inputValue.length < 3) {
+      // Não carrega nada se menos de 3 caracteres
+      callback([]);
+      return;
     }
-  }, [serachQueryEntrada]);
+
+    return await getOperacaoPortoAgendada(inputValue);
+  };
+
+  const loadOptions = async (inputValue: string, callback: any) => {
+    if (inputValue.length < 3) {
+      // Não carrega nada se menos de 3 caracteres
+      callback([]);
+      return;
+    }
+
+    return await getOperacoesPatioEntradaVeiculo(inputValue);
+  };
 
   useEffect(() => {
-    getOperacaoPortoAgendada();
     getOperacoesPortoCarrossel();
   }, []);
 
@@ -262,7 +298,7 @@ const Associate: React.FC = () => {
               <SelectCustom
                 async
                 selectRef={selectRef}
-                data={getOperacoesPatioEntradaVeiculo}
+                data={loadOptions}
                 onChange={(selectedOption: any) => {
                   formik.setFieldValue(
                     "id_operacao_entrada_veiculo",
@@ -321,19 +357,37 @@ const Associate: React.FC = () => {
             <div>
               {Number(formik.values.tipo_operacao_porto) === 0 ? (
                 <SelectCustom
-                  data={operacaoPortoAgendada}
+                  async
+                  selectRef={selectRef}
+                  data={loadOptionsAgendada}
                   onChange={(selectedOption: any) => {
                     formik.setFieldValue(
                       "id_operacao_porto_agendada",
                       selectedOption.value
                     );
                   }}
+                  onInputChange={(value) => {
+                    setSearchQueryAgendada(value);
+                  }}
                   title="Operação Agendada"
                   touched={formik.touched.id_operacao_porto_agendada}
                   error={formik.errors.id_operacao_porto_agendada}
                   value={formik.values.id_operacao_porto_agendada}
                 />
-              ) : Number(formik.values.tipo_operacao_porto) === 1 ? (
+              ) : // <SelectCustom
+              //   data={operacaoPortoAgendada}
+              //   onChange={(selectedOption: any) => {
+              //     formik.setFieldValue(
+              //       "id_operacao_porto_agendada",
+              //       selectedOption.value
+              //     );
+              //   }}
+              //   title="Operação Agendada"
+              //   touched={formik.touched.id_operacao_porto_agendada}
+              //   error={formik.errors.id_operacao_porto_agendada}
+              //   value={formik.values.id_operacao_porto_agendada}
+              // />
+              Number(formik.values.tipo_operacao_porto) === 1 ? (
                 <SelectCustom
                   data={operacaoPortoCarrossel}
                   onChange={(selectedOption: any) => {
@@ -356,14 +410,14 @@ const Associate: React.FC = () => {
       </motion.div>
 
       <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
-      <button
+        <button
           type="button"
           className="w-36 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
           onClick={() => {
             setIsAssociate(true);
             formik.handleSubmit();
           }}
-          style={{ border: '1px solid #DBDEDF' }}
+          style={{ border: "1px solid #DBDEDF" }}
         >
           Entrou no Pátio
         </button>
