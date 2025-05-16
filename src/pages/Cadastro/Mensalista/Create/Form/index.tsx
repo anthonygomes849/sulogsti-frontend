@@ -80,8 +80,8 @@ const Form: React.FC<Props> = (props: Props) => {
         const body = {
           id_mensalista: row?.id_mensalista,
           placa: values.placa.replace("-", ""),
-          cnpj: values.cnpj,
-          id_transportadora: values.id_transportadora,
+          cnpj: values.cnpj.length > 0 ? values.cnpj.replaceAll('.', '').replace('/', '').replace('-', '') : null,
+          id_transportadora: String(values.id_transportadora).length > 0 ? values.id_transportadora : null,
           ativo: true,
           id_usuario_historico: userId,
         };
@@ -198,7 +198,8 @@ const Form: React.FC<Props> = (props: Props) => {
             <ChoiceBox
               data={choiceOptions}
               onChange={(value: number) => {
-                formik.setFieldValue("tipo_transportadora", value);
+                console.log(value);
+                formik.setFieldValue("tipo_transportadora", String(value));
 
                 setChoiceOptions([
                   {

@@ -34,8 +34,7 @@ const Form: React.FC<Props> = (props: Props) => {
         id_tipo_servico: row?.id_tipo_servico,
         tipo_servico: values.tipo_servico,
         ativo: true,
-        id_usuario_historico: userId,
-        status: 1,
+        id_usuario_historico: Number(userId),
       };
 
 
