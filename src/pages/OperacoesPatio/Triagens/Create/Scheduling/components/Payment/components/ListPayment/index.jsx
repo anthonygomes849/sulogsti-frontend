@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./styles.css";
-// import { Container } from './styles';
-import { ValueFormatterParams } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
-import { AgGridReact, CustomCellRendererProps } from "ag-grid-react";
+import { AgGridReact } from "ag-grid-react";
 import DeleteIcon from "../../../../../../../../../assets/images/deleteIcon.svg";
 import InfoIcon from "../../../../../../../../../assets/images/infoIcon.svg";
 import PlusButtonIcon from "../../../../../../../../../assets/images/PlusButtonIcon.svg";
@@ -20,27 +18,26 @@ import {
 import { STATUS_PAGAMENTO } from "../../../../../../../../../helpers/status";
 import { useStatus } from "../../../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../../../services/api";
-import { ITriagens } from "../../../../../../types/types";
 import Info from "./components/Info";
 import ReversedPayment from "./components/ReversedPayment";
 
-const ListPayment: React.FC = () => {
-  const [columns, setColumns] = useState<any[]>([]);
+const ListPayment = () => {
+  const [columns, setColumns] = useState([]);
   const [rowData, setRowData] = useState([]);
-  const [selectedRow, setSelectedRow] = useState<any>();
-  const [isView, setIsView] = useState<boolean>(false);
-  const [isRemove, setIsRemove] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [update, setUpdate] = useState<boolean>(false);
-  const [gridApi, setGridApi] = useState<any>(null);
-  const [currentRow, setCurrentRow] = useState<ITriagens>();
-  const [isReversedPayment, setIsReversedPayment] = useState<boolean>(false);
+  const [selectedRow, setSelectedRow] = useState();
+  const [isView, setIsView] = useState(false);
+  const [isRemove, setIsRemove] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [update, setUpdate] = useState(false);
+  const [gridApi, setGridApi] = useState(null);
+  const [currentRow, setCurrentRow] = useState();
+  const [isReversedPayment, setIsReversedPayment] = useState(false);
 
   const defaultColumns = [
     {
       field: "data_hora_pagamento",
       headerName: "Data do pagamento",
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return formatDateTimeBR(params.value);
         }
@@ -51,7 +48,7 @@ const ListPayment: React.FC = () => {
     {
       field: "tipo_pagamento",
       headerName: "Tipo de pagamento",
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return renderPaymentTypes(params.value);
         }
@@ -66,7 +63,7 @@ const ListPayment: React.FC = () => {
     {
       field: "quantia_paga",
       headerName: "Valor Pago",
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return `R$ ${params.value}`;
         }
@@ -78,7 +75,7 @@ const ListPayment: React.FC = () => {
       field: "",
       headerName: "",
       pinned: "right",
-      cellRenderer: (params: CustomCellRendererProps) => {
+      cellRenderer: (params) => {
         if (params.data) {
           return (
             <div>
@@ -109,14 +106,16 @@ const ListPayment: React.FC = () => {
     },
   ];
 
+  const authenticatedRef = useRef(false);
+
   const { setStatus } = useStatus();
 
-  const gridRef: any = useRef(null);
+  const gridRef = useRef(null);
 
-  const onGridReady = useCallback(async (params: any) => {
+  const onGridReady = useCallback(async (params) => {
     try {
       console.log("entrou");
-      let cols: any[] = defaultColumns;
+      let cols = defaultColumns;
 
       cols.unshift({
         field: "status",
@@ -129,7 +128,7 @@ const ListPayment: React.FC = () => {
         // width: 310,
         cellStyle: { textAlign: "center" },
         // pinned: "left",
-        cellRenderer: (params: CustomCellRendererProps) => {
+        cellRenderer: (params) => {
           if (params.data) {
             return (
               <Status data={STATUS_PAGAMENTO} status={params.data.status} />
@@ -146,7 +145,7 @@ const ListPayment: React.FC = () => {
     } catch {}
   }, []);
 
-  const onDelete = useCallback(async (rowId?: number) => {
+  const onDelete = useCallback(async (rowId) => {
     try {
       setLoading(true);
 
@@ -173,16 +172,105 @@ const ListPayment: React.FC = () => {
     }
   }, []);
 
+  var checkouts;
+  var checkout;
+  var authSuccessMessage = 'Autenticado com sucesso.';
+
+  var onPaymentSuccess = function (response) {
+    console.log(response.receipt.merchantReceipt + '<br>' + response.receipt.customerReceipt);
+    console.log(response);
+
+    onDelete(selectedRow.id_operacao_patio_pagamento);
+  };
+  var onPaymentError = function (error) {
+    console.log(error);
+    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
+
+    if(error.reasonCode == 9) {
+      checkout = window.PaykitCheckout.undoPayments();
+    }
+  };
+
+  const creditPayment = (value) => {
+    var creditRequest = {
+      amount: parseFloat(value),
+      requestKey: null,
+    };
+
+    checkout = window.PaykitCheckout.creditPayment(creditRequest, onPaymentSuccess, onPaymentError);
+  }
+
+
+  function debitPayment(value) {
+    const amount = parseFloat(value);
+    checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
+  }
+
+  const onAuthenticationSuccess = function (response) {
+    console.log(authSuccessMessage);
+  };
+
+  const onAuthenticationError = function (error) {
+    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
+  };
+
+  const onPendingPayments = function (response) {
+    var codesWithLinebreak = "";
+    var pendingPayments = response.details.administrativeCodes;
+
+    checkout = window.PaykitCheckout.undoPayments();
+
+
+  };
+
+  function authenticate(){
+    if (window.PaykitCheckout) {
+      const authenticationRequest = {
+        authenticationKey: '91749225000109',
+      };
+      checkout = window.PaykitCheckout.authenticate(
+          authenticationRequest,
+          onAuthenticationSuccess,
+          onAuthenticationError,
+          onPendingPayments
+      );
+    } else {
+      console.error("PaykitCheckout não está carregado.");
+    }
+  }
+
+  const onPayment = (selectedRow) => {
+    console.log(selectedRow);
+    switch (selectedRow.tipo_pagamento) {
+      case 4:
+        console.log("Entrou")
+        return creditPayment(selectedRow.quantia_paga)
+      case "5":
+        return debitPayment(values.valor_pago)
+      case "6":
+        return debitPayment(values.valor_pago)
+      case "7":
+        return creditPayment(values.valor_pago)
+
+    }
+  }
+
 
   useEffect(() => {
+
+    if (!authenticatedRef.current) {
+      authenticate();
+      authenticatedRef.current = true;
+    }
+
     if (gridApi) {
       const dataSource = {
-        getRows: async (params: any) => {
+        getRows: async (params) => {
           try {
             // Fazer uma requisição ao servidor passando os parâmetros da página
             const page = params.endRow / 100 - 1;
 
-            let currentRow: any = sessionStorage.getItem("@triagem");
+            let currentRow = sessionStorage.getItem("@triagem");
 
             if (currentRow) {
               currentRow = JSON.parse(currentRow);
@@ -224,7 +312,7 @@ const ListPayment: React.FC = () => {
           <ReversedPayment
               onConfirm={() => {
                 setIsReversedPayment(false);
-                onDelete(selectedRow?.id_operacao_patio_pagamento)
+                onPayment(selectedRow)
               }}
               onCancel={() => setIsReversedPayment(!isReversedPayment)}
           />

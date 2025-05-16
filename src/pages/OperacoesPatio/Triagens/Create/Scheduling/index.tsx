@@ -5,7 +5,7 @@ import IdentifyDriver from "./components/IdentifyDriver";
 import IdentifyVehicle from "./components/IdentifyVehicle";
 import Invoiced from "./components/Invocied";
 import Payment from "./components/Payment/index.jsx";
-import ListPayment from "./components/Payment/components/ListPayment";
+import ListPayment from "./components/Payment/components/ListPayment/index.jsx";
 
 // import { Container } from './styles';
 interface Props {

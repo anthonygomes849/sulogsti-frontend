@@ -6,7 +6,7 @@ import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
 import api from "../../../../../../../services/api";
 import { ITypePayment } from "./types/types";
-
+import './styles.css';
 import { format } from "date-fns";
 import { useFormik } from "formik";
 import { ToastContainer } from "react-toastify";
@@ -178,7 +178,7 @@ const Payment = ({ onClose }) => {
             setShowTicket(false);
             setShowTicket(true);
             setTimeout(() => {
-              props.onClose();
+              onClose();
             }, 3000);
           }
 
@@ -229,7 +229,7 @@ const Payment = ({ onClose }) => {
         return {
           value: `${index + 1}`,
           label: value,
-          isDisabled: index <= 4,
+          isDisabled: index <= 2,
           isHide: index <= 2,
         };
       }
@@ -246,26 +246,76 @@ const Payment = ({ onClose }) => {
   var checkout;
   var authSuccessMessage = 'Autenticado com sucesso.';
 
-  var onAuthenticationSuccess = function (response) {
-    console.log(authSuccessMessage);
-    // getCheckouts();
+  function canStartMultiplePaymentsSession() {
+    return multiplePaymentsSessionInProgress === false && $('input[name="rbMultiplePayments"]:checked').val() === 'true';
+  }
+
+  var multiplePaymentsSessionInProgress = false;
+
+
+  function startMultiplePayments() {
+    try {
+      var numberOfPayments = parseInt(document.getElementById('txtNumberOfPayments').value);
+
+      checkout.startMultiplePayments(numberOfPayments, function () {
+        alert('Sessão multiplos pagamentos encerrada!');
+        document.getElementById('txtNumberOfPayments').value = 0;
+        handlerMultiplePaymentsElements(false);
+
+      });
+
+      multiplePaymentsSessionInProgress = true;
+      handlerMultiplePaymentsElements(true);
+    } catch (ex) {
+      alert(ex);
+    }
+  }
+
+  var onPaymentSuccess = function (response) {
+    console.log(response.receipt.merchantReceipt + '<br>' + response.receipt.customerReceipt);
+    console.log(response);
+
+    formik.handleSubmit();
+  };
+  var onPaymentError = function (error) {
+    console.log(error);
+    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
+
+    if(error.reasonCode == 9) {
+      checkout = window.PaykitCheckout.undoPayments();
+    }
   };
 
-  var onAuthenticationError = function (error) {
+  const creditPayment = (value) => {
+    var creditRequest = {
+      amount: parseFloat(value),
+      requestKey: null,
+    };
+
+    checkout = window.PaykitCheckout.creditPayment(creditRequest, onPaymentSuccess, onPaymentError);
+  }
+
+
+  function debitPayment(value) {
+    const amount = parseFloat(value);
+    checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
+  }
+
+  const onAuthenticationSuccess = function (response) {
+    console.log(authSuccessMessage);
+  };
+
+  const onAuthenticationError = function (error) {
     console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
   };
 
-  var onPendingPayments = function (response) {
+  const onPendingPayments = function (response) {
     var codesWithLinebreak = "";
     var pendingPayments = response.details.administrativeCodes;
 
-    // for (var i = 0; i < pendingPayments.length; i++) {
-    //   nsuAtual = pendingPayments[i];
-    //   codesWithLinebreak += nsuAtual + '<br>';
-    // }
+    checkout = window.PaykitCheckout.undoPayments();
 
-    var pendingPaymentsMessage = authSuccessMessage + '<br><br>' + 'Possui transações pendentes:<br>' + codesWithLinebreak;
-    // updateResult(pendingPaymentsMessage);
+
   };
 
   function authenticate(){
@@ -283,6 +333,25 @@ const Payment = ({ onClose }) => {
       console.error("PaykitCheckout não está carregado.");
     }
   }
+
+
+  const onPayment = (values) => {
+    const typePayment = values.tipo_pagamento;
+
+    switch (typePayment) {
+      case "4":
+        return creditPayment(values.valor_pago)
+      case "5":
+        return debitPayment(values.valor_pago)
+      case "6":
+        return debitPayment(values.valor_pago)
+      case "7":
+        return creditPayment(values.valor_pago)
+      default:
+        formik.handleSubmit();
+    }
+  }
+
 
 
   const initialValues = {
@@ -308,6 +377,17 @@ const Payment = ({ onClose }) => {
       authenticate();
       authenticatedRef.current = true;
     }
+
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   return (
@@ -761,7 +841,7 @@ const Payment = ({ onClose }) => {
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2 shadow-md"
-          onClick={() => createPayment()}
+          onClick={() => onPayment(formik.values)}
         >
           Finalizar
         </button>
