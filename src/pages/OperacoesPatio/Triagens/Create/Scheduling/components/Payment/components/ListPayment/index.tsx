@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import "./styles.css";
+import { ValueFormatterParams } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { AgGridReact } from "ag-grid-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import DeleteIcon from "../../../../../../../../../assets/images/deleteIcon.svg";
 import InfoIcon from "../../../../../../../../../assets/images/infoIcon.svg";
 import PlusButtonIcon from "../../../../../../../../../assets/images/PlusButtonIcon.svg";
@@ -20,7 +20,7 @@ import { useStatus } from "../../../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../../../services/api";
 import Info from "./components/Info";
 import ReversedPayment from "./components/ReversedPayment";
-import {ValueFormatterParams} from "ag-grid-community";
+import "./styles.css";
 
 const ListPayment: React.FC = () => {
   const [columns, setColumns] = useState([]);
@@ -251,7 +251,6 @@ const ListPayment: React.FC = () => {
 
     }
   }
-
 
   useEffect(() => {
 
