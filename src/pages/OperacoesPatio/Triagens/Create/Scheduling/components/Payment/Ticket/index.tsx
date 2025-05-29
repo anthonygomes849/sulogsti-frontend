@@ -234,10 +234,10 @@ const Ticket = (props: Props) => {
                     Número Container:
                   </span>
                   <span className="text-sm text-[#000] font-normal ml-1">
-                    {item.operacaoPatio.operacao_porto_agendada !== null &&
-                    item.operacaoPatio.operacao_porto_agendada
+                    {item.operacaoPatio.entrada_veiculo !== null &&
+                    item.operacaoPatio.entrada_veiculo
                       .identificadores_conteineres !== null
-                      ? item.operacaoPatio.operacao_porto_agendada
+                      ? item.operacaoPatio.entrada_veiculo
                           .identificadores_conteineres
                       : "---"}
                   </span>
