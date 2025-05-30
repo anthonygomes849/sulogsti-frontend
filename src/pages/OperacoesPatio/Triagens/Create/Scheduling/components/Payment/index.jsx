@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
-import React, { Fragment, useCallback, useEffect, useState } from "react";
+import React, {Fragment, useCallback, useEffect, useRef, useState} from "react";
 import { NumericFormat } from "react-number-format";
 import Logo from "../../../../../../../assets/images/logo-sulog-rodape.svg";
 import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
 import api from "../../../../../../../services/api";
-import { IPaymentTicket, ITypePayment } from "./types/types";
-
+import { ITypePayment } from "./types/types";
+import './styles.css';
 import { format } from "date-fns";
 import { useFormik } from "formik";
 import { ToastContainer } from "react-toastify";
@@ -23,36 +23,13 @@ import Ticket from "./Ticket";
 import formValidator from "./validators/formValidator";
 import InputCustom from "../../../../../../../components/InputCustom";
 
-interface FormValues {
-  tipo_pagamento: string;
-  valor_pago: string;
-  desconto: string;
-  cpf_supervisor: string;
-}
-// import { Container } from './styles';
+const Payment = ({ onClose }) => {
+  const [dataTicket, setDataTicket] = useState();
+  const [paymentTypes, setPaymentTypes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showTicket, setShowTicket] = useState(false);
 
-declare global {
-  interface Window {
-    PaykitCheckout: {
-      authenticate: (
-        authRequest: any,
-        success: (response: any) => void,
-        error: (error: any) => void,
-        handlePendingPayments: (pendingPayment: any) => void
-      ) => void;
-    };
-  }
-}
-
-interface Props {
-  onClose: () => void;
-}
-
-const Payment: React.FC<Props> = (props: Props) => {
-  const [dataTicket, setDataTicket] = useState<IPaymentTicket>();
-  const [paymentTypes, setPaymentTypes] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [showTicket, setShowTicket] = useState<boolean>(false);
+  const authenticatedRef = useRef(false);
 
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
@@ -66,7 +43,7 @@ const Payment: React.FC<Props> = (props: Props) => {
     try {
       setLoading(true);
 
-      let currentRow: any = sessionStorage.getItem("@triagem");
+      let currentRow = sessionStorage.getItem("@triagem");
 
       if (currentRow) {
         currentRow = JSON.parse(currentRow);
@@ -92,7 +69,7 @@ const Payment: React.FC<Props> = (props: Props) => {
     }
   }, []);
 
-  const getSupervisorCpf = useCallback(async (cpfSupervisor: string) => {
+  const getSupervisorCpf = useCallback(async (cpfSupervisor) => {
     try {
       setLoading(true);
 
@@ -112,7 +89,7 @@ const Payment: React.FC<Props> = (props: Props) => {
   }, [])
 
   const handleSubmit = useCallback(
-    async (values: FormValues, dataTicket?: IPaymentTicket) => {
+    async (values, dataTicket) => {
       try {
         setLoading(true);
 
@@ -134,7 +111,7 @@ const Payment: React.FC<Props> = (props: Props) => {
           FrontendNotification("CPF Supervisor inválido", "warning");
 
         } else {
-          let currentRow: any = sessionStorage.getItem("@triagem");
+          let currentRow = sessionStorage.getItem("@triagem");
 
           if (currentRow) {
             currentRow = JSON.parse(currentRow);
@@ -149,8 +126,8 @@ const Payment: React.FC<Props> = (props: Props) => {
           const userId = urlParams.get("userId");
 
 
-          const valorPago: any = Number(values.valor_pago).toFixed(2);
-          const desconto: any = Number(values.desconto).toFixed(2);
+          const valorPago = Number(values.valor_pago).toFixed(2);
+          const desconto = Number(values.desconto).toFixed(2);
 
           const body = {
             id_operacao_patio,
@@ -201,7 +178,7 @@ const Payment: React.FC<Props> = (props: Props) => {
             setShowTicket(false);
             setShowTicket(true);
             setTimeout(() => {
-              props.onClose();
+              onClose();
             }, 3000);
           }
 
@@ -220,7 +197,7 @@ const Payment: React.FC<Props> = (props: Props) => {
     try {
       setLoading(true);
 
-      let getDataTriagem: any = sessionStorage.getItem("@triagem");
+      let getDataTriagem = sessionStorage.getItem("@triagem");
       if (getDataTriagem) {
         getDataTriagem = JSON.parse(getDataTriagem);
       }
@@ -248,53 +225,136 @@ const Payment: React.FC<Props> = (props: Props) => {
 
   const getPaymentTypes = useCallback(() => {
     const data = Object.values(ITypePayment).map(
-      (value: any, index: number) => {
+      (value, index) => {
         return {
           value: `${index + 1}`,
           label: value,
-          isDisabled: index <= 4,
+          isDisabled: index <= 2,
           isHide: index <= 2,
         };
       }
     );
 
-    const filteredData = data.filter((item: any) => !item.isHide);
+    const filteredData = data.filter((item) => !item.isHide);
 
     console.log(filteredData);
 
     setPaymentTypes(filteredData);
   }, []);
 
-  // if (window.PaykitCheckout) {
-  //   const authenticationRequest = {
-  //     authenticationKey: '11166491000161'
-  //   };
+  var checkouts;
+  var checkout;
+  var authSuccessMessage = 'Autenticado com sucesso.';
 
-  //   // Success handler
-  //   const success = (response: any) => {
-  //     console.log('Payment successful!', response);
-  //   };
+  function canStartMultiplePaymentsSession() {
+    return multiplePaymentsSessionInProgress === false && $('input[name="rbMultiplePayments"]:checked').val() === 'true';
+  }
 
-  //   // Error handler
-  //   const error = (error: any) => {
-  //     console.error('Payment failed', error);
-  //   };
+  var multiplePaymentsSessionInProgress = false;
 
-  //   // Pending payments handler
-  //   const handlePendingPayments = (pendingPayment: any) => {
-  //     console.log('Handling pending payment:', pendingPayment);
-  //   };
 
-  //   // Triggering the PaykitCheckout.authenticate method
-  //   window.PaykitCheckout.authenticate(
-  //     authenticationRequest,
-  //     success,
-  //     error,
-  //     handlePendingPayments
-  //   );
-  // }
+  function startMultiplePayments() {
+    try {
+      var numberOfPayments = parseInt(document.getElementById('txtNumberOfPayments').value);
 
-  const initialValues: FormValues = {
+      checkout.startMultiplePayments(numberOfPayments, function () {
+        alert('Sessão multiplos pagamentos encerrada!');
+        document.getElementById('txtNumberOfPayments').value = 0;
+        handlerMultiplePaymentsElements(false);
+
+      });
+
+      multiplePaymentsSessionInProgress = true;
+      handlerMultiplePaymentsElements(true);
+    } catch (ex) {
+      alert(ex);
+    }
+  }
+
+  var onPaymentSuccess = function (response) {
+    console.log(response.receipt.merchantReceipt + '<br>' + response.receipt.customerReceipt);
+    console.log(response);
+
+    formik.handleSubmit();
+  };
+  var onPaymentError = function (error) {
+    console.log(error);
+    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
+
+    if(error.reasonCode == 9) {
+      checkout = window.PaykitCheckout.undoPayments();
+    }
+  };
+
+  const creditPayment = (value) => {
+    var creditRequest = {
+      amount: parseFloat(value),
+      requestKey: null,
+    };
+
+    checkout = window.PaykitCheckout.creditPayment(creditRequest, onPaymentSuccess, onPaymentError);
+  }
+
+
+  function debitPayment(value) {
+    const amount = parseFloat(value);
+    checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
+  }
+
+  const onAuthenticationSuccess = function (response) {
+    console.log(authSuccessMessage);
+  };
+
+  const onAuthenticationError = function (error) {
+    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
+  };
+
+  const onPendingPayments = function (response) {
+    var codesWithLinebreak = "";
+    var pendingPayments = response.details.administrativeCodes;
+
+    checkout = window.PaykitCheckout.undoPayments();
+
+
+  };
+
+  function authenticate(){
+    if (window.PaykitCheckout) {
+      const authenticationRequest = {
+        authenticationKey: '91749225000109',
+      };
+      checkout = window.PaykitCheckout.authenticate(
+          authenticationRequest,
+          onAuthenticationSuccess,
+          onAuthenticationError,
+          onPendingPayments
+      );
+    } else {
+      console.error("PaykitCheckout não está carregado.");
+    }
+  }
+
+
+  const onPayment = (values) => {
+    const typePayment = values.tipo_pagamento;
+
+    switch (typePayment) {
+      case "4":
+        return creditPayment(values.valor_pago)
+      case "5":
+        return debitPayment(values.valor_pago)
+      case "6":
+        return debitPayment(values.valor_pago)
+      case "7":
+        return creditPayment(values.valor_pago)
+      default:
+        formik.handleSubmit();
+    }
+  }
+
+
+
+  const initialValues = {
     tipo_pagamento: "",
     desconto: "",
     valor_pago: "",
@@ -304,13 +364,31 @@ const Payment: React.FC<Props> = (props: Props) => {
   const formik = useFormik({
     initialValues,
     validationSchema: formValidator,
-    onSubmit: (values: FormValues) => handleSubmit(values, dataTicket),
+    onSubmit: (values) => handleSubmit(values, dataTicket),
   });
 
   useEffect(() => {
     getPaymentTicket();
     getPaymentTypes();
   }, [getPaymentTicket, getPaymentTypes]);
+
+  useEffect(() => {
+    if (!authenticatedRef.current) {
+      authenticate();
+      authenticatedRef.current = true;
+    }
+
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   return (
     <Fragment>
@@ -508,7 +586,7 @@ const Payment: React.FC<Props> = (props: Props) => {
                     dataTicket?.operacaoPatio.pagamento &&
                     dataTicket?.operacaoPatio.pagamento.length > 0
                       ? dataTicket?.operacaoPatio.pagamento
-                          .map((item: any) =>
+                          .map((item) =>
                             formatDateTimeBR(item.data_hora_pagamento)
                           )
                           .join(",")
@@ -638,7 +716,7 @@ const Payment: React.FC<Props> = (props: Props) => {
                         dataTicket?.operacaoPatio.pagamento.length > 0 ? (
                           <>
                             {dataTicket?.operacaoPatio.pagamento.map(
-                              (item: any) => (
+                              (item) => (
                                 <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
                                   {renderPaymentTypes(item.tipo_pagamento)}
                                 </span>
@@ -683,7 +761,7 @@ const Payment: React.FC<Props> = (props: Props) => {
                   <SelectCustom
                     title="Tipo de pagamento"
                     data={paymentTypes}
-                    onChange={(selectedOption: any) => {
+                    onChange={(selectedOption) => {
                       formik.setFieldValue(
                         "tipo_pagamento",
                         selectedOption.value
@@ -706,7 +784,7 @@ const Payment: React.FC<Props> = (props: Props) => {
                     disabled
                     prefix="R$"
                     placeholder="R$ 0,00"
-                    onValueChange={(values: any) => {
+                    onValueChange={(values) => {
                       formik.setFieldValue("valor_pago", values.value); // Unformatted numeric value
                     }}
                     value={formik.values.valor_pago}
@@ -729,7 +807,7 @@ const Payment: React.FC<Props> = (props: Props) => {
                     fixedDecimalScale
                     prefix="R$"
                     placeholder="R$ 0,00"
-                    onValueChange={(values: any) => {
+                    onValueChange={(values) => {
                       formik.setFieldValue("desconto", values.value); // Unformatted numeric value
                     }}
                     value={formik.values.desconto}
@@ -763,7 +841,7 @@ const Payment: React.FC<Props> = (props: Props) => {
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2 shadow-md"
-          onClick={() => formik.handleSubmit()}
+          onClick={() => onPayment(formik.values)}
         >
           Finalizar
         </button>
