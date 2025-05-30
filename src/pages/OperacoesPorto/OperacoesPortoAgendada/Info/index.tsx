@@ -1,6 +1,6 @@
 import React from "react";
 import ModalSideBar from "../../../../components/ModalSideBar";
-import { formatDateTimeBR, renderCargoTypes, renderOperationTypes } from "../../../../helpers/format";
+import { formatDateTimeBR, maskCnpj, renderCargoTypes, renderOperationTypes } from "../../../../helpers/format";
 import { IOperacoesPortoAgendada } from "../types/types";
 
 // import { Container } from './styles';
@@ -66,6 +66,14 @@ const Info: React.FC<Props> = (props: Props) => {
             </span>
             <span className="text-sm text-[#666666] font-normal">
               {props.data && props.data.placa_traseira_veiculo ? props.data.placa_traseira_veiculo : '---'}
+            </span>
+          </div>
+          <div className="flex flex-col w-full">
+            <span className="text-sm text-[#1E2121] font-semibold mb-1">
+              CNPJ Transportadora
+            </span>
+            <span className="text-sm text-[#666666] font-normal">
+              {props.data && props.data.cnpj_transportadora ? maskCnpj(props.data.cnpj_transportadora) : '---'}
             </span>
           </div>
           <div className="flex flex-col w-full">

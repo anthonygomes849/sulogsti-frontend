@@ -8,6 +8,7 @@ import Loading from "../../../core/common/Loading";
 import {
   getCargoTypes,
   getOperationTypes,
+  maskCnpj,
   renderCargoTypes,
   renderOperationTypes,
 } from "../../../helpers/format";
@@ -62,6 +63,16 @@ const OperacoesPortoAgendada: React.FC = () => {
         }
         return "---";
       },
+    },
+    {
+      field: "cnpj_transportadora",
+      headerName: "CNPJ Transportadora",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if(params.value) {
+          return maskCnpj(params.value);
+        }
+        return '---';
+      }
     },
     {
       field: "tipo_carga",
