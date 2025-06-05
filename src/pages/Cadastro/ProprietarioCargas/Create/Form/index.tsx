@@ -1,14 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { BillingPeriod, City, ITransportadoras, Neighborhood, Options, PeriodPayment, States } from '../types/types';
-import InputCustom from '../../../../../components/InputCustom';
-import SelectCustom from '../../../../../components/SelectCustom';
-import { useFormik } from 'formik';
-import Loading from '../../../../../core/common/Loading';
-import { ToastContainer } from 'react-toastify';
-import api from '../../../../../services/api';
-import RadioGroupCustom from '../../../../../components/RadioGroup';
-import { FrontendNotification } from '../../../../../shared/Notification';
-import formValidator from './validators/formValidator';
+import { useFormik } from "formik";
+import React, { useCallback, useEffect, useState } from "react";
+import InputCustom from "../../../../../components/InputCustom/index.tsx";
+import SelectCustom from "../../../../../components/SelectCustom/index.tsx";
+import Loading from "../../../../../core/common/Loading/index.tsx";
+import api from "../../../../../services/api.ts";
+import { City, States } from "../../../Motoristas/Create/types/types.ts";
+import {
+  BillingPeriod,
+  CargaType,
+  IProprietarioCargas,
+  Neighborhood, Options,
+  PeriodPayment,
+} from "../types/types.ts";
+import formValidator from "./validators/formValidator.ts";
+import {FrontendNotification} from "../../../../../shared/Notification/index.ts";
+import {ToastContainer} from "react-toastify";
 
 interface FormValues {
   cnpj: string;
@@ -16,10 +22,6 @@ interface FormValues {
   nome_fantasia: string;
   periodo_faturamento: string;
   id_przpgto: string;
-  faturamento_triagem: boolean;
-  faturamento_estadia: boolean;
-  rntrc: string;
-  data_expiracao_rntrc: string;
   endereco: string;
   id_estado: string;
   id_cidade: string;
@@ -36,122 +38,88 @@ interface FormValues {
 interface Props {
   isView?: boolean;
   isEdit?: boolean;
-  selectedRow?: ITransportadoras;
+  selectedRow?: IProprietarioCargas;
   onConfirm: () => void;
   onClose: () => void;
 }
 
 const Form: React.FC<Props> = (props: Props) => {
-  const [loading, setLoading] = useState<boolean>(false);
   const [states, setStates] = useState<Options[]>([]);
   const [cities, setCities] = useState<Options[]>([]);
   const [neighborhood, setNeighborhood] = useState<Options[]>([]);
+  const [cargoTypes, setCargoTypes] = useState<Options[]>([]);
   const [billingPeriod, setBillingPeriod] = useState<Options[]>([]);
+  const [valueCargoTypes, setValueCargoTypes] = useState<Options[]>([]);
   const [periodPayment, setPeriodPayment] = useState<Options[]>([]);
 
-  const handleSubmit = useCallback(async (values: FormValues, row?: ITransportadoras) => {
-    try {
-      setLoading(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
 
-      const urlParams = new URLSearchParams(window.location.search);
+  const handleSubmit = useCallback(async (values: FormValues, row?: IProprietarioCargas) => {
+      try {
+        setLoading(true);
 
-      const userId = urlParams.get("userId");
 
-      const body = {
-        id_transportadora: row?.id_transportadora,
-        cnpj: values.cnpj.replaceAll(".", "").replaceAll("-", "").replace("/", ""),
-        razao_social: values.razao_social,
-        nome_fantasia: values.nome_fantasia,
-        faturamento_triagem: values.faturamento_triagem,
-        faturamento_estadia: values.faturamento_estadia,
-        periodo_faturamento: values.periodo_faturamento.length > 0 ? Number(values.periodo_faturamento) + 1 : null,
-        id_przpgto: values.id_przpgto.length > 0 ? Number(values.id_przpgto) : null,
-        endereco: values.endereco,
-        id_estado: values.id_estado !== null && values.id_estado.length > 0 ? Number(values.id_estado) : null,
-        id_cidade: values.id_cidade !== null && values.id_cidade.length > 0 ? Number(values.id_cidade) : null,
-        id_bairro: values.id_bairro !== null && values.id_bairro.length > 0 ? Number(values.id_bairro) : null,
-        numero: values.numero.length > 0 ? Number(values.numero) : null,
-        complemento: values.complemento !== null && values.complemento.length > 0 ? values.complemento : null,
-        cep: values.cep !== null && values.cep.length > 0 ? values.cep.replace("-", "") : null,
-        celular: values.celular !== null && values.celular.length > 0 ? values.celular.replace("(", "").replace(")", "").replace("-", "").replaceAll(" ", "") : null,
-        telefone: values.telefone !== null && values.telefone.length > 0 ? values.telefone.replace("(", "").replace(")", "").replace("-", "").replaceAll(" ", "") : null,
-        email: values.email,
-        id_usuario_historico: Number(userId),
-        ativo: true,
-        status: 0
-      }
+        const urlParams = new URLSearchParams(window.location.search);
 
-      if (props.isEdit) {
-        const response = await api.post("/editar/transportadoras", body);
+        const userId = urlParams.get("userId");
 
-        if (response.status === 200) {
-          FrontendNotification("Transportadora salvo com sucesso!", "success");
-          props.onConfirm();
-        } else {
-          FrontendNotification("Erro ao salvar o transportadora!", "error");
+        const body = {
+          id_proprietario_carga: row?.id_proprietario_carga,
+          cnpj: values.cnpj.replaceAll(".", "").replaceAll("-", "").replace("/", ""),
+          razao_social: values.razao_social,
+          nome_fantasia: values.nome_fantasia,
+          periodo_faturamento: values.periodo_faturamento.length > 0 ? Number(values.periodo_faturamento) + 1 : null,
+          id_przpgto: values.id_przpgto.length > 0 ? Number(values.id_przpgto) : null,
+          endereco: values.endereco,
+          id_estado: values.id_estado !== null && values.id_estado.length > 0 ? Number(values.id_estado) : null,
+          id_cidade: values.id_cidade !== null && values.id_cidade.length > 0 ? Number(values.id_cidade) : null,
+          id_bairro: values.id_bairro !== null && values.id_bairro.length > 0 ? Number(values.id_bairro) : null,
+          numero: values.numero.length > 0 ? Number(values.numero) : null,
+          complemento: values.complemento !== null && values.complemento.length > 0 ? values.complemento : null,
+          cep: values.cep !== null && values.cep.length > 0 ? values.cep.replace("-", "") : null,
+          celular: values.celular !== null && values.celular.length > 0 ? values.celular.replace("(", "").replace(")", "").replace("-", "").replaceAll(" ", "") : null,
+          telefone: values.telefone !== null && values.telefone.length > 0 ? values.telefone.replace("(", "").replace(")", "").replace("-", "").replaceAll(" ", "") : null,
+          email: values.email,
+          id_usuario_historico: Number(userId),
+          ativo: true,
+          status: 0
         }
-      } else {
-        const response = await api.post("/cadastrar/transportadoras", body);
 
-        if (response.status === 200) {
-          FrontendNotification("Transportadora salvo com sucesso!", "success");
-          props.onConfirm();
+
+
+        if(props.isEdit) {
+            const response = await api.post("/editar/proprietariosCarga", body);
+
+            if(response.status === 200) {
+              FrontendNotification("Proprietario Cargas salvo com sucesso!", "success");
+              props.onConfirm();
+            } else {
+              FrontendNotification("Erro ao salvar o Proprietario Cargas!", "error");
+            }
         } else {
-          FrontendNotification("Erro ao salvar o transportadora!", "error");
+          const response = await api.post("/cadastrar/proprietariosCarga", body);
+
+          if(response.status === 200) {
+            FrontendNotification("Proprietario Cargas salvo com sucesso!", "success");
+            props.onConfirm();
+          } else {
+            FrontendNotification("Erro ao salvar o Proprietario Cargas!", "error");
+          }
         }
-      }
 
-      setLoading(false);
-    } catch {
-      FrontendNotification("Erro ao salvar o transportadora!", "error");
-      setLoading(false);
-    }
-  }, []);
-
-  const onLoadFormValues = useCallback((row?: ITransportadoras) => {
-    const data = row;
-
-    if (data) {
-      console.log(data.periodo_faturamento - 1);
-      formik.setFieldValue("cnpj", data.cnpj);
-      formik.setFieldValue("razao_social", data.razao_social);
-      formik.setFieldValue("rntrc", data.nome_fantasia);
-      formik.setFieldValue("data_expiracao_rntrc", data.rntrc);
-      formik.setFieldValue("nome_fantasia", data.data_expiracao_rntrc);
-      formik.setFieldValue("periodo_faturamento", String(data.periodo_faturamento - 1));
-      formik.setFieldValue("id_przpgto", data.id_przpgto);
-      formik.setFieldValue("nomeFantasia", data.nome_fantasia);
-      formik.setFieldValue("celular", data.celular);
-      formik.setFieldValue("endereco", data.endereco);
-      formik.setFieldValue("id_estado", String(data.id_estado));
-      if (data.id_estado !== null) {
-        getCities(data.id_estado);
+        setLoading(false);
+      }catch{
+        FrontendNotification("Erro ao salvar o terminal!", "error");
+        setLoading(false);
       }
-      formik.setFieldValue("id_cidade", String(data.id_cidade));
-      if (data.id_cidade !== null) {
-        getNeighborhood(data.id_cidade);
-      }
-      formik.setFieldValue("id_bairro", String(data.id_bairro));
-      formik.setFieldValue("email", data.email);
-      formik.setFieldValue("numero", data.numero);
-      formik.setFieldValue("complemento", data.complemento);
-      formik.setFieldValue("cep", data.cep);
-      formik.setFieldValue("telefone", data.telefone);
-      formik.setFieldValue("contato", data.contato);
-      formik.setFieldValue("ativo", data.ativo);
-    }
-  }, []);
+  }, [])
 
   const initialValues: FormValues = {
     cnpj: "",
     nome_fantasia: "",
     razao_social: "",
     periodo_faturamento: "",
-    faturamento_triagem: true,
-    faturamento_estadia: true,
-    rntrc: '',
-    data_expiracao_rntrc: '',
     id_przpgto: "",
     endereco: "",
     id_estado: "",
@@ -173,6 +141,39 @@ const Form: React.FC<Props> = (props: Props) => {
       handleSubmit(values, props.selectedRow);
     },
   });
+
+  const onLoadFormValues = useCallback((row?: IProprietarioCargas) => {
+    const data = row;
+
+
+    if (data) {
+    console.log(data.periodo_faturamento - 1);
+      formik.setFieldValue("cnpj", data.cnpj);
+      formik.setFieldValue("razao_social", data.razao_social);
+      formik.setFieldValue("nome_fantasia", data.nome_fantasia);
+      formik.setFieldValue("periodo_faturamento", String(data.periodo_faturamento - 1));
+      formik.setFieldValue("id_przpgto", data.id_przpgto);
+      formik.setFieldValue("nomeFantasia", data.nome_fantasia);
+      formik.setFieldValue("celular", data.celular);
+      formik.setFieldValue("endereco", data.endereco);
+      formik.setFieldValue("id_estado", String(data.id_estado));
+      if(data.id_estado !== null) {
+        getCities(data.id_estado);
+      }
+      formik.setFieldValue("id_cidade", String(data.id_cidade));
+      if(data.id_cidade !== null) {
+        getNeighborhood(data.id_cidade);
+      }
+      formik.setFieldValue("id_bairro",String(data.id_bairro));
+      formik.setFieldValue("email", data.email);
+      formik.setFieldValue("numero", data.numero);
+      formik.setFieldValue("complemento", data.complemento);
+      formik.setFieldValue("cep", data.cep);
+      formik.setFieldValue("telefone", data.telefone);
+      formik.setFieldValue("contato", data.contato);
+      formik.setFieldValue("ativo", data.ativo);
+    }
+  }, []);
 
   const getStates = useCallback(async () => {
     try {
@@ -235,24 +236,36 @@ const Form: React.FC<Props> = (props: Props) => {
     [formik.values.id_cidade]
   );
 
+  const getCargoTypes = useCallback(() => {
+    const data = Object.values(CargaType).map((value: string, index: number) => {
+      return {
+        value: `${index + 1}`,
+        label: value,
+      };
+    });
+    console.log(data);
+
+    setCargoTypes(data);
+  }, []);
+
   const getPeriodPayment = useCallback(async () => {
     try {
       const response = await api.post('/listar/faturasPrazoPagamento');
 
-      if (response.status === 200) {
+      if(response.status === 200) {
 
-
+        
         const mappingResponse = response.data.map((item: PeriodPayment) => {
           return {
             label: item.descricao,
             value: item.id_przpgto,
           }
         });
-
+        
         setPeriodPayment(mappingResponse);
-
+        
       }
-    } catch { /* empty */ }
+    }catch{ /* empty */ }
   }, [])
 
   const getBillingPeriod = useCallback(() => {
@@ -278,13 +291,13 @@ const Form: React.FC<Props> = (props: Props) => {
   }, [getStates]);
 
   useEffect(() => {
+    getCargoTypes();
     getBillingPeriod();
     getPeriodPayment();
     if (props.isView || props.isEdit) {
       onLoadFormValues(props.selectedRow);
     }
   }, []);
-
 
   return (
     <>
@@ -328,7 +341,6 @@ const Form: React.FC<Props> = (props: Props) => {
               disabled={props.isView}
             />
           </div>
-
           <div>
             <SelectCustom
               data={billingPeriod}
@@ -345,10 +357,8 @@ const Form: React.FC<Props> = (props: Props) => {
               value={formik.values.periodo_faturamento}
             />
           </div>
-        </div>
-        <div className='grid grid-cols-3 gap-3 mt-3'>
           <div>
-            <SelectCustom
+          <SelectCustom
               data={periodPayment}
               onChange={(selectedOption: Options) => {
                 formik.setFieldValue(
@@ -362,54 +372,10 @@ const Form: React.FC<Props> = (props: Props) => {
               disabled={props.isView}
               value={formik.values.id_przpgto}
             />
-          </div>
-          <div>
-            <InputCustom
-              title="RNTRC"
-              placeholder=""
-              onChange={formik.handleChange("rntrc")}
-              value={formik.values.rntrc}
-              touched={formik.touched.rntrc}
-              error={formik.errors.rntrc}
-              disabled={props.isView}
-            />
-          </div>
-          <div>
-            <InputCustom
-              title="Data Expiração RNTRC"
-              type="date"
-              placeholder=""
-              onChange={formik.handleChange("data_expiracao_rntrc")}
-              value={formik.values.data_expiracao_rntrc}
-              touched={formik.touched.data_expiracao_rntrc}
-              error={formik.errors.data_expiracao_rntrc}
-              disabled={props.isView}
-            />
+            
           </div>
         </div>
-        <div className='grid grid-cols-2 gap-3 mt-3'>
-          <div>
-            <RadioGroupCustom
-              title="Faturamento Triagem"
-              onChange={(value: string) =>
-                formik.setFieldValue("faturamento_triagem", value === "true")
-              }
-              value={formik.values.faturamento_triagem}
-              disabled={props.isView}
-            />
-          </div>
-          <div>
-            <RadioGroupCustom
-              title="Faturamento Estadia"
-              onChange={(value: string) =>
-                formik.setFieldValue("faturamento_estadia", value === "true")
-              }
-              value={formik.values.faturamento_estadia}
-              disabled={props.isView}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-3 mb-2 mt-3">
+        <div className="grid grid-cols-1 gap-3 mb-2">
           <div>
             <InputCustom
               title="Endereco"
@@ -573,7 +539,7 @@ const Form: React.FC<Props> = (props: Props) => {
         </button>
       </div>
     </>
-  )
-}
+  );
+};
 
 export default Form;
