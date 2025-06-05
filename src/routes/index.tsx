@@ -79,7 +79,7 @@ const router = createBrowserRouter([
     )
   },
   {
-    path: '/cadastros/proprietario_cargas',
+    path: '/cadastros/proprietarios_carga',
     element: (
       <PrivateRoute>
         <ProprietarioCargas />

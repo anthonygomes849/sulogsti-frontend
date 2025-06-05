@@ -47,9 +47,7 @@ const Form: React.FC<Props> = (props: Props) => {
   const [states, setStates] = useState<Options[]>([]);
   const [cities, setCities] = useState<Options[]>([]);
   const [neighborhood, setNeighborhood] = useState<Options[]>([]);
-  const [cargoTypes, setCargoTypes] = useState<Options[]>([]);
   const [billingPeriod, setBillingPeriod] = useState<Options[]>([]);
-  const [valueCargoTypes, setValueCargoTypes] = useState<Options[]>([]);
   const [periodPayment, setPeriodPayment] = useState<Options[]>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -236,17 +234,6 @@ const Form: React.FC<Props> = (props: Props) => {
     [formik.values.id_cidade]
   );
 
-  const getCargoTypes = useCallback(() => {
-    const data = Object.values(CargaType).map((value: string, index: number) => {
-      return {
-        value: `${index + 1}`,
-        label: value,
-      };
-    });
-    console.log(data);
-
-    setCargoTypes(data);
-  }, []);
 
   const getPeriodPayment = useCallback(async () => {
     try {
@@ -291,7 +278,6 @@ const Form: React.FC<Props> = (props: Props) => {
   }, [getStates]);
 
   useEffect(() => {
-    getCargoTypes();
     getBillingPeriod();
     getPeriodPayment();
     if (props.isView || props.isEdit) {

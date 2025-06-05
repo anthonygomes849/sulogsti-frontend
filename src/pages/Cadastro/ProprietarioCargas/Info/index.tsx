@@ -1,12 +1,12 @@
 import React from "react";
 import ModalSideBar from "../../../../components/ModalSideBar";
 import { formatDateTimeBR, maskCnpj, maskedPhone, maskedZipcode, renderCargoTypes } from "../../../../helpers/format";
-import { ITerminal } from "../Create/types/types";
+import { IProprietarioCargas } from "../Create/types/types";
 
 // import { Container } from './styles';
 
 interface Props {
-  data?: ITerminal;
+  data?: IProprietarioCargas;
   title: string;
   onClose: () => void;
 }
@@ -22,7 +22,7 @@ const Info: React.FC<Props> = (props: Props) => {
               ID
             </span>
             <span className="text-sm text-[#666666] font-normal">
-              {props.data?.id_terminal ? props.data.id_terminal : '---'}
+              {props.data?.id_proprietario_carga ? props.data.id_proprietario_carga : '---'}
             </span>
           </div>
           <div className="flex flex-col w-full">
