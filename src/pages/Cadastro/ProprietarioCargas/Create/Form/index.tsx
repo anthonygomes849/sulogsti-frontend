@@ -7,7 +7,6 @@ import api from "../../../../../services/api.ts";
 import { City, States } from "../../../Motoristas/Create/types/types.ts";
 import {
   BillingPeriod,
-  CargaType,
   IProprietarioCargas,
   Neighborhood, Options,
   PeriodPayment,
