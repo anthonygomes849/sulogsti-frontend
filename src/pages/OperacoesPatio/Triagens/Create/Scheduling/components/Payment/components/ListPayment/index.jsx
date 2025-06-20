@@ -202,6 +202,7 @@ const ListPayment = () => {
 
 
   function debitPayment(value) {
+    console.log(value);
     const amount = parseFloat(value);
     checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
   }
@@ -239,18 +240,19 @@ const ListPayment = () => {
     }
   }
 
-  const onPayment = (selectedRow) => {
-    console.log(selectedRow);
-    switch (selectedRow.tipo_pagamento) {
+  const onPayment = (row) => {
+    console.log(row);
+    switch (row.tipo_pagamento) {
       case 4:
         console.log("Entrou")
-        return creditPayment(selectedRow.quantia_paga)
-      case "5":
-        return debitPayment(values.valor_pago)
-      case "6":
-        return debitPayment(values.valor_pago)
-      case "7":
-        return creditPayment(values.valor_pago)
+        return creditPayment(row.quantia_paga)
+      case 5:
+        console.log("Debito")
+        return debitPayment(row.quantia_paga)
+      case 6:
+        return debitPayment(row.quantia_paga)
+      case 7:
+        return creditPayment(row.quantia_paga)
 
     }
   }
