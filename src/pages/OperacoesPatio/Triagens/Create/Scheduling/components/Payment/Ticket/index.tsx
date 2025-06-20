@@ -208,11 +208,23 @@ const Ticket = (props: Props) => {
                     Terminal:
                   </span>
                   <span className="text-sm text-[#000] font-normal ml-1">
-                    {item.operacaoPatio.operacao_porto_agendada !== null &&
-                    item.operacaoPatio.operacao_porto_agendada.terminal !== null
-                      ? item.operacaoPatio.operacao_porto_agendada.terminal
-                          .razao_social
+                  {item.operacaoPatio.id_operacao_porto_carrossel !== null ? (
+                    <>
+                      {item.operacaoPatio.id_operacao_porto_carrossel !== null &&
+                      item.operacaoPatio.operacao_porto_carrossel.terminal !== null
+                      ? item.operacaoPatio.operacao_porto_carrossel.terminal
+                      .razao_social
                       : "---"}
+                    </>
+                  ) : (
+                    <>
+                    {item.operacaoPatio.operacao_porto_agendada !== null &&
+                      item.operacaoPatio.operacao_porto_agendada.terminal !== null
+                      ? item.operacaoPatio.operacao_porto_agendada.terminal
+                      .razao_social
+                      : "---"}
+                      </>
+                    )}
                   </span>
                 </div>
                 <div className="w-full flex items-center mb-1">
