@@ -430,7 +430,7 @@ const IdentifyVehicle: React.FC = () => {
       }
 
       const body = {
-        qtd_por_pagina: 100,
+        qtd_por_pagina: 400,
         order_by: "data_historico",
         order_direction: "desc",
         id_operacao_porto_carrossel: currentRow?.operacao_porto_carrossel?.id_operacao_porto_carrossel
