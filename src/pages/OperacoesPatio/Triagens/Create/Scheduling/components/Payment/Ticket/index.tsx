@@ -428,7 +428,14 @@ const Ticket = (props: Props) => {
                     Operador:
                   </span>
                   <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                    ADMINISTRADOR
+                    {
+                      // Busca o nome do usuário do último pagamento, se existir
+                      item.operacaoPatio &&
+                      item.operacaoPatio.pagamento &&
+                      item.operacaoPatio.pagamento.length > 0
+                        ? item.operacaoPatio.pagamento[item.operacaoPatio.pagamento.length - 1].usuario.toUpperCase()
+                        : "ADMINISTRADOR"
+                    }
                   </span>
                 </div>
 
