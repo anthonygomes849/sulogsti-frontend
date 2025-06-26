@@ -234,10 +234,10 @@ const Ticket = (props: Props) => {
                     Número Container:
                   </span>
                   <span className="text-sm text-[#000] font-normal ml-1">
-                    {item.operacaoPatio.entrada_veiculo !== null &&
-                    item.operacaoPatio.entrada_veiculo
+                    {item.operacaoPatio.operacao_porto_agendada !== null &&
+                    item.operacaoPatio.operacao_porto_agendada
                       .identificadores_conteineres !== null
-                      ? item.operacaoPatio.entrada_veiculo
+                      ? item.operacaoPatio.operacao_porto_agendada
                           .identificadores_conteineres
                       : "---"}
                   </span>
@@ -428,7 +428,14 @@ const Ticket = (props: Props) => {
                     Operador:
                   </span>
                   <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                    ADMINISTRADOR
+                    {
+                      // Busca o nome do usuário do último pagamento, se existir
+                      item.operacaoPatio &&
+                      item.operacaoPatio.pagamento &&
+                      item.operacaoPatio.pagamento.length > 0
+                        ? item.operacaoPatio.pagamento[item.operacaoPatio.pagamento.length - 1].usuario.toUpperCase()
+                        : "ADMINISTRADOR"
+                    }
                   </span>
                 </div>
 
