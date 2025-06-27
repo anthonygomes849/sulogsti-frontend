@@ -58,7 +58,7 @@ const Ticket = (props: Props) => {
 
       if (response.status === 200) {
         let rows: IPaymentTicket[] = [];
-        var numPages = props.numPages || 3;
+        var numPages = 3;
         for (var i = 0; i < numPages; i++) {
           rows.push(response.data);
         }
