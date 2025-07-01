@@ -467,12 +467,16 @@ const IdentifyVehicle: React.FC = () => {
 
 
   const getVehicleTypes = useCallback(() => {
-    const data = Object.values(TipoVeiculo).map((value: any, index: number) => {
+    let data = Object.values(TipoVeiculo).map((value: any, index: number) => {
       return {
         value: `${index + 1}`,
         label: value,
-        isDisabled: index === 0
       };
+    });
+
+    data.unshift({
+      label: "Selecione uma opção",
+      value: ""
     });
 
     setVehicleTypes(data);
@@ -567,7 +571,7 @@ const IdentifyVehicle: React.FC = () => {
     id_transportadora: "",
     cnpj_transportadora: "",
     tipo_placa: 1,
-    tipo_veiculo: "0",
+    tipo_veiculo: "1",
     identificacao_carga: false,
   };
 
@@ -728,11 +732,11 @@ const IdentifyVehicle: React.FC = () => {
                         <div className="w-full mt-4">
                           <SelectCustom
                             data={vehicleTypes}
-                            disabled={
-                              detailVehicleMotorized.length > 0 &&
-                              detailVehicleMotorized[0].tipo_veiculo ==
-                                TipoVeiculo.TRUCK
-                            }
+                            // disabled={
+                            //   detailVehicleMotorized.length > 0 &&
+                            //   detailVehicleMotorized[0].tipo_veiculo ==
+                            //     TipoVeiculo.TRUCK
+                            // }
                             onChange={(selectedOption: any) => {
                               formik.setFieldValue(
                                 "tipo_veiculo",
