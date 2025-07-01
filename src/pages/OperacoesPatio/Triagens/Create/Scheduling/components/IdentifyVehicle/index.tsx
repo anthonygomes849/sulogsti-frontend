@@ -381,6 +381,8 @@ const IdentifyVehicle: React.FC = () => {
           body
         );
 
+        console.log(response.data);
+
         if (response.status === 200) {
 
           if(response.data.id_veiculo) {
@@ -390,13 +392,13 @@ const IdentifyVehicle: React.FC = () => {
             data.push(response.data);
             
             setDetailVehicleMotorized(data);
-            if(response.data.tipo_veiculo == TipoVeiculo.TRUCK) {
-              formik.setFieldValue('tipo_veiculo', "1");
-            } else if(response.data.tipo_veiculo == TipoVeiculo.CARRETA) {
-              formik.setFieldValue('tipo_veiculo', "2");
-            } else {
-              formik.setFieldValue('tipo_veiculo', "3");
-            }
+            // if(response.data.tipo_veiculo == TipoVeiculo.TRUCK) {
+            //   formik.setFieldValue('tipo_veiculo', "1");
+            // } else if(response.data.tipo_veiculo == TipoVeiculo.CARRETA) {
+            //   formik.setFieldValue('tipo_veiculo', "2");
+            // } else {
+            //   formik.setFieldValue('tipo_veiculo', "3");
+            // }
 
             if(licensePlate) {
               formik.setFieldValue(
@@ -571,7 +573,7 @@ const IdentifyVehicle: React.FC = () => {
     id_transportadora: "",
     cnpj_transportadora: "",
     tipo_placa: 1,
-    tipo_veiculo: "1",
+    tipo_veiculo: "",
     identificacao_carga: false,
   };
 
@@ -760,8 +762,7 @@ const IdentifyVehicle: React.FC = () => {
               )}
             </div>
             <div className="w-[50%] h-full flex flex-col">
-              {detailVehicleMotorized.length > 0 &&
-                detailVehicleMotorized[0].tipo_veiculo != TipoVeiculo.TRUCK && (
+              {formik.values.tipo_veiculo.length > 0 && formik.values.tipo_veiculo !== "1" && (
                   <div className="w-full h-full flex ml-4">
                     <motion.div
                       initial="initial"
