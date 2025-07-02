@@ -343,10 +343,6 @@ const Payment = ({ onClose }) => {
         return creditPayment(values.valor_pago)
       case "5":
         return debitPayment(values.valor_pago)
-      case "6":
-        return debitPayment(values.valor_pago)
-      case "7":
-        return creditPayment(values.valor_pago)
       default:
         formik.handleSubmit();
     }
