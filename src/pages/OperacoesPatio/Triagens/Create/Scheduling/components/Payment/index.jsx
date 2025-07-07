@@ -202,7 +202,7 @@ const Payment = ({ onClose }) => {
             FrontendNotification("Pagamento realizado com sucesso!", "success");
             setShowTicket(false);
             setShowTicket(true);
-            // onSavePorto();
+            onSavePorto();
             setTimeout(() => {
               onClose();
             }, 3000);
