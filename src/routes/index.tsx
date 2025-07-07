@@ -13,6 +13,7 @@ import OperacoesPortoAgendada from "../pages/OperacoesPorto/OperacoesPortoAgenda
 import PrivateRoute from "./privateRoute";
 import Route from "./route";
 import Transportadoras from "../pages/Cadastro/Transportadoras";
+import ProprietarioCargas from "../pages/Cadastro/ProprietarioCargas";
 
 /**
  * `router` is a configuration object used to define the routes for a React application, utilizing the `createBrowserRouter` function.
@@ -75,6 +76,14 @@ const router = createBrowserRouter([
         <PrivateRoute>
           <Transportadoras />
         </PrivateRoute>
+    )
+  },
+  {
+    path: '/cadastros/proprietarios_carga',
+    element: (
+      <PrivateRoute>
+        <ProprietarioCargas />
+      </PrivateRoute>
     )
   },
   {

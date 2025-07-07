@@ -381,6 +381,8 @@ const IdentifyVehicle: React.FC = () => {
           body
         );
 
+        console.log(response.data);
+
         if (response.status === 200) {
 
           if(response.data.id_veiculo) {
@@ -390,13 +392,13 @@ const IdentifyVehicle: React.FC = () => {
             data.push(response.data);
             
             setDetailVehicleMotorized(data);
-            if(response.data.tipo_veiculo == TipoVeiculo.TRUCK) {
-              formik.setFieldValue('tipo_veiculo', "1");
-            } else if(response.data.tipo_veiculo == TipoVeiculo.CARRETA) {
-              formik.setFieldValue('tipo_veiculo', "2");
-            } else {
-              formik.setFieldValue('tipo_veiculo', "3");
-            }
+            // if(response.data.tipo_veiculo == TipoVeiculo.TRUCK) {
+            //   formik.setFieldValue('tipo_veiculo', "1");
+            // } else if(response.data.tipo_veiculo == TipoVeiculo.CARRETA) {
+            //   formik.setFieldValue('tipo_veiculo', "2");
+            // } else {
+            //   formik.setFieldValue('tipo_veiculo', "3");
+            // }
 
             if(licensePlate) {
               formik.setFieldValue(
@@ -430,7 +432,7 @@ const IdentifyVehicle: React.FC = () => {
       }
 
       const body = {
-        qtd_por_pagina: 100,
+        qtd_por_pagina: 400,
         order_by: "data_historico",
         order_direction: "desc",
         id_operacao_porto_carrossel: currentRow?.operacao_porto_carrossel?.id_operacao_porto_carrossel
@@ -467,12 +469,16 @@ const IdentifyVehicle: React.FC = () => {
 
 
   const getVehicleTypes = useCallback(() => {
-    const data = Object.values(TipoVeiculo).map((value: any, index: number) => {
+    let data = Object.values(TipoVeiculo).map((value: any, index: number) => {
       return {
         value: `${index + 1}`,
         label: value,
-        isDisabled: index === 0
       };
+    });
+
+    data.unshift({
+      label: "Selecione uma opção",
+      value: ""
     });
 
     setVehicleTypes(data);
@@ -567,7 +573,7 @@ const IdentifyVehicle: React.FC = () => {
     id_transportadora: "",
     cnpj_transportadora: "",
     tipo_placa: 1,
-    tipo_veiculo: "0",
+    tipo_veiculo: "",
     identificacao_carga: false,
   };
 
@@ -728,11 +734,11 @@ const IdentifyVehicle: React.FC = () => {
                         <div className="w-full mt-4">
                           <SelectCustom
                             data={vehicleTypes}
-                            disabled={
-                              detailVehicleMotorized.length > 0 &&
-                              detailVehicleMotorized[0].tipo_veiculo ==
-                                TipoVeiculo.TRUCK
-                            }
+                            // disabled={
+                            //   detailVehicleMotorized.length > 0 &&
+                            //   detailVehicleMotorized[0].tipo_veiculo ==
+                            //     TipoVeiculo.TRUCK
+                            // }
                             onChange={(selectedOption: any) => {
                               formik.setFieldValue(
                                 "tipo_veiculo",
@@ -756,8 +762,7 @@ const IdentifyVehicle: React.FC = () => {
               )}
             </div>
             <div className="w-[50%] h-full flex flex-col">
-              {detailVehicleMotorized.length > 0 &&
-                detailVehicleMotorized[0].tipo_veiculo != TipoVeiculo.TRUCK && (
+              {formik.values.tipo_veiculo.length > 0 && formik.values.tipo_veiculo !== "1" && (
                   <div className="w-full h-full flex ml-4">
                     <motion.div
                       initial="initial"

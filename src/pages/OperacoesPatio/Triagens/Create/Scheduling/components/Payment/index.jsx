@@ -88,6 +88,31 @@ const Payment = ({ onClose }) => {
     }
   }, [])
 
+  const onSavePorto = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      let currentRow = sessionStorage.getItem("@triagem");
+
+      if (currentRow) {
+        currentRow = JSON.parse(currentRow);
+      }
+
+      const body = {
+        operacaoPatio: currentRow,
+      };
+
+      const response = await api.post('/operacaopatio/savePorto', body);
+
+
+      setLoading(false);
+
+      return;
+    }catch {
+      setLoading(false);
+    }
+  }, [])
+
   const handleSubmit = useCallback(
     async (values, dataTicket) => {
       try {
@@ -177,6 +202,7 @@ const Payment = ({ onClose }) => {
             FrontendNotification("Pagamento realizado com sucesso!", "success");
             setShowTicket(false);
             setShowTicket(true);
+            // onSavePorto();
             setTimeout(() => {
               onClose();
             }, 3000);
@@ -343,10 +369,6 @@ const Payment = ({ onClose }) => {
         return creditPayment(values.valor_pago)
       case "5":
         return debitPayment(values.valor_pago)
-      case "6":
-        return debitPayment(values.valor_pago)
-      case "7":
-        return creditPayment(values.valor_pago)
       default:
         formik.handleSubmit();
     }
