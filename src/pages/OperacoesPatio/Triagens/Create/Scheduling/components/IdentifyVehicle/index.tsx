@@ -85,17 +85,17 @@ const IdentifyVehicle: React.FC = () => {
 
       const response = await api.post('/operacaopatio/deleteIdMotorista', body);
 
-      if(response.status === 200) {
+      if (response.status === 200) {
         setStatus(1);
       }
 
       setLoading(false);
-    }catch{
+    } catch {
       setLoading(false);
     }
   }, []);
 
-  const onPaymentInvoiced = useCallback(async () => {
+  const onPaymentInvoiced = useCallback(async (values: FormValues, data: any[]) => {
     try {
       setLoading(true);
 
@@ -164,7 +164,21 @@ const IdentifyVehicle: React.FC = () => {
       );
       if (response.status === 200) {
         FrontendNotification("Triagem faturada com sucesso!", "success");
-        setStatus(4);
+
+        const findCarrierById = data.find(
+          (item: any) =>
+            String(item.id_transportadora) == String(values.id_transportadora)
+        );
+
+        console.log(findCarrierById)
+
+        if (findCarrierById &&
+          findCarrierById.faturamento_triagem &&
+          findCarrierById.faturamento_estadia) {
+          setStatus(4);
+        } else {
+          setStatus(3);
+        }
       }
 
       setLoading(false);
@@ -207,7 +221,9 @@ const IdentifyVehicle: React.FC = () => {
 
         if (response.status === 200) {
           if (isInvoiced) {
-            onPaymentInvoiced();
+            onPaymentInvoiced(values, data);
+
+
           } else {
             setStatus(3);
           }
@@ -278,10 +294,10 @@ const IdentifyVehicle: React.FC = () => {
 
       setLoading(false);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch(error: any) {
+    } catch (error: any) {
       console.log(error);
       setLoading(false);
-      if(error.response && error.response.data && error.response.data.error_msg) {
+      if (error.response && error.response.data && error.response.data.error_msg) {
         FrontendNotification(error.response.data.error_msg, "error");
       } else {
         FrontendNotification(
@@ -338,15 +354,15 @@ const IdentifyVehicle: React.FC = () => {
       );
 
       if (response.status === 200) {
-        if(response.data.id_veiculo) {
+        if (response.data.id_veiculo) {
 
           let data = [];
-          
+
           data.push(response.data);
-          
+
           setDetailVehicle(data);
 
-          if(licensePlate) {
+          if (licensePlate) {
             formik.setFieldValue(
               "id_veiculo_parte_nao_motorizada",
               String(response.data.id_veiculo)
@@ -385,12 +401,12 @@ const IdentifyVehicle: React.FC = () => {
 
         if (response.status === 200) {
 
-          if(response.data.id_veiculo) {
+          if (response.data.id_veiculo) {
 
             let data = [];
-            
+
             data.push(response.data);
-            
+
             setDetailVehicleMotorized(data);
             // if(response.data.tipo_veiculo == TipoVeiculo.TRUCK) {
             //   formik.setFieldValue('tipo_veiculo', "1");
@@ -400,7 +416,7 @@ const IdentifyVehicle: React.FC = () => {
             //   formik.setFieldValue('tipo_veiculo', "3");
             // }
 
-            if(licensePlate) {
+            if (licensePlate) {
               formik.setFieldValue(
                 "id_veiculo_parte_motorizada",
                 String(response.data.id_veiculo)
@@ -530,7 +546,7 @@ const IdentifyVehicle: React.FC = () => {
     );
 
     return findCarrierById &&
-      findCarrierById.faturamento_triagem &&
+      findCarrierById.faturamento_triagem ||
       findCarrierById.faturamento_estadia
       ? true
       : false;
@@ -543,17 +559,17 @@ const IdentifyVehicle: React.FC = () => {
     }
 
     if (getDataTriagem && getDataTriagem.entrada_veiculos !== null) {
-      if(getDataTriagem.entrada_veiculos.placa_dianteira !== null && getDataTriagem.entrada_veiculos.placa_dianteira.length > 0) {
+      if (getDataTriagem.entrada_veiculos.placa_dianteira !== null && getDataTriagem.entrada_veiculos.placa_dianteira.length > 0) {
 
         formik.setFieldValue(
           "license_plate_motorized",
           getDataTriagem.entrada_veiculos.placa_dianteira
         );
-       
+
         onSearchDetailVehicleMotorized(formik.values, getDataTriagem.entrada_veiculos.placa_dianteira);
       }
 
-      if(getDataTriagem.entrada_veiculos.placa_traseira !== null && getDataTriagem.entrada_veiculos.placa_traseira.length > 0) {
+      if (getDataTriagem.entrada_veiculos.placa_traseira !== null && getDataTriagem.entrada_veiculos.placa_traseira.length > 0) {
 
         formik.setFieldValue(
           "license_plate",
@@ -581,7 +597,7 @@ const IdentifyVehicle: React.FC = () => {
     initialValues,
     validationSchema:
       detailVehicleMotorized.length > 0 &&
-      detailVehicleMotorized[0].tipo_veiculo != TipoVeiculo.TRUCK
+        detailVehicleMotorized[0].tipo_veiculo != TipoVeiculo.TRUCK
         ? formValidator2
         : formValidator,
     onSubmit: (values: FormValues) => {
@@ -763,129 +779,129 @@ const IdentifyVehicle: React.FC = () => {
             </div>
             <div className="w-[50%] h-full flex flex-col">
               {formik.values.tipo_veiculo.length > 0 && formik.values.tipo_veiculo !== "1" && (
-                  <div className="w-full h-full flex ml-4">
+                <div className="w-full h-full flex ml-4">
+                  <motion.div
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    variants={vehicleVariants}
+                    className="page w-full h-full flex flex-col"
+                  >
+                    <div className="w-full flex">
+                      <div className="flex flex-col w-full">
+                        <SelectCustom
+                          data={listVehicle}
+                          onChange={(selectedOption: any) => {
+                            formik.setFieldValue(
+                              "id_veiculo_parte_nao_motorizada",
+                              String(selectedOption.value)
+                            );
+                            formik.setFieldValue(
+                              "license_plate",
+                              selectedOption.label
+                            );
+                          }}
+                          onInputChange={(value) => {
+                            if (value.length >= 3) {
+                              onSearchVehicle(value);
+                            }
+                          }}
+                          title="Placa Traseira"
+                          touched={
+                            formik.touched.id_veiculo_parte_nao_motorizada
+                          }
+                          error={
+                            formik.errors.id_veiculo_parte_nao_motorizada
+                          }
+                          value={
+                            formik.values.id_veiculo_parte_nao_motorizada
+                          }
+                        />
+                      </div>
+
+                      <button
+                        className="w-full max-w-28 h-10 flex items-center justify-center border-none rounded-full bg-[#0A4984] text-base text-[#fff] font-bold mt-6 ml-3 cursor-pointer"
+                        type="button"
+                        onClick={() => {
+                          if (
+                            String(formik.values.license_plate).length > 0
+                          ) {
+                            onSearchDetailVehicle(formik.values);
+                          }
+                        }}
+                      >
+                        Procurar
+                      </button>
+                    </div>
+                    {detailVehicle.length > 0 && (
+                      <div className="w-full h-[2px] bg-[#DBDEDF] mt-4" />
+                    )}
+
                     <motion.div
                       initial="initial"
                       animate="animate"
                       exit="exit"
-                      variants={vehicleVariants}
-                      className="page w-full h-full flex flex-col"
+                      variants={detailVehicleVariants}
+                      className="page w-full h-full p-2"
                     >
-                      <div className="w-full flex">
-                        <div className="flex flex-col w-full">
-                          <SelectCustom
-                            data={listVehicle}
-                            onChange={(selectedOption: any) => {
-                              formik.setFieldValue(
-                                "id_veiculo_parte_nao_motorizada",
-                                String(selectedOption.value)
-                              );
-                              formik.setFieldValue(
-                                "license_plate",
-                                selectedOption.label
-                              );
-                            }}
-                            onInputChange={(value) => {
-                              if (value.length >= 3) {
-                                onSearchVehicle(value);
-                              }
-                            }}
-                            title="Placa Traseira"
-                            touched={
-                              formik.touched.id_veiculo_parte_nao_motorizada
-                            }
-                            error={
-                              formik.errors.id_veiculo_parte_nao_motorizada
-                            }
-                            value={
-                              formik.values.id_veiculo_parte_nao_motorizada
-                            }
-                          />
-                        </div>
-
-                        <button
-                          className="w-full max-w-28 h-10 flex items-center justify-center border-none rounded-full bg-[#0A4984] text-base text-[#fff] font-bold mt-6 ml-3 cursor-pointer"
-                          type="button"
-                          onClick={() => {
-                            if (
-                              String(formik.values.license_plate).length > 0
-                            ) {
-                              onSearchDetailVehicle(formik.values);
-                            }
-                          }}
-                        >
-                          Procurar
-                        </button>
-                      </div>
                       {detailVehicle.length > 0 && (
-                        <div className="w-full h-[2px] bg-[#DBDEDF] mt-4" />
-                      )}
-
-                      <motion.div
-                        initial="initial"
-                        animate="animate"
-                        exit="exit"
-                        variants={detailVehicleVariants}
-                        className="page w-full h-full p-2"
-                      >
-                        {detailVehicle.length > 0 && (
-                          <div className="flex flex-col mb-1 mt-3">
-                            <span className="text-sm text-[#000] font-bold">
-                              Dados da placa
-                            </span>
-                            <span className="text-sm text-[#666666] font-normal mt-3">
-                              Dados da placa do veículo
-                            </span>
-                          </div>
-                        )}
-                        <div className="grid grid-cols-2 gap-3 mb-4">
-                          {detailVehicle.map((item: IVeiculos) => (
-                            <React.Fragment>
-                              <div className="flex flex-col items-start">
-                                <span className="text-sm text-[#1E2121] font-bold mt-2">
-                                  Placa Dianteira
-                                </span>
-                                <span className="text-sm text-[#1E2121] font-light mt-1">
-                                  {item.placa}
-                                </span>
-                              </div>
-                              <div className="flex flex-col items-start">
-                                <span className="text-sm text-[#1E2121] font-bold mt-2">
-                                  RENAVAM
-                                </span>
-                                <span className="text-sm text-[#1E2121] font-light mt-1">
-                                  {item.renavam}
-                                </span>
-                              </div>
-                              <div className="flex flex-col items-start">
-                                <span className="text-sm text-[#1E2121] font-bold mt-2">
-                                  Ano de exercício do CRLV
-                                </span>
-                                <span className="text-sm text-[#1E2121] font-light mt-1">
-                                  {item.ano_exercicio_crlv}
-                                </span>
-                              </div>
-                              <div className="flex flex-col items-start">
-                                <span className="text-sm text-[#1E2121] font-bold mt-2">
-                                  Data expiração do RNTRC
-                                </span>
-                                <span className="text-sm text-[#1E2121] font-light mt-1">
-                                  {item.data_expiracao_rntrc}
-                                </span>
-                              </div>
-                            </React.Fragment>
-                          ))}
+                        <div className="flex flex-col mb-1 mt-3">
+                          <span className="text-sm text-[#000] font-bold">
+                            Dados da placa
+                          </span>
+                          <span className="text-sm text-[#666666] font-normal mt-3">
+                            Dados da placa do veículo
+                          </span>
                         </div>
+                      )}
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        {detailVehicle.map((item: IVeiculos) => (
+                          <React.Fragment>
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm text-[#1E2121] font-bold mt-2">
+                                Placa Dianteira
+                              </span>
+                              <span className="text-sm text-[#1E2121] font-light mt-1">
+                                {item.placa}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm text-[#1E2121] font-bold mt-2">
+                                RENAVAM
+                              </span>
+                              <span className="text-sm text-[#1E2121] font-light mt-1">
+                                {item.renavam}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm text-[#1E2121] font-bold mt-2">
+                                Ano de exercício do CRLV
+                              </span>
+                              <span className="text-sm text-[#1E2121] font-light mt-1">
+                                {item.ano_exercicio_crlv}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm text-[#1E2121] font-bold mt-2">
+                                Data expiração do RNTRC
+                              </span>
+                              <span className="text-sm text-[#1E2121] font-light mt-1">
+                                {item.data_expiracao_rntrc}
+                              </span>
+                            </div>
+                          </React.Fragment>
+                        ))}
+                      </div>
 
-                        {detailVehicleMotorized.length > 0 &&
-                          detailVehicleMotorized[0].tipo_veiculo !=
-                            TipoVeiculo.TRUCK && (
-                            <div className="w-full h-[1px] bg-[#0A4984] mr-4" />
-                          )}
-                      </motion.div>
+                      {detailVehicleMotorized.length > 0 &&
+                        detailVehicleMotorized[0].tipo_veiculo !=
+                        TipoVeiculo.TRUCK && (
+                          <div className="w-full h-[1px] bg-[#0A4984] mr-4" />
+                        )}
                     </motion.div>
-                  </div>
-                )}
+                  </motion.div>
+                </div>
+              )}
               {detailVehicleMotorized.length > 0 && (
                 <div className="w-full h-full ml-4 mt-2">
                   <div>
@@ -942,7 +958,7 @@ const IdentifyVehicle: React.FC = () => {
         </div>
       </motion.div>
       <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
-      <button
+        <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
           onClick={() => onHandleBack()}
