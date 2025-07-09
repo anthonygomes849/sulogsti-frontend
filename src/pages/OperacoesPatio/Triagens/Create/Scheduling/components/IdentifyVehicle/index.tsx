@@ -197,8 +197,11 @@ const IdentifyVehicle: React.FC = () => {
       try {
         setLoading(true);
 
+        console.log("passou");
+        
         const isInvoiced: boolean = isInvoicedCarrier(values, data);
-
+        
+        console.log("passou2", isInvoiced);
         console.log(values);
 
         const body = {
@@ -282,10 +285,14 @@ const IdentifyVehicle: React.FC = () => {
         body
       );
 
-      if (response.status === 200) {
+      console.log(response);
+
+      if (response.status == 200) {
+        console.log("entrou")
         sessionStorage.setItem("id_operacao_patio", response.data);
         onUpdateAutorizacao(values, id, userId, data);
       } else {
+        console.log("entrou2")
         FrontendNotification(
           "Erro ao realizar a identificação do veiculo!",
           "error"
@@ -545,11 +552,18 @@ const IdentifyVehicle: React.FC = () => {
         String(item.id_transportadora) == String(values.id_transportadora)
     );
 
-    return findCarrierById &&
-      findCarrierById.faturamento_triagem ||
+    console.log(findCarrierById);
+
+
+    if(findCarrierById) {
+      return  findCarrierById.faturamento_triagem ||
       findCarrierById.faturamento_estadia
       ? true
       : false;
+    }
+
+    return false;
+     
   };
 
   const onLoadFormValues = useCallback(() => {
