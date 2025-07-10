@@ -6,6 +6,7 @@ import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
 import {
+  formatDateTimeBR,
   getCargoTypes,
   getOperationTypes,
   maskCnpj,
@@ -28,6 +29,12 @@ const OperacoesPortoAgendada: React.FC = () => {
       headerName: "Data/Hora",
       filter: true,
       type: "dateColumn",
+      valueFormatter: (params: ValueFormatterParams) => {
+        if(params.value) {
+          return formatDateTimeBR(params.value)
+        }
+        return '---';
+      }
     },
     {
       field: "placa_dianteira_veiculo",

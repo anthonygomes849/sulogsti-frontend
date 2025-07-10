@@ -161,8 +161,8 @@ const Payment = ({ onClose }) => {
               values.desconto.length > 0
                 ? parseFloat(values.desconto).toFixed(2)
                 : 0.0,
-            quantia_paga: values.valor_pago,
-            valor_total: Number(valorPago - desconto).toFixed(2), //Desconto
+            quantia_paga: Number(valorPago - desconto).toFixed(2),
+            valor_total: values.valor_pago, //Desconto
             data_hora_pagamento: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
             tempo_base_triagem:
               dataTicket && dataTicket.comercialCustoTriagem !== null

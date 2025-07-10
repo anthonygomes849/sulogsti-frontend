@@ -31,9 +31,9 @@ const IdentifyDriver: React.FC = () => {
   const [detailDriver, setDetailDriver] = useState<IMotorista[]>([]);
   const [, setSearchQuery] = useState<string>('');
   const [searchDriver, setSearchDriver] = useState();
-  const [showCreateDriver, setShowCreateDriver]  = useState<boolean>(false);
-  const [showUpdatePhone, setShowUpdatePhone]  = useState<boolean>(false);
-  const [textPhone, setTextPhone]  = useState<string>('');
+  const [showCreateDriver, setShowCreateDriver] = useState<boolean>(false);
+  const [showUpdatePhone, setShowUpdatePhone] = useState<boolean>(false);
+  const [textPhone, setTextPhone] = useState<string>('');
 
   const selectRef: any = useRef(null);
 
@@ -50,6 +50,39 @@ const IdentifyDriver: React.FC = () => {
   };
 
   const { setStatus } = useStatus();
+
+  const onDelete = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      let currentRow: any = sessionStorage.getItem("@triagem");
+
+      if (currentRow) {
+        currentRow = JSON.parse(currentRow);
+      }
+
+      const idOperacaoPatio = sessionStorage.getItem("id_operacao_patio");
+
+      const id =
+        idOperacaoPatio && idOperacaoPatio.length > 0
+          ? idOperacaoPatio
+          : currentRow.id_operacao_patio;
+
+      const body = {
+        id_operacao_patio: Number(id),
+      };
+
+      await api.post("/deletar/desassociarTriagem", body);
+
+      
+      setLoading(false);
+      
+      setStatus(0);
+
+    } catch {
+      setLoading(false);
+    }
+  }, []);
 
 
   const handleSubmit = useCallback(async (values: FormValues) => {
@@ -210,7 +243,7 @@ const IdentifyDriver: React.FC = () => {
 
       const response = await api.post(`/operacaopatio/trocaTelefone`, body);
 
-      if(response.status === 200){
+      if (response.status === 200) {
         FrontendNotification('Telefone alterado com sucesso!', 'success');
         setShowUpdatePhone(!showUpdatePhone);
         onSearchDetailDriver(formik.values.cpf_motorista);
@@ -220,7 +253,7 @@ const IdentifyDriver: React.FC = () => {
       }
 
       setLoading(false);
-    }catch{
+    } catch {
       setLoading(false);
     }
   }, [])
@@ -246,7 +279,7 @@ const IdentifyDriver: React.FC = () => {
       callback([]);
       return;
     }
-  
+
     return await onSearchDriver(inputValue)
   };
 
@@ -280,22 +313,22 @@ const IdentifyDriver: React.FC = () => {
         <div className="overflow-y-scroll max-h-[calc(90vh)] p-5">
           <div className="flex mb-3 mt-3">
 
-          <div className="flex flex-col mb-3 mt-3">
-            <span className="text-sm text-[#000] font-bold">
-              Identificação de motorista
-            </span>
-            <span className="text-sm text-[#666666] font-normal mt-3">
-              Procura do cadastro de motorista no sistema
-            </span>
-          </div>
-          <button
+            <div className="flex flex-col mb-3 mt-3">
+              <span className="text-sm text-[#000] font-bold">
+                Identificação de motorista
+              </span>
+              <span className="text-sm text-[#666666] font-normal mt-3">
+                Procura do cadastro de motorista no sistema
+              </span>
+            </div>
+            <button
               type="button"
               className="w-28 h-9 ml-4 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
               onClick={() => setShowCreateDriver(!showCreateDriver)}
-              >
+            >
               + Adicionar
             </button>
-              </div>
+          </div>
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="flex items-center w-full">
               <div className="w-full">
@@ -385,21 +418,21 @@ const IdentifyDriver: React.FC = () => {
                         </span>
                         <div className="flex items-center">
                           {!showUpdatePhone ? (
-                              <>
+                            <>
 
-                        <span className="text-sm text-[#1E2121] font-light mt-1">
-                          {item.celular && item.celular.length > 0
-                            ? maskedPhone(item.celular)
-                            : "---"}
+                              <span className="text-sm text-[#1E2121] font-light mt-1">
+                                {item.celular && item.celular.length > 0
+                                  ? maskedPhone(item.celular)
+                                  : "---"}
 
-                        </span>
+                              </span>
                               <img className="ml-2 cursor-pointer" src={edit} alt="" onClick={() => setShowUpdatePhone(!showUpdatePhone)} />
-                              </>
-                          ): (
-                              <div className="flex items-center">
-                                <input type="text" className="w-full h-9" value={textPhone} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextPhone(e.target.value)} onBlur={() => onUpdatePhone(Number(formik.values.id_motorista), textPhone)} />
-                        <img className="ml-2 cursor-pointer" src={deleteIcon} alt="" onClick={() => setShowUpdatePhone(!showUpdatePhone)} />
-                              </div>
+                            </>
+                          ) : (
+                            <div className="flex items-center">
+                              <input type="text" className="w-full h-9" value={textPhone} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextPhone(e.target.value)} onBlur={() => onUpdatePhone(Number(formik.values.id_motorista), textPhone)} />
+                              <img className="ml-2 cursor-pointer" src={deleteIcon} alt="" onClick={() => setShowUpdatePhone(!showUpdatePhone)} />
+                            </div>
                           )}
                         </div>
                       </div>
@@ -415,7 +448,7 @@ const IdentifyDriver: React.FC = () => {
                             ? `${item.categoria_cnh} |`
                             : "---"}{" "}
                           {item.data_expiracao_cnh &&
-                          item.data_expiracao_cnh !== null
+                            item.data_expiracao_cnh !== null
                             ? formatDateBR(item.data_expiracao_cnh)
                             : "---"}
                         </span>
@@ -447,10 +480,10 @@ const IdentifyDriver: React.FC = () => {
         </div>
       </motion.div>
       <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
-      <button
+        <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
-          onClick={() => setStatus(0)}
+          onClick={() => onDelete()}
           style={{ border: '1px solid #DBDEDF' }}
         >
           Voltar

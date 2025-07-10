@@ -163,6 +163,8 @@ const Associate: React.FC = () => {
         order_direction: "desc",
         qtd_por_pagina: 100,
         triagem: "sim",
+        status: 0,
+        ativo: true
       };
 
       const response = await api.post("/listar/operacaoPortoCarrossel", body);
