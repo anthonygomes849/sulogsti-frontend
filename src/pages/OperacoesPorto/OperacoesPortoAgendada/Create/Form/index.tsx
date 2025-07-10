@@ -84,8 +84,8 @@ const Form: React.FC<Props> = (props: Props) => {
         console.log(conteiners);
 
         if (validateCPF(values.cpf_motorista)) {
-          const body = {
-            id_operacao_porto_agendada: row?.id_operacao_porto_agendada,
+          
+          let body: any = {
             cnpj_transportadora: values.cnpj_transportadora.replaceAll('.', '').replaceAll('-', '').replace('/', ''),
             data_agendamento_terminal: format(
               new Date(values.data_agendamento_terminal),
@@ -119,6 +119,13 @@ const Form: React.FC<Props> = (props: Props) => {
             origem: 1,
             status: 0,
           };
+
+          if(row) { 
+            body = {
+              ...body,
+              id_operacao_porto_agendada: row.id_operacao_porto_agendada,
+            }
+          }
 
           if (props.isEdit) {
             const response = await api.post(

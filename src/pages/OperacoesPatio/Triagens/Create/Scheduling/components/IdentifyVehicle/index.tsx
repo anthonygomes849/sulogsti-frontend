@@ -330,7 +330,7 @@ const IdentifyVehicle: React.FC = () => {
           order_direction: "desc",
           qtd_por_pagina: 100,
           liscense_plate: value,
-          tipo_placa: value,
+          placa: value,
         };
 
         const response = await api.post("/listar/veiculos", body);
