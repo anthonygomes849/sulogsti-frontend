@@ -198,9 +198,9 @@ const IdentifyVehicle: React.FC = () => {
         setLoading(true);
 
         console.log("passou");
-        
+
         const isInvoiced: boolean = isInvoicedCarrier(values, data);
-        
+
         console.log("passou2", isInvoiced);
         console.log(values);
 
@@ -223,13 +223,18 @@ const IdentifyVehicle: React.FC = () => {
         );
 
         if (response.status === 200) {
-          if (isInvoiced) {
-            onPaymentInvoiced(values, data);
+          const custoOperacao = await getPaymentTicket();
 
-
+          if (values.identificacao_carga && custoOperacao && custoOperacao !== null && custoOperacao.valor_a_pagar <= 0) {
+            setStatus(4);
           } else {
-            setStatus(3);
+            if (isInvoiced) {
+              onPaymentInvoiced(values, data);
+            } else {
+              setStatus(3);
+            }
           }
+
         } else {
           FrontendNotification("Erro na identificação do veiculo!", "error");
         }
@@ -555,15 +560,15 @@ const IdentifyVehicle: React.FC = () => {
     console.log(findCarrierById);
 
 
-    if(findCarrierById) {
-      return  findCarrierById.faturamento_triagem ||
-      findCarrierById.faturamento_estadia
-      ? true
-      : false;
+    if (findCarrierById) {
+      return findCarrierById.faturamento_triagem ||
+        findCarrierById.faturamento_estadia
+        ? true
+        : false;
     }
 
     return false;
-     
+
   };
 
   const onLoadFormValues = useCallback(() => {
