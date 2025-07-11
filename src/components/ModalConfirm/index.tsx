@@ -14,7 +14,7 @@ interface Props {
   row?: string;
 }
 
-const ModalConfirm: React.FC<Props> = ({ onConfirm, onCancel, row, title, message }: Props) => {
+const ModalConfirm: React.FC<Props> = ({ onConfirm, onCancel, title, message }: Props) => {
   const BootstrapDialog = styled(Dialog)(() => ({
     "& .MuiPaper-root": {
       borderRadius: "10px",
