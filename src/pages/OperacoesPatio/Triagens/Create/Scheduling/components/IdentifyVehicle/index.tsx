@@ -18,6 +18,9 @@ import CreateVeiculos from "../../../../../../Cadastro/Veiculos/components/Creat
 import { ITriagens } from "../../../../types/types";
 import formValidator from "./validators/formValidator";
 import formValidator2 from "./validators/formValidator2";
+import * as Yup from 'yup';
+import ModalConfirm from "../../../../../../../components/ModalConfirm";
+
 
 // import { Container } from './styles';
 
@@ -44,6 +47,7 @@ const IdentifyVehicle: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showCreateVehicle, setShowCreateVehicle] = useState<boolean>(false);
   const [rowData, setRowData] = useState<ITriagens>();
+  const [showBackPlateModal, setShowBackPlateModal] = useState<boolean>(false);
 
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
@@ -197,12 +201,18 @@ const IdentifyVehicle: React.FC = () => {
       try {
         setLoading(true);
 
-        console.log("passou");
+        console.log("Entrou autorizacao");
 
         const isInvoiced: boolean = isInvoicedCarrier(values, data);
 
-        console.log("passou2", isInvoiced);
-        console.log(values);
+        console.log("isInvoiced", isInvoiced);
+
+        let currentRow: any = sessionStorage.getItem("@triagem");
+        if (currentRow) {
+          currentRow = JSON.parse(currentRow);
+        }
+
+        console.log("currentRow", currentRow);
 
         const body = {
           id_operacao_patio: idOperacaoPatio,
@@ -217,16 +227,59 @@ const IdentifyVehicle: React.FC = () => {
           id_usuario_historico: idUser,
         };
 
+        console.log("body", body);
+
         const response = await api.post(
           "/operacaopatio/adicionarAutorizacao",
           body
         );
 
+        let isDevolucaoContainerVazio = false;
+
+        if (currentRow.operacao_porto_agendada !== null) {
+          isDevolucaoContainerVazio = currentRow.operacao_porto_agendada.tipo_carga === 3 && currentRow.operacao_porto_agendada.tipo_operacao === 2;
+        }
+
+        console.log("isDevolucaoContainerVazio", isDevolucaoContainerVazio);
         if (response.status === 200) {
           const custoOperacao = await getPaymentTicket();
 
-          if (values.identificacao_carga && custoOperacao && custoOperacao !== null && custoOperacao.valor_a_pagar <= 0) {
-            setStatus(4);
+          if (isDevolucaoContainerVazio && !values.identificacao_carga) {
+            console.log("isContainerVazio");
+            if (custoOperacao && custoOperacao.valor_a_pagar > 0) {
+              console.log("isContainerVazio faturado vazio");
+              await onPaymentInvoiced(values, data);
+            } else {
+              const isAvulso = values.id_transportadora === "-1";
+              if (isAvulso) {
+                console.log("isContainerVazio avulso");
+                setStatus(3);
+              } else {
+                console.log("isContainerVazio faturado");
+                const findCarrierById = data.find((item: any) => String(item.id_transportadora) == String(values.id_transportadora));
+
+                if (findCarrierById && findCarrierById.faturamento_triagem && findCarrierById.faturamento_estadia) {
+                  console.log("isContainerVazio faturado faturado");
+                  await onPaymentInvoiced(values, data);
+                } else {
+                  console.log("isContainerVazio payment");
+                  setStatus(3);
+                }
+              }
+            }
+          } else if (!isDevolucaoContainerVazio && values.identificacao_carga) {
+            if (values.identificacao_carga && custoOperacao && custoOperacao !== null && custoOperacao.valor_a_pagar <= 0) {
+              console.log("isContainerCheio faturado");
+              setStatus(4);
+            } else {
+              if (isInvoiced) {
+                console.log("isContainerCheio faturado payment");
+                onPaymentInvoiced(values, data);
+              } else {
+                console.log("isContainerCheio payment");
+                setStatus(3);
+              }
+            }
           } else {
             if (isInvoiced) {
               onPaymentInvoiced(values, data);
@@ -234,6 +287,7 @@ const IdentifyVehicle: React.FC = () => {
               setStatus(3);
             }
           }
+
 
         } else {
           FrontendNotification("Erro na identificação do veiculo!", "error");
@@ -248,7 +302,7 @@ const IdentifyVehicle: React.FC = () => {
     []
   );
 
-  const handleSubmit = useCallback(async (values: FormValues, data: any[]) => {
+  const onSubmit = useCallback(async (values: FormValues, data: any[]) => {
     try {
       setLoading(true);
 
@@ -290,10 +344,9 @@ const IdentifyVehicle: React.FC = () => {
         body
       );
 
-      console.log(response);
+      console.log("response", response.status);
 
       if (response.status == 200) {
-        console.log("entrou")
         sessionStorage.setItem("id_operacao_patio", response.data);
         onUpdateAutorizacao(values, id, userId, data);
       } else {
@@ -309,14 +362,10 @@ const IdentifyVehicle: React.FC = () => {
     } catch (error: any) {
       console.log(error);
       setLoading(false);
-      if (error.response && error.response.data && error.response.data.error_msg) {
-        FrontendNotification(error.response.data.error_msg, "error");
-      } else {
-        FrontendNotification(
-          "Erro ao realizar a identificação do veiculo!",
-          "error"
-        );
-      }
+      FrontendNotification(
+        "Erro ao realizar a identificação do veiculo!",
+        "error"
+      );
     }
   }, []);
 
@@ -559,17 +608,48 @@ const IdentifyVehicle: React.FC = () => {
 
     console.log(findCarrierById);
 
+    let result = false;
 
     if (findCarrierById) {
-      return findCarrierById.faturamento_triagem ||
-        findCarrierById.faturamento_estadia
-        ? true
-        : false;
+      if (findCarrierById.faturamento_triagem ||
+        findCarrierById.faturamento_estadia) {
+        result = true;
+      }
+    }
+
+    console.log("result", result);
+
+    return result;
+
+  };
+
+  const checkIfVehicleIsBackPlate = (values: FormValues) => {
+    let getDataTriagem: any = sessionStorage.getItem("@triagem");
+    if (getDataTriagem) {
+      getDataTriagem = JSON.parse(getDataTriagem);
+    }
+
+    if (values.tipo_veiculo == '1' && getDataTriagem.entrada_veiculos.placa_dianteira !== null && getDataTriagem.entrada_veiculos.placa_dianteira.length > 0 && getDataTriagem.entrada_veiculos.placa_traseira !== null) {
+      if (getDataTriagem.entrada_veiculos.placa_dianteira !== getDataTriagem.entrada_veiculos.placa_traseira) {
+        return true;
+      }
+      return false;
     }
 
     return false;
+  }
 
-  };
+  const handleSubmit = useCallback((values: FormValues, data: any[]) => {
+
+    const result = checkIfVehicleIsBackPlate(values);
+
+    if (result) {
+      setShowBackPlateModal(true);
+    } else {
+      onSubmit(values, data);
+    }
+
+  }, []);
 
   const onLoadFormValues = useCallback(() => {
     let getDataTriagem: any = sessionStorage.getItem("@triagem");
@@ -614,12 +694,11 @@ const IdentifyVehicle: React.FC = () => {
 
   const formik = useFormik({
     initialValues,
-    validationSchema:
-      detailVehicleMotorized.length > 0 &&
-        detailVehicleMotorized[0].tipo_veiculo != TipoVeiculo.TRUCK
-        ? formValidator2
-        : formValidator,
+    validationSchema: Yup.lazy((values: FormValues) =>
+      Number(values.tipo_veiculo) > 1 ? formValidator2 : formValidator
+    ),
     onSubmit: (values: FormValues) => {
+      console.log("values", values);
       handleSubmit(values, transportadoras);
     },
   });
@@ -645,6 +724,20 @@ const IdentifyVehicle: React.FC = () => {
           }}
           onConfirm={() => {
             setShowCreateVehicle(!showCreateVehicle);
+          }}
+        />
+      )}
+      {showBackPlateModal && (
+        <ModalConfirm
+          isOpen={showBackPlateModal}
+          title="Confirmar"
+          message="A placa traseira e a placa dianteira da entrada são diferentes. Deseja continuar?"
+          onConfirm={() => {
+            setShowBackPlateModal(false);
+            onSubmit(formik.values, transportadoras);
+          }}
+          onCancel={() => {
+            setShowBackPlateModal(false);
           }}
         />
       )}

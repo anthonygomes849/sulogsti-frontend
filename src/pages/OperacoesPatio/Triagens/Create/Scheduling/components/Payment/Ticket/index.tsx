@@ -384,6 +384,7 @@ const Ticket = (props: Props) => {
                       style={{ border: "1px dashed #ccc" }}
                     />
                     <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                      
                       {item.valor_pago.toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
