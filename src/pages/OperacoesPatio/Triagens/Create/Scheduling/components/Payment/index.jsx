@@ -88,18 +88,13 @@ const Payment = ({ onClose }) => {
     }
   }, [])
 
-  const onSavePorto = useCallback(async () => {
+  const onSavePorto = useCallback(async (data) => {
     try {
       setLoading(true);
 
-      let currentRow = sessionStorage.getItem("@triagem");
-
-      if (currentRow) {
-        currentRow = JSON.parse(currentRow);
-      }
-
+    
       const body = {
-        operacaoPatio: currentRow,
+        operacaoPatio: data.operacaoPatio,
       };
 
       const response = await api.post('/operacaopatio/savePorto', body);
@@ -202,7 +197,7 @@ const Payment = ({ onClose }) => {
             FrontendNotification("Pagamento realizado com sucesso!", "success");
             setShowTicket(false);
             setShowTicket(true);
-            onSavePorto();
+            onSavePorto(dataTicket);
             setTimeout(() => {
               onClose();
             }, 3000);

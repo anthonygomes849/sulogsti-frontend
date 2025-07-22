@@ -120,6 +120,7 @@ const IdentifyDriver: React.FC = () => {
 
       if (response.status === 200) {
         sessionStorage.setItem("id_operacao_patio", response.data.id_operacao_patio);
+        sessionStorage.setItem("@triagem", JSON.stringify(response.data));
         setStatus(2);
       } else {
         FrontendNotification("Erro ao identificar o motorista", "error");
