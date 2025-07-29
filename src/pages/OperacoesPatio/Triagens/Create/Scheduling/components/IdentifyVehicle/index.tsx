@@ -103,7 +103,7 @@ const IdentifyVehicle: React.FC = () => {
     try {
       setLoading(true);
 
-    
+
       const body = {
         operacaoPatio: data.operacaoPatio,
       };
@@ -114,7 +114,7 @@ const IdentifyVehicle: React.FC = () => {
       setLoading(false);
 
       return;
-    }catch {
+    } catch {
       setLoading(false);
     }
   }, []);
@@ -191,7 +191,7 @@ const IdentifyVehicle: React.FC = () => {
 
         const custoOperacao = await getPaymentTicket();
 
-        if(custoOperacao && custoOperacao !== null) {
+        if (custoOperacao && custoOperacao !== null) {
           onSavePorto(custoOperacao);
         }
         const findCarrierById = data.find(
@@ -201,9 +201,10 @@ const IdentifyVehicle: React.FC = () => {
 
         console.log(findCarrierById)
 
-        if (findCarrierById &&
-          findCarrierById.faturamento_triagem &&
-          findCarrierById.faturamento_estadia) {
+        if (
+          findCarrierById &&
+          (findCarrierById.faturamento_triagem || findCarrierById.faturamento_estadia)
+        ) {
           setStatus(4);
         } else {
           setStatus(3);
@@ -283,7 +284,7 @@ const IdentifyVehicle: React.FC = () => {
                 console.log("isContainerVazio faturado");
                 const findCarrierById = data.find((item: any) => String(item.id_transportadora) == String(values.id_transportadora));
 
-                if (findCarrierById && findCarrierById.faturamento_triagem && findCarrierById.faturamento_estadia) {
+                if (findCarrierById && findCarrierById.faturamento_triagem || findCarrierById.faturamento_estadia) {
                   console.log("isContainerVazio faturado faturado");
                   await onPaymentInvoiced(values, data);
                 } else {

@@ -17,7 +17,7 @@ import { FrontendNotification } from "../../../../../../../shared/Notification";
 import Create from "../../../../../../Cadastro/Motoristas/Create";
 import { IMotorista } from "../../../../../../Cadastro/Motoristas/Create/types/types";
 import formValidator from "./validators/formValidator";
-
+import CheckIcon from '@mui/icons-material/Check';
 // import { Container } from './styles';
 
 interface FormValues {
@@ -186,6 +186,7 @@ const IdentifyDriver: React.FC = () => {
       getDataTriagem = JSON.parse(getDataTriagem);
     }
 
+
     if (getDataTriagem && getDataTriagem.operacao_porto_agendada !== null) {
       formik.setFieldValue(
         "cpf_motorista",
@@ -247,7 +248,9 @@ const IdentifyDriver: React.FC = () => {
       if (response.status === 200) {
         FrontendNotification('Telefone alterado com sucesso!', 'success');
         setShowUpdatePhone(!showUpdatePhone);
-        onSearchDetailDriver(formik.values.cpf_motorista);
+        if(formik.values.cpf_motorista.length > 0) {
+          onSearchDetailDriver(formik.values.cpf_motorista);
+        }
 
       } else {
         FrontendNotification('Erro ao alterar o telefone!', 'error');
@@ -431,8 +434,20 @@ const IdentifyDriver: React.FC = () => {
                             </>
                           ) : (
                             <div className="flex items-center">
-                              <input type="text" className="w-full h-9" value={textPhone} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextPhone(e.target.value)} onBlur={() => onUpdatePhone(Number(formik.values.id_motorista), textPhone)} />
-                              <img className="ml-2 cursor-pointer" src={deleteIcon} alt="" onClick={() => setShowUpdatePhone(!showUpdatePhone)} />
+                              <input type="text" className="w-full h-9" value={textPhone} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextPhone(e.target.value)} />
+
+                              {/* <img className="ml-2 cursor-pointer" src={deleteIcon} alt="" onClick={() => setShowUpdatePhone(!showUpdatePhone)} /> */}
+
+                              <CheckIcon 
+                                className="ml-2 relative -top-2 cursor-pointer" 
+                                style={{
+                                  fill: 'green'
+                                }}
+                                onClick={() => {
+                                  setShowUpdatePhone(false)
+                                  onUpdatePhone(Number(formik.values.id_motorista), textPhone)
+                                }} 
+                              />
                             </div>
                           )}
                         </div>
