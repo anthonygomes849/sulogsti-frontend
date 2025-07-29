@@ -108,7 +108,7 @@ const IdentifyVehicle: React.FC = () => {
         operacaoPatio: data.operacaoPatio,
       };
 
-      const response = await api.post('/operacaopatio/savePorto', body);
+      await api.post('/operacaopatio/savePorto', body);
 
 
       setLoading(false);
