@@ -99,6 +99,26 @@ const IdentifyVehicle: React.FC = () => {
     }
   }, []);
 
+  const onSavePorto = useCallback(async (data: any) => {
+    try {
+      setLoading(true);
+
+    
+      const body = {
+        operacaoPatio: data.operacaoPatio,
+      };
+
+      const response = await api.post('/operacaopatio/savePorto', body);
+
+
+      setLoading(false);
+
+      return;
+    }catch {
+      setLoading(false);
+    }
+  }, []);
+
   const onPaymentInvoiced = useCallback(async (values: FormValues, data: any[]) => {
     try {
       setLoading(true);
@@ -169,6 +189,11 @@ const IdentifyVehicle: React.FC = () => {
       if (response.status === 200) {
         FrontendNotification("Triagem faturada com sucesso!", "success");
 
+        const custoOperacao = await getPaymentTicket();
+
+        if(custoOperacao && custoOperacao !== null) {
+          onSavePorto(custoOperacao);
+        }
         const findCarrierById = data.find(
           (item: any) =>
             String(item.id_transportadora) == String(values.id_transportadora)
@@ -246,7 +271,7 @@ const IdentifyVehicle: React.FC = () => {
 
           if (isDevolucaoContainerVazio && !values.identificacao_carga) {
             console.log("isContainerVazio");
-            if (custoOperacao && custoOperacao.valor_a_pagar > 0) {
+            if (custoOperacao && custoOperacao.valor_a_pagar > 0 && isInvoiced) {
               console.log("isContainerVazio faturado vazio");
               await onPaymentInvoiced(values, data);
             } else {
@@ -698,10 +723,12 @@ const IdentifyVehicle: React.FC = () => {
       Number(values.tipo_veiculo) > 1 ? formValidator2 : formValidator
     ),
     onSubmit: (values: FormValues) => {
-      console.log("values", values);
       handleSubmit(values, transportadoras);
     },
   });
+
+
+
 
   useEffect(() => {
     getTransportadoras();
