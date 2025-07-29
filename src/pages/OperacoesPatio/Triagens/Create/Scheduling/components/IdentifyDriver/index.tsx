@@ -2,7 +2,6 @@ import { useFormik } from "formik";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
-import deleteIcon from '../../../../../../../assets/images/deleteIcon.svg';
 import edit from '../../../../../../../assets/images/edit.svg';
 import SelectCustom from "../../../../../../../components/SelectCustom";
 import Loading from "../../../../../../../core/common/Loading";
