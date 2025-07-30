@@ -11,12 +11,14 @@ import { validateCPF } from "../../../../../helpers/format";
 import api from "../../../../../services/api";
 import { FrontendNotification } from "../../../../../shared/Notification";
 import { ITerminal } from "../../../../Cadastro/Terminal/Create/types/types";
+import * as Yup from 'yup';
 import {
   CargaType,
   IOperacoesPortoAgendada,
   OperationType,
 } from "../../types/types";
 import formValidator from "../validators/formValidator";
+import formValidator2 from "../validators/formValidator2";
 
 interface Props {
   isView?: boolean;
@@ -286,7 +288,9 @@ const Form: React.FC<Props> = (props: Props) => {
 
   const formik = useFormik({
     initialValues,
-    validationSchema: formValidator,
+    validationSchema: Yup.lazy((values: FormValues) =>
+      Number(values.tipo_carga) == 2 ? formValidator2 : formValidator
+    ),
     onSubmit: (values: FormValues) => {
       handleSubmit(values, props.selectedRow, conteiners);
     },
@@ -427,7 +431,7 @@ const Form: React.FC<Props> = (props: Props) => {
               touched={formik.touched.placa_traseira_veiculo}
               error={formik.errors.placa_traseira_veiculo}
               disabled={props.isView}
-              isRequired={false}
+              isRequired={Number(formik.values.tipo_carga) == 2}
             />
           </div>
         </div>

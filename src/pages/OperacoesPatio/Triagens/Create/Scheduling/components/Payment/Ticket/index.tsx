@@ -93,18 +93,18 @@ const Ticket = (props: Props) => {
 
       const body = {
         id_operacao_patio:
-            Number(sessionStorage.getItem("id_operacao_patio")) ||
-            Number(currentRow.id_operacao_patio),
+          Number(sessionStorage.getItem("id_operacao_patio")) ||
+          Number(currentRow.id_operacao_patio),
       };
 
       const response = await api.post("/operacaopatio/bumerangue", body);
 
-      if(response.status === 200) {
+      if (response.status === 200) {
         setBumerangue(response.data);
       }
 
       setLoading(false);
-    }catch{
+    } catch {
       setLoading(false);
     }
   }, [])
@@ -142,17 +142,25 @@ const Ticket = (props: Props) => {
                 className="w-full flex flex-col items-center justify-center mt-2 p-4"
                 style={{ borderBottom: "2px dashed #000" }}
               >
-                <span className="text-sm text-[#000] font-bold">
-                  Agendamento:
-                </span>
-                <span className="text-sm text-[#000] font-bold mt-1">
-                  {item.operacaoPatio.operacao_porto_agendada !== null
-                    ? formatDateTimeBR(
-                        item.operacaoPatio.operacao_porto_agendada
-                          .data_agendamento_terminal
-                      )
-                    : "---"}
-                </span>
+                {item.operacaoPatio.operacao_porto_carrossel !== null ? (
+                  <span className="text-sm text-[#000] font-bold">
+                    Carrossel
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-sm text-[#000] font-bold">
+                      Agendamento:
+                    </span>
+                    <span className="text-sm text-[#000] font-bold mt-1">
+                      {item.operacaoPatio.operacao_porto_agendada !== null
+                        ? formatDateTimeBR(
+                          item.operacaoPatio.operacao_porto_agendada
+                            .data_agendamento_terminal
+                        )
+                        : "---"}
+                    </span>
+                  </>
+                )}
               </div>
               <div
                 className="w-full flex flex-col items-center justify-center p-4"
@@ -175,12 +183,12 @@ const Ticket = (props: Props) => {
                   </span>
                   <span className="text-sm text-[#000] font-normal ml-1">
                     {item.operacaoPatio.operacao_patio_identificacao_veiculo &&
-                    item.operacaoPatio.operacao_patio_identificacao_veiculo !==
+                      item.operacaoPatio.operacao_patio_identificacao_veiculo !==
                       null
                       ? renderVehicleTypes(
-                          item.operacaoPatio
-                            .operacao_patio_identificacao_veiculo.tipo_veiculo
-                        )
+                        item.operacaoPatio
+                          .operacao_patio_identificacao_veiculo.tipo_veiculo
+                      )
                       : "---"}
                   </span>
                 </div>
@@ -196,10 +204,10 @@ const Ticket = (props: Props) => {
                   </span>
                   <span className="text-sm text-[#000] font-normal ml-1">
                     {item.operacaoPatio.operacao_porto_agendada !== null &&
-                    item.operacaoPatio.operacao_porto_agendada
-                      .transportadora !== null
+                      item.operacaoPatio.operacao_porto_agendada
+                        .transportadora !== null
                       ? item.operacaoPatio.operacao_porto_agendada
-                          .transportadora.razao_social
+                        .transportadora.razao_social
                       : "---"}
                   </span>
                 </div>
@@ -208,21 +216,21 @@ const Ticket = (props: Props) => {
                     Terminal:
                   </span>
                   <span className="text-sm text-[#000] font-normal ml-1">
-                  {item.operacaoPatio.id_operacao_porto_carrossel !== null ? (
-                    <>
-                      {item.operacaoPatio.id_operacao_porto_carrossel !== null &&
-                      item.operacaoPatio.operacao_porto_carrossel.terminal !== null
-                      ? item.operacaoPatio.operacao_porto_carrossel.terminal
-                      .razao_social
-                      : "---"}
-                    </>
-                  ) : (
-                    <>
-                    {item.operacaoPatio.operacao_porto_agendada !== null &&
-                      item.operacaoPatio.operacao_porto_agendada.terminal !== null
-                      ? item.operacaoPatio.operacao_porto_agendada.terminal
-                      .razao_social
-                      : "---"}
+                    {item.operacaoPatio.id_operacao_porto_carrossel !== null ? (
+                      <>
+                        {item.operacaoPatio.id_operacao_porto_carrossel !== null &&
+                          item.operacaoPatio.operacao_porto_carrossel.terminal !== null
+                          ? item.operacaoPatio.operacao_porto_carrossel.terminal
+                            .razao_social
+                          : "---"}
+                      </>
+                    ) : (
+                      <>
+                        {item.operacaoPatio.operacao_porto_agendada !== null &&
+                          item.operacaoPatio.operacao_porto_agendada.terminal !== null
+                          ? item.operacaoPatio.operacao_porto_agendada.terminal
+                            .razao_social
+                          : "---"}
                       </>
                     )}
                   </span>
@@ -233,11 +241,11 @@ const Ticket = (props: Props) => {
                   </span>
                   <span className="text-sm text-[#000] font-normal ml-1">
                     {item.operacaoPatio.operacao_porto_agendada !== null &&
-                    item.operacaoPatio.operacao_porto_agendada.tipo_carga !==
+                      item.operacaoPatio.operacao_porto_agendada.tipo_carga !==
                       null
                       ? renderCargoTypes(
-                          item.operacaoPatio.operacao_porto_agendada.tipo_carga
-                        ).replace(",", "")
+                        item.operacaoPatio.operacao_porto_agendada.tipo_carga
+                      ).replace(",", "")
                       : "---"}
                   </span>
                 </div>
@@ -247,10 +255,10 @@ const Ticket = (props: Props) => {
                   </span>
                   <span className="text-sm text-[#000] font-normal ml-1">
                     {item.operacaoPatio.operacao_porto_agendada !== null &&
-                    item.operacaoPatio.operacao_porto_agendada
-                      .identificadores_conteineres !== null
+                      item.operacaoPatio.operacao_porto_agendada
+                        .identificadores_conteineres !== null
                       ? item.operacaoPatio.operacao_porto_agendada
-                          .identificadores_conteineres
+                        .identificadores_conteineres
                       : "---"}
                   </span>
                 </div>
@@ -273,8 +281,8 @@ const Ticket = (props: Props) => {
                   <span className="text-sm text-[#000] font-normal ml-1">
                     {item.operacaoPatio.entrada_veiculo !== null
                       ? formatDateTimeBR(
-                          item.operacaoPatio.entrada_veiculo.data_hora
-                        )
+                        item.operacaoPatio.entrada_veiculo.data_hora
+                      )
                       : "---"}
                   </span>
                 </div>
@@ -284,13 +292,13 @@ const Ticket = (props: Props) => {
                   </span>
                   <span className="text-sm text-[#000] font-normal ml-1">
                     {item.operacaoPatio &&
-                    item.operacaoPatio.pagamento &&
-                    item.operacaoPatio.pagamento.length > 0
+                      item.operacaoPatio.pagamento &&
+                      item.operacaoPatio.pagamento.length > 0
                       ? item.operacaoPatio.pagamento
-                          .map((item: any) =>
-                            formatDateTimeBR(item.data_hora_pagamento)
-                          )
-                          .join(",")
+                        .map((item: any) =>
+                          formatDateTimeBR(item.data_hora_pagamento)
+                        )
+                        .join(",")
                       : "---"}
                   </span>
                 </div>
@@ -315,125 +323,125 @@ const Ticket = (props: Props) => {
                   </span>
                 </div>
               </div>
-                <div
+              <div
                 className="w-full flex flex-col items-center justify-center mt-3 p-4"
                 style={{ borderBottom: "2px dashed #000" }}
-                >
+              >
                 {item.operacaoPatio &&
-                item.operacaoPatio.pagamento &&
-                item.operacaoPatio.pagamento.length > 0 &&
-                item.operacaoPatio.pagamento[
-                  item.operacaoPatio.pagamento.length - 1
-                ].tipo_pagamento === 3 ? (
+                  item.operacaoPatio.pagamento &&
+                  item.operacaoPatio.pagamento.length > 0 &&
+                  item.operacaoPatio.pagamento[
+                    item.operacaoPatio.pagamento.length - 1
+                  ].tipo_pagamento === 3 ? (
                   <></>
                 ) : (
                   <>
-                  <div className="w-full flex items-center justify-between mb-1">
-                    <span className="text-sm text-[#000] font-bold">
-                      Triagem:
-                    </span>
-                    <div
-                      className="w-full ml-2 mr-2"
-                      style={{ border: "1px dashed #ccc" }}
-                    />
-                    <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                      {item.valor_total_triagem.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                    </span>
-                  </div>
-                  {item.valor_hora_extra > 0 && (
-                    <div className="w-full flex items-center justify-between mb-4">
+                    <div className="w-full flex items-center justify-between mb-1">
                       <span className="text-sm text-[#000] font-bold">
-                        Hora Extra:
+                        Triagem:
                       </span>
                       <div
                         className="w-full ml-2 mr-2"
                         style={{ border: "1px dashed #ccc" }}
                       />
                       <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                        {item.valor_hora_extra.toLocaleString("pt-BR", {
+                        {item.valor_total_triagem.toLocaleString("pt-BR", {
                           style: "currency",
                           currency: "BRL",
                         })}
                       </span>
                     </div>
-                  )}
-                  <div className="w-full flex items-center justify-between mb-4">
-                    <span className="text-sm text-[#000] font-bold">
-                      Estadia:
-                    </span>
-                    <div
-                      className="w-full ml-2 mr-2"
-                      style={{ border: "1px dashed #ccc" }}
-                    />
-                    <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                      {item.valor_total_estadia.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                    </span>
-                  </div>
-                  <div className="w-full flex items-center justify-between mb-1">
-                    <span className="w-[70%] text-sm text-[#000] font-bold">
-                      Valor Pago:
-                    </span>
-                    <div
-                      className="w-full ml-2 mr-2"
-                      style={{ border: "1px dashed #ccc" }}
-                    />
-                    <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                      
-                      {item.valor_pago.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                    </span>
-                  </div>
-                  <div className="w-full flex items-center justify-between mb-4">
-                    <span className="w-[70%] text-sm text-[#000] font-bold">
-                      Falta Pagar:
-                    </span>
-                    <div
-                      className="w-full mr-2"
-                      style={{ border: "1px dashed #ccc" }}
-                    />
-                    <span className="text-sm text-[#000] font-bold ml-1 w-full">
-                      {item.valor_a_pagar
-                        ? item.valor_a_pagar.toLocaleString("pt-BR", {
+                    {item.valor_hora_extra > 0 && (
+                      <div className="w-full flex items-center justify-between mb-4">
+                        <span className="text-sm text-[#000] font-bold">
+                          Hora Extra:
+                        </span>
+                        <div
+                          className="w-full ml-2 mr-2"
+                          style={{ border: "1px dashed #ccc" }}
+                        />
+                        <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                          {item.valor_hora_extra.toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          })}
+                        </span>
+                      </div>
+                    )}
+                    <div className="w-full flex items-center justify-between mb-4">
+                      <span className="text-sm text-[#000] font-bold">
+                        Estadia:
+                      </span>
+                      <div
+                        className="w-full ml-2 mr-2"
+                        style={{ border: "1px dashed #ccc" }}
+                      />
+                      <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                        {item.valor_total_estadia.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </span>
+                    </div>
+                    <div className="w-full flex items-center justify-between mb-1">
+                      <span className="w-[70%] text-sm text-[#000] font-bold">
+                        Valor Pago:
+                      </span>
+                      <div
+                        className="w-full ml-2 mr-2"
+                        style={{ border: "1px dashed #ccc" }}
+                      />
+                      <span className="text-sm text-[#000] font-bold ml-1 w-full">
+
+                        {item.valor_pago.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </span>
+                    </div>
+                    <div className="w-full flex items-center justify-between mb-4">
+                      <span className="w-[70%] text-sm text-[#000] font-bold">
+                        Falta Pagar:
+                      </span>
+                      <div
+                        className="w-full mr-2"
+                        style={{ border: "1px dashed #ccc" }}
+                      />
+                      <span className="text-sm text-[#000] font-bold ml-1 w-full">
+                        {item.valor_a_pagar
+                          ? item.valor_a_pagar.toLocaleString("pt-BR", {
                             style: "currency",
                             currency: "BRL",
                           })
-                        : `R$ 0.00`}
-                    </span>
-                  </div>
+                          : `R$ 0.00`}
+                      </span>
+                    </div>
                   </>
 
                 )}
 
-                  <div className="w-full flex flex-col items-center justify-between mb-1">
-                    <span className="text-sm text-[#000] font-bold">
-                      Tipo de pagamento:
-                    </span>
-                    {item.operacaoPatio &&
+                <div className="w-full flex flex-col items-center justify-between mb-1">
+                  <span className="text-sm text-[#000] font-bold">
+                    Tipo de pagamento:
+                  </span>
+                  {item.operacaoPatio &&
                     item.operacaoPatio.pagamento &&
                     item.operacaoPatio.pagamento.length > 0 ? (
-                      <>
-                        {item.operacaoPatio.pagamento.map((item: any) => (
-                          <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
-                            {renderPaymentTypes(item.tipo_pagamento)}
-                          </span>
-                        ))}
-                      </>
-                    ) : (
-                      "---"
-                    )}
-                    {/* <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
+                    <>
+                      {item.operacaoPatio.pagamento.map((item: any) => (
+                        <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
+                          {renderPaymentTypes(item.tipo_pagamento)}
+                        </span>
+                      ))}
+                    </>
+                  ) : (
+                    "---"
+                  )}
+                  {/* <span className="text-sm text-[#000] font-bold ml-1 flex flex-col">
                     CRÉDITO
                   </span> */}
-                  </div>
                 </div>
+              </div>
 
               <div className="w-full flex flex-col items-center justify-center mt-3 p-4">
                 <div className="w-full flex items-center justify-between mb-1">
@@ -444,8 +452,8 @@ const Ticket = (props: Props) => {
                     {
                       // Busca o nome do usuário do último pagamento, se existir
                       item.operacaoPatio &&
-                      item.operacaoPatio.pagamento &&
-                      item.operacaoPatio.pagamento.length > 0
+                        item.operacaoPatio.pagamento &&
+                        item.operacaoPatio.pagamento.length > 0
                         ? item.operacaoPatio.pagamento[item.operacaoPatio.pagamento.length - 1].usuario.toUpperCase()
                         : "ADMINISTRADOR"
                     }
