@@ -195,12 +195,20 @@ const Payment = ({ onClose }) => {
 
           if (response.status === 200) {
             FrontendNotification("Pagamento realizado com sucesso!", "success");
-            setShowTicket(false);
-            setShowTicket(true);
-            onSavePorto(dataTicket);
-            setTimeout(() => {
-              onClose();
-            }, 3000);
+            const custoOperacao = await getPaymentTicket();
+
+            console.log(custoOperacao.valor_a_pagar);
+
+            if(custoOperacao.valor_a_pagar <= 0) {
+              setShowTicket(false);
+              setShowTicket(true);
+              onSavePorto(dataTicket);
+              setTimeout(() => {
+                onClose();
+              }, 3000);
+            }
+
+
           }
 
         }
@@ -239,6 +247,8 @@ const Payment = ({ onClose }) => {
       }
 
       setLoading(false);
+
+      return response.data;
     } catch {
       setLoading(false);
     }
