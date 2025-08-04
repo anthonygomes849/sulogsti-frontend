@@ -162,7 +162,10 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         try {
           setLoading(true);
           // Fazer uma requisição ao servidor passando os parâmetros da página
-          const page = params.endRow / 100 - 1;
+          const pageSize = 20;
+          const page = Math.floor(params.startRow / pageSize);
+
+          console.log(page);
 
           let filters: any = {};
 
@@ -186,7 +189,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
                   filters[`${newFilter.field}1`] = newFilter.value[0];
                   filters[`${newFilter.field}2`] = newFilter.value[1];
                 }
-              } 
+              }
               else {
                 console.log(newFilter.field);
                 let field = newFilter.field;
@@ -206,7 +209,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
           }
 
           const reqDTO = {
-            qtd_por_pagina: 100,
+            qtd_por_pagina: 20,
             order_by:
               params.sortModel.length > 0
                 ? params.sortModel[0].colId.replace("uf_estado", "id_estado")
@@ -258,6 +261,11 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         loadingOverlayComponent={loadingOverlayComponent}
         loadingCellRenderer={loadingOverlayComponent}
         onGridReady={onGridReady}
+        paginationPageSize={20}
+        paginationPageSizeSelector={[20]}
+        paginationAutoPageSize={false}
+        cacheBlockSize={20}        // 👈 ESSENCIAL para trabalhar com paginação no Infinite
+        maxBlocksInCache={5}
       />
     </div>
   );
