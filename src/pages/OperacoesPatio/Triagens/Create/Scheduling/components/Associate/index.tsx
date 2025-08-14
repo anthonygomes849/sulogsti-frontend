@@ -118,7 +118,7 @@ const Associate: React.FC = () => {
       const body = {
         order_by: "data_hora",
         order_direction: "desc",
-        qtd_por_pagina: 100,
+        qtd_por_pagina: 20,
         triagem: "sim",
         placa_dianteira: value.toUpperCase(),
       };

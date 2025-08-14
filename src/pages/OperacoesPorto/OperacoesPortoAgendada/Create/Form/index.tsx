@@ -86,7 +86,7 @@ const Form: React.FC<Props> = (props: Props) => {
         console.log(conteiners);
 
         if (validateCPF(values.cpf_motorista)) {
-          
+
           let body: any = {
             cnpj_transportadora: values.cnpj_transportadora.replaceAll('.', '').replaceAll('-', '').replace('/', ''),
             data_agendamento_terminal: format(
@@ -122,7 +122,7 @@ const Form: React.FC<Props> = (props: Props) => {
             status: 0,
           };
 
-          if(row) { 
+          if (row) {
             body = {
               ...body,
               id_operacao_porto_agendada: row.id_operacao_porto_agendada,
@@ -178,12 +178,21 @@ const Form: React.FC<Props> = (props: Props) => {
       const response = await api.post("/listar/terminais", body);
 
       if (response.status === 200) {
-        const mappingResponse = response.data.data.map((item: ITerminal) => {
+        let mappingResponse = response.data.data.map((item: ITerminal) => {
           return {
             label: item.razao_social,
             value: item.id_terminal,
+            tipos_carga: item.tipos_carga
           };
         });
+
+        mappingResponse.unshift({
+          label: 'Selecione uma opção',
+          value: null,
+          tipos_carga: null,
+        })
+
+
         setTerminal(mappingResponse);
       }
 
@@ -272,6 +281,31 @@ const Form: React.FC<Props> = (props: Props) => {
     }
   }, []);
 
+  const handleCargoType = (idTerminal: number, terminais: any[]) => {
+    const cargoType = Object.values(CargaType).map((value: any, index: number) => {
+      return {
+        value: Number(index + 1),
+        label: value,
+      };
+    });
+    if (idTerminal !== null) {
+      const findTerminalById = terminais.find((item: any) => item.value == idTerminal);
+
+      if (findTerminalById) {
+
+        let cargoTypes = findTerminalById.tipos_carga.replaceAll("{", "").replaceAll("}", "").split(',');
+
+        const findCargoType = cargoType.filter((item: any) => cargoTypes.some((cargo: any) => cargo == item.value));
+
+        setCargoTypes(findCargoType);
+
+      }
+    } else {
+      setCargoTypes(cargoType);
+    }
+
+  };
+
   const initialValues: FormValues = {
     placa_dianteira_veiculo: "",
     placa_traseira_veiculo: "",
@@ -358,6 +392,7 @@ const Form: React.FC<Props> = (props: Props) => {
               data={terminais}
               onChange={(selectedOption: any) => {
                 formik.setFieldValue("id_terminal", selectedOption.value);
+                handleCargoType(selectedOption.value, terminais);
               }}
               title="Terminal"
               touched={formik.touched.id_terminal}
