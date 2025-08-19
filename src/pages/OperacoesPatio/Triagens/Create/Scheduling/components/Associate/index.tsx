@@ -34,7 +34,6 @@ const Associate: React.FC = () => {
   const [operacaoPortoCarrossel, setOperacaoPortoCarrossel] = useState([]);
   const [, setSearchQueryEntrada] = useState<string>("");
   const [, setSearchQueryAgendada] = useState<string>("");
-  const [isAssociate, setIsAssociate] = useState(false);
 
   const selectRef: any = useRef(null);
 
@@ -62,7 +61,7 @@ const Associate: React.FC = () => {
   const { setStatus } = useStatus();
 
   const onSubmit = useCallback(
-    async (values: FormValues, isAssociate: boolean) => {
+    async (values: FormValues) => {
       try {
         setLoading(true);
 
@@ -93,11 +92,7 @@ const Associate: React.FC = () => {
 
           sessionStorage.setItem("@triagem", JSON.stringify(response.data));
 
-          if (isAssociate) {
-            window.location.reload();
-          } else {
-            setStatus(1);
-          }
+          setStatus(1);
         } else {
           setLoading(false);
           FrontendNotification("Erro ao associar a entrada a triagem", "error");
@@ -250,7 +245,7 @@ const Associate: React.FC = () => {
     initialValues,
     validationSchema: formValidator,
     onSubmit: (values: FormValues) => {
-      onSubmit(values, isAssociate);
+      onSubmit(values);
     },
   });
 
