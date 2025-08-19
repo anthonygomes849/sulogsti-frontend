@@ -269,50 +269,55 @@ const IdentifyVehicle: React.FC = () => {
         console.log("isDevolucaoContainerVazio", isDevolucaoContainerVazio);
         if (response.status === 200) {
           const custoOperacao = await getPaymentTicket();
-
-          if (isDevolucaoContainerVazio && !values.identificacao_carga) {
-            console.log("isContainerVazio");
-            if (custoOperacao && custoOperacao.valor_a_pagar > 0 && isInvoiced) {
-              console.log("isContainerVazio faturado vazio");
-              await onPaymentInvoiced(values, data);
-            } else {
-              const isAvulso = values.id_transportadora === "-1";
-              if (isAvulso) {
-                console.log("isContainerVazio avulso");
-                setStatus(3);
+          if (custoOperacao && custoOperacao.valor_a_pagar > 0) {
+            if (isDevolucaoContainerVazio && !values.identificacao_carga) {
+              console.log("isContainerVazio");
+              if (custoOperacao && custoOperacao.valor_a_pagar > 0 && isInvoiced) {
+                console.log("isContainerVazio faturado vazio");
+                await onPaymentInvoiced(values, data);
               } else {
-                console.log("isContainerVazio faturado");
-                const findCarrierById = data.find((item: any) => String(item.id_transportadora) == String(values.id_transportadora));
-
-                if (findCarrierById && findCarrierById.faturamento_triagem || findCarrierById.faturamento_estadia) {
-                  console.log("isContainerVazio faturado faturado");
-                  await onPaymentInvoiced(values, data);
+                const isAvulso = values.id_transportadora === "-1";
+                if (isAvulso) {
+                  console.log("isContainerVazio avulso");
+                  setStatus(3);
                 } else {
-                  console.log("isContainerVazio payment");
+                  console.log("isContainerVazio faturado");
+                  const findCarrierById = data.find((item: any) => String(item.id_transportadora) == String(values.id_transportadora));
+
+                  if (findCarrierById && findCarrierById.faturamento_triagem || findCarrierById.faturamento_estadia) {
+                    console.log("isContainerVazio faturado faturado");
+                    await onPaymentInvoiced(values, data);
+                  } else {
+                    console.log("isContainerVazio payment");
+                    setStatus(3);
+                  }
+                }
+              }
+            } else if (!isDevolucaoContainerVazio && values.identificacao_carga) {
+              if (values.identificacao_carga && custoOperacao && custoOperacao !== null && custoOperacao.valor_a_pagar <= 0) {
+                console.log("isContainerCheio faturado");
+                setStatus(4);
+              } else {
+                if (isInvoiced) {
+                  console.log("isContainerCheio faturado payment");
+                  onPaymentInvoiced(values, data);
+                } else {
+                  console.log("isContainerCheio payment");
                   setStatus(3);
                 }
               }
-            }
-          } else if (!isDevolucaoContainerVazio && values.identificacao_carga) {
-            if (values.identificacao_carga && custoOperacao && custoOperacao !== null && custoOperacao.valor_a_pagar <= 0) {
-              console.log("isContainerCheio faturado");
-              setStatus(4);
             } else {
               if (isInvoiced) {
-                console.log("isContainerCheio faturado payment");
                 onPaymentInvoiced(values, data);
               } else {
-                console.log("isContainerCheio payment");
                 setStatus(3);
               }
             }
+
           } else {
-            if (isInvoiced) {
-              onPaymentInvoiced(values, data);
-            } else {
-              setStatus(3);
-            }
+            setStatus(4);
           }
+
 
 
         } else {

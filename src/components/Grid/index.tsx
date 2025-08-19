@@ -195,7 +195,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
             };
 
             const response = await api.post(
-              `${path}?page=${page + 1}`,
+              `${path}?page=${page}`,
               reqDTO
             );
 

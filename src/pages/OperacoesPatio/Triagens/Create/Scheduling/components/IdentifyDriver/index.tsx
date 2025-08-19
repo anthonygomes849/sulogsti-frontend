@@ -33,6 +33,7 @@ const IdentifyDriver: React.FC = () => {
   const [showCreateDriver, setShowCreateDriver] = useState<boolean>(false);
   const [showUpdatePhone, setShowUpdatePhone] = useState<boolean>(false);
   const [textPhone, setTextPhone] = useState<string>('');
+  const [isAssociate, setIsAssociate] = useState<boolean>(false);
 
   const selectRef: any = useRef(null);
 
@@ -84,7 +85,7 @@ const IdentifyDriver: React.FC = () => {
   }, []);
 
 
-  const handleSubmit = useCallback(async (values: FormValues) => {
+  const handleSubmit = useCallback(async (values: FormValues, isAssociate: boolean) => {
     try {
       setLoading(true);
 
@@ -120,7 +121,12 @@ const IdentifyDriver: React.FC = () => {
       if (response.status === 200) {
         sessionStorage.setItem("id_operacao_patio", response.data.id_operacao_patio);
         sessionStorage.setItem("@triagem", JSON.stringify(response.data));
-        setStatus(2);
+
+        if(isAssociate) {
+          window.location.reload();
+        } else { 
+          setStatus(2);
+        }
       } else {
         FrontendNotification("Erro ao identificar o motorista", "error");
       }
@@ -271,7 +277,7 @@ const IdentifyDriver: React.FC = () => {
     validationSchema: formValidator,
     onSubmit: (values: FormValues) => {
       if (detailDriver.length > 0) {
-        handleSubmit(values);
+        handleSubmit(values, isAssociate);
       }
     },
   });
@@ -502,6 +508,18 @@ const IdentifyDriver: React.FC = () => {
           style={{ border: '1px solid #DBDEDF' }}
         >
           Voltar
+        </button>
+
+        <button
+          type="button"
+          className="w-36 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-xs text-[#000] font-bold rounded-full mr-2 shadow-md"
+          onClick={() => {
+            setIsAssociate(true);
+            formik.handleSubmit();
+          }}
+          style={{ border: "1px solid #DBDEDF" }}
+        >
+          Aguardar Chamada
         </button>
         <button
           type="button"
