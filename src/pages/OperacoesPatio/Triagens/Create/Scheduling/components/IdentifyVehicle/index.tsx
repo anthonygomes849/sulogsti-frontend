@@ -119,7 +119,7 @@ const IdentifyVehicle: React.FC = () => {
     }
   }, []);
 
-  const onPaymentInvoiced = useCallback(async (values: FormValues, data: any[]) => {
+  const onPaymentInvoiced = useCallback(async (values: FormValues, data: any[], isInvoiced: boolean) => {
     try {
       setLoading(true);
 
@@ -146,7 +146,7 @@ const IdentifyVehicle: React.FC = () => {
 
       const body = {
         id_operacao_patio,
-        tipo_pagamento: 3,
+        tipo_pagamento: isInvoiced ? 3 : 9,
         desconto: 0.0,
         quantia_paga: dataTicket?.valor_a_pagar,
         valor_total: dataTicket?.valor_a_pagar, //Desconto
@@ -201,13 +201,19 @@ const IdentifyVehicle: React.FC = () => {
 
         console.log(findCarrierById)
 
-        if (
-          findCarrierById &&
-          (findCarrierById.faturamento_triagem || findCarrierById.faturamento_estadia)
-        ) {
-          setStatus(4);
+        if(isInvoiced) {
+
+          
+          if (
+            findCarrierById &&
+            (findCarrierById.faturamento_triagem || findCarrierById.faturamento_estadia)
+          ) {
+            setStatus(4);
+          } else {
+            setStatus(3);
+          }
         } else {
-          setStatus(3);
+          setStatus(4);
         }
       }
 
@@ -274,7 +280,7 @@ const IdentifyVehicle: React.FC = () => {
               console.log("isContainerVazio");
               if (custoOperacao && custoOperacao.valor_a_pagar > 0 && isInvoiced) {
                 console.log("isContainerVazio faturado vazio");
-                await onPaymentInvoiced(values, data);
+                await onPaymentInvoiced(values, data, true);
               } else {
                 const isAvulso = values.id_transportadora === "-1";
                 if (isAvulso) {
@@ -286,7 +292,7 @@ const IdentifyVehicle: React.FC = () => {
 
                   if (findCarrierById && findCarrierById.faturamento_triagem || findCarrierById.faturamento_estadia) {
                     console.log("isContainerVazio faturado faturado");
-                    await onPaymentInvoiced(values, data);
+                    await onPaymentInvoiced(values, data, true);
                   } else {
                     console.log("isContainerVazio payment");
                     setStatus(3);
@@ -300,7 +306,7 @@ const IdentifyVehicle: React.FC = () => {
               } else {
                 if (isInvoiced) {
                   console.log("isContainerCheio faturado payment");
-                  onPaymentInvoiced(values, data);
+                  onPaymentInvoiced(values, data, true);
                 } else {
                   console.log("isContainerCheio payment");
                   setStatus(3);
@@ -308,14 +314,14 @@ const IdentifyVehicle: React.FC = () => {
               }
             } else {
               if (isInvoiced) {
-                onPaymentInvoiced(values, data);
+                onPaymentInvoiced(values, data, true);
               } else {
                 setStatus(3);
               }
             }
 
           } else {
-            setStatus(4);
+            onPaymentInvoiced(values, data, false);
           }
 
 
