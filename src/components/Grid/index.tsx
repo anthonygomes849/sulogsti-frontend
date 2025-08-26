@@ -199,11 +199,18 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
               reqDTO
             );
 
+            const mappingResponse = response.data.data.map((item: any) => {
+              return {
+                ...item,
+                status: item.status ? item.status : 0
+              }
+            })
+
             gridParams.successCallback(
-              response.data.data,
+              mappingResponse,
               response.data.total
             );
-            setRowData(response.data.data);
+            setRowData(mappingResponse);
             setLoading(false);
           } catch {
             setLoading(false);
