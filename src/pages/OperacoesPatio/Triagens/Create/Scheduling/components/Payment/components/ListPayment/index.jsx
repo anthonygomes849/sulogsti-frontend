@@ -142,7 +142,7 @@ const ListPayment = () => {
       console.log(cols);
 
       setGridApi(params.api);
-    } catch {}
+    } catch { }
   }, []);
 
   const onDelete = useCallback(async (rowId) => {
@@ -186,7 +186,7 @@ const ListPayment = () => {
     console.log(error);
     console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
 
-    if(error.reasonCode == 9) {
+    if (error.reasonCode == 9) {
       checkout = window.PaykitCheckout.undoPayments();
     }
   };
@@ -197,14 +197,23 @@ const ListPayment = () => {
       requestKey: null,
     };
 
-    checkout = window.PaykitCheckout.creditPayment(creditRequest, onPaymentSuccess, onPaymentError);
+    if (window.PaykitCheckout) {
+      checkout = window.PaykitCheckout.creditPayment(creditRequest, onPaymentSuccess, onPaymentError);
+    } else {
+      FrontendNotification("Erro ao carregar o SDK Paykit", "error")
+    }
+
   }
 
 
   function debitPayment(value) {
     console.log(value);
     const amount = parseFloat(value);
-    checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
+    if (window.PaykitCheckout) {
+      checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
+    } else {
+      FrontendNotification("Erro ao carregar o SDK Paykit", "error")
+    }
   }
 
   const onAuthenticationSuccess = function (response) {
@@ -224,21 +233,44 @@ const ListPayment = () => {
 
   };
 
-  function authenticate(){
+  function authenticate() {
+    console.log(window.PaykitCheckout)
     if (window.PaykitCheckout) {
       const authenticationRequest = {
         authenticationKey: '91749225000109',
       };
       checkout = window.PaykitCheckout.authenticate(
-          authenticationRequest,
-          onAuthenticationSuccess,
-          onAuthenticationError,
-          onPendingPayments
+        authenticationRequest,
+        onAuthenticationSuccess,
+        onAuthenticationError,
+        onPendingPayments
       );
     } else {
       console.error("PaykitCheckout não está carregado.");
     }
   }
+
+  const loadPaykitScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.PaykitCheckout) {
+        resolve();
+        return;
+      }
+
+      const existingScript = document.querySelector('script[src="https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js"]');
+      if (existingScript) {
+        existingScript.addEventListener('load', resolve);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js';
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = () => reject('Erro ao carregar o SDK Paykit');
+      document.body.appendChild(script);
+    });
+  };
 
   const onPayment = (row) => {
     console.log(row);
@@ -257,12 +289,25 @@ const ListPayment = () => {
     }
   }
 
+  const loaderPaykit = useCallback(async () => {
+    try {
+      await loadPaykitScript();
+      if (window.PaykitCheckout) {
+        authenticate();
+        authenticatedRef.current = true;
+      } else {
+        console.error("PaykitCheckout ainda não está disponível após carregar o script.");
+      }
+    } catch (error) {
+      FrontendNotification("Erro ao carregar o SDK Paykit:", "error");
+    }
+  }, []);
+
 
   useEffect(() => {
 
     if (!authenticatedRef.current) {
-      authenticate();
-      authenticatedRef.current = true;
+      loaderPaykit();
     }
 
     if (gridApi) {
@@ -298,7 +343,7 @@ const ListPayment = () => {
 
             params.successCallback(response.data.data, response.data.total);
             setRowData(response.data.data);
-          } catch {}
+          } catch { }
         },
       };
 
@@ -311,13 +356,13 @@ const ListPayment = () => {
       <Loading loading={loading} />
 
       {isReversedPayment && (
-          <ReversedPayment
-              onConfirm={() => {
-                setIsReversedPayment(false);
-                onPayment(selectedRow)
-              }}
-              onCancel={() => setIsReversedPayment(!isReversedPayment)}
-          />
+        <ReversedPayment
+          onConfirm={() => {
+            setIsReversedPayment(false);
+            onPayment(selectedRow)
+          }}
+          onCancel={() => setIsReversedPayment(!isReversedPayment)}
+        />
       )}
 
       {isRemove && (

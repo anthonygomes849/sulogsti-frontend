@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import React, {Fragment, useCallback, useEffect, useRef, useState} from "react";
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import Logo from "../../../../../../../assets/images/logo-sulog-rodape.svg";
 import SelectCustom from "../../../../../../../components/SelectCustom";
@@ -18,7 +18,7 @@ import {
   renderVehicleTypes,
 } from "../../../../../../../helpers/format";
 import { useStatus } from "../../../../../../../hooks/StatusContext";
-import { FrontendNotification } from "../../../../../../../shared/Notification";
+import { FrontendNotification, NotificationType } from "../../../../../../../shared/Notification";
 import Ticket from "./Ticket";
 import formValidator from "./validators/formValidator";
 import InputCustom from "../../../../../../../components/InputCustom";
@@ -59,12 +59,12 @@ const Payment = ({ onClose }) => {
 
       const response = await api.post('/operacaopatio/deleteIdVeiculoAutorizacao', body);
 
-      if(response.status === 200) {
+      if (response.status === 200) {
         setStatus(2);
       }
 
       setLoading(false);
-    }catch{
+    } catch {
       setLoading(false);
     }
   }, []);
@@ -83,7 +83,7 @@ const Payment = ({ onClose }) => {
 
       return response.data;
 
-    }catch {
+    } catch {
       setLoading(false);
     }
   }, [])
@@ -92,7 +92,7 @@ const Payment = ({ onClose }) => {
     try {
       setLoading(true);
 
-    
+
       const body = {
         operacaoPatio: data.operacaoPatio,
       };
@@ -103,7 +103,7 @@ const Payment = ({ onClose }) => {
       setLoading(false);
 
       return;
-    }catch {
+    } catch {
       setLoading(false);
     }
   }, [])
@@ -122,11 +122,11 @@ const Payment = ({ onClose }) => {
 
         let getCpfSupervisor = null;
 
-        if(values.desconto.length > 0 && Number(values.desconto) > 0) {
+        if (values.desconto.length > 0 && Number(values.desconto) > 0) {
           getCpfSupervisor = await getSupervisorCpf(cpfSupervisor);
         }
 
-        if(values.desconto.length > 0 && Number(values.desconto) > 0 && cpfSupervisor.length === 11 && !getCpfSupervisor){
+        if (values.desconto.length > 0 && Number(values.desconto) > 0 && cpfSupervisor.length === 11 && !getCpfSupervisor) {
 
           FrontendNotification("CPF Supervisor inválido", "warning");
 
@@ -199,7 +199,7 @@ const Payment = ({ onClose }) => {
 
             console.log(custoOperacao.valor_a_pagar);
 
-            if(custoOperacao.valor_a_pagar <= 0) {
+            if (custoOperacao.valor_a_pagar <= 0) {
               setShowTicket(false);
               setShowTicket(true);
               onSavePorto(dataTicket);
@@ -303,6 +303,7 @@ const Payment = ({ onClose }) => {
   }
 
   var onPaymentSuccess = function (response) {
+    console.log(response);
     console.log(response.receipt.merchantReceipt + '<br>' + response.receipt.customerReceipt);
     console.log(response);
 
@@ -312,24 +313,42 @@ const Payment = ({ onClose }) => {
     console.log(error);
     console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
 
-    if(error.reasonCode == 9) {
+    if (error.reasonCode == 9) {
       checkout = window.PaykitCheckout.undoPayments();
     }
   };
 
   const creditPayment = (value) => {
-    var creditRequest = {
-      amount: parseFloat(value),
-      requestKey: null,
-    };
 
-    checkout = window.PaykitCheckout.creditPayment(creditRequest, onPaymentSuccess, onPaymentError);
+    try {
+      var creditRequest = {
+        amount: parseFloat(value),
+        requestKey: null,
+      };
+
+      console.log(window.PaykitCheckout);
+
+      if (window.PaykitCheckout) {
+
+        checkout = window.PaykitCheckout.creditPayment(creditRequest, onPaymentSuccess, onPaymentError);
+      } else {
+        FrontendNotification("Erro ao carregar o SDK Paykit", "error")
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+
   }
 
 
   function debitPayment(value) {
     const amount = parseFloat(value);
-    checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
+    if(window.PaykitCheckout) {
+      checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
+    } else {
+      FrontendNotification("Erro ao carregar o SDK Paykit", "error")
+    }
   }
 
   const onAuthenticationSuccess = function (response) {
@@ -349,21 +368,44 @@ const Payment = ({ onClose }) => {
 
   };
 
-  function authenticate(){
+  function authenticate() {
+    console.log(window.PaykitCheckout);
     if (window.PaykitCheckout) {
       const authenticationRequest = {
         authenticationKey: '91749225000109',
       };
       checkout = window.PaykitCheckout.authenticate(
-          authenticationRequest,
-          onAuthenticationSuccess,
-          onAuthenticationError,
-          onPendingPayments
+        authenticationRequest,
+        onAuthenticationSuccess,
+        onAuthenticationError,
+        onPendingPayments
       );
     } else {
       console.error("PaykitCheckout não está carregado.");
     }
   }
+
+  const loadPaykitScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.PaykitCheckout) {
+        resolve();
+        return;
+      }
+
+      const existingScript = document.querySelector('script[src="https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js"]');
+      if (existingScript) {
+        existingScript.addEventListener('load', resolve);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js';
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = () => reject('Erro ao carregar o SDK Paykit');
+      document.body.appendChild(script);
+    });
+  };
 
 
   const onPayment = (values) => {
@@ -399,10 +441,23 @@ const Payment = ({ onClose }) => {
     getPaymentTypes();
   }, [getPaymentTicket, getPaymentTypes]);
 
+  const loaderPaykit = useCallback(async () => {
+    try {
+      await loadPaykitScript();
+      if (window.PaykitCheckout) {
+        authenticate();
+        authenticatedRef.current = true;
+      } else {
+        console.error("PaykitCheckout ainda não está disponível após carregar o script.");
+      }
+    } catch (error) {
+      FrontendNotification("Erro ao carregar o SDK Paykit:", "error");
+    }
+  }, [])
+
   useEffect(() => {
     if (!authenticatedRef.current) {
-      authenticate();
-      authenticatedRef.current = true;
+      loaderPaykit();
     }
 
     const handleBeforeUnload = (e) => {
@@ -423,7 +478,7 @@ const Payment = ({ onClose }) => {
       <ToastContainer />
       {showTicket && (
         <div className="hidden">
-          <Ticket numPages={1} data={dataTicket} onClose={() => {}} />
+          <Ticket numPages={1} data={dataTicket} onClose={() => { }} />
         </div>
       )}
       <motion.div
@@ -469,12 +524,12 @@ const Payment = ({ onClose }) => {
                       </span>
                       <span className="text-sm text-[#000] font-bold mt-1">
                         {dataTicket &&
-                        dataTicket.operacaoPatio.operacao_porto_agendada !==
+                          dataTicket.operacaoPatio.operacao_porto_agendada !==
                           null
                           ? formatDateTimeBR(
-                              dataTicket.operacaoPatio.operacao_porto_agendada
-                                .data_agendamento_terminal
-                            )
+                            dataTicket.operacaoPatio.operacao_porto_agendada
+                              .data_agendamento_terminal
+                          )
                           : "---"}
                       </span>
                     </div>
@@ -501,15 +556,15 @@ const Payment = ({ onClose }) => {
                         </span>
                         <span className="text-sm text-[#000] font-normal ml-1">
                           {dataTicket &&
-                          dataTicket.operacaoPatio
-                            .operacao_patio_identificacao_veiculo &&
-                          dataTicket.operacaoPatio
-                            .operacao_patio_identificacao_veiculo !== null
+                            dataTicket.operacaoPatio
+                              .operacao_patio_identificacao_veiculo &&
+                            dataTicket.operacaoPatio
+                              .operacao_patio_identificacao_veiculo !== null
                             ? renderVehicleTypes(
-                                dataTicket.operacaoPatio
-                                  .operacao_patio_identificacao_veiculo
-                                  .tipo_veiculo
-                              )
+                              dataTicket.operacaoPatio
+                                .operacao_patio_identificacao_veiculo
+                                .tipo_veiculo
+                            )
                             : "---"}
                         </span>
                       </div>
@@ -529,12 +584,12 @@ const Payment = ({ onClose }) => {
                         </span>
                         <span className="text-sm text-[#000] font-normal ml-1">
                           {dataTicket &&
-                          dataTicket.operacaoPatio.operacao_porto_agendada !==
+                            dataTicket.operacaoPatio.operacao_porto_agendada !==
                             null &&
-                          dataTicket.operacaoPatio.operacao_porto_agendada
-                            .transportadora !== null
+                            dataTicket.operacaoPatio.operacao_porto_agendada
+                              .transportadora !== null
                             ? dataTicket.operacaoPatio.operacao_porto_agendada
-                                .transportadora.razao_social
+                              .transportadora.razao_social
                             : "---"}
                         </span>
                       </div>
@@ -544,12 +599,12 @@ const Payment = ({ onClose }) => {
                         </span>
                         <span className="text-sm text-[#000] font-normal ml-1">
                           {dataTicket &&
-                          dataTicket.operacaoPatio.operacao_porto_agendada !==
+                            dataTicket.operacaoPatio.operacao_porto_agendada !==
                             null &&
-                          dataTicket.operacaoPatio.operacao_porto_agendada
-                            .terminal !== null
+                            dataTicket.operacaoPatio.operacao_porto_agendada
+                              .terminal !== null
                             ? dataTicket.operacaoPatio.operacao_porto_agendada
-                                .terminal.razao_social
+                              .terminal.razao_social
                             : "---"}
                         </span>
                       </div>
@@ -559,14 +614,14 @@ const Payment = ({ onClose }) => {
                         </span>
                         <span className="text-sm text-[#000] font-normal ml-1">
                           {dataTicket &&
-                          dataTicket.operacaoPatio.operacao_porto_agendada !==
+                            dataTicket.operacaoPatio.operacao_porto_agendada !==
                             null &&
-                          dataTicket.operacaoPatio.operacao_porto_agendada
-                            .tipo_carga !== null
+                            dataTicket.operacaoPatio.operacao_porto_agendada
+                              .tipo_carga !== null
                             ? renderCargoTypes(
-                                dataTicket.operacaoPatio.operacao_porto_agendada
-                                  .tipo_carga
-                              ).replace(",", "")
+                              dataTicket.operacaoPatio.operacao_porto_agendada
+                                .tipo_carga
+                            ).replace(",", "")
                             : "---"}
                         </span>
                       </div>
@@ -576,12 +631,12 @@ const Payment = ({ onClose }) => {
                         </span>
                         <span className="text-sm text-[#000] font-normal ml-1">
                           {dataTicket &&
-                          dataTicket.operacaoPatio.operacao_porto_agendada !==
+                            dataTicket.operacaoPatio.operacao_porto_agendada !==
                             null &&
-                          dataTicket.operacaoPatio.operacao_porto_agendada
-                            .identificadores_conteineres !== null
+                            dataTicket.operacaoPatio.operacao_porto_agendada
+                              .identificadores_conteineres !== null
                             ? dataTicket.operacaoPatio.operacao_porto_agendada
-                                .identificadores_conteineres
+                              .identificadores_conteineres
                             : "---"}
                         </span>
                       </div>
@@ -596,11 +651,11 @@ const Payment = ({ onClose }) => {
                         </span>
                         <span className="text-sm text-[#000] font-normal ml-1">
                           {dataTicket &&
-                          dataTicket.operacaoPatio.entrada_veiculo !== null
+                            dataTicket.operacaoPatio.entrada_veiculo !== null
                             ? formatDateTimeBR(
-                                dataTicket.operacaoPatio.entrada_veiculo
-                                  .data_hora
-                              )
+                              dataTicket.operacaoPatio.entrada_veiculo
+                                .data_hora
+                            )
                             : "---"}
                         </span>
                       </div>
@@ -609,15 +664,15 @@ const Payment = ({ onClose }) => {
                           Pagamento:
                         </span>
                         <span className="text-sm text-[#000] font-normal ml-1">
-                        {dataTicket?.operacaoPatio &&
-                    dataTicket?.operacaoPatio.pagamento &&
-                    dataTicket?.operacaoPatio.pagamento.length > 0
-                      ? dataTicket?.operacaoPatio.pagamento
-                          .map((item) =>
-                            formatDateTimeBR(item.data_hora_pagamento)
-                          )
-                          .join(",")
-                      : "---"}
+                          {dataTicket?.operacaoPatio &&
+                            dataTicket?.operacaoPatio.pagamento &&
+                            dataTicket?.operacaoPatio.pagamento.length > 0
+                            ? dataTicket?.operacaoPatio.pagamento
+                              .map((item) =>
+                                formatDateTimeBR(item.data_hora_pagamento)
+                              )
+                              .join(",")
+                            : "---"}
                         </span>
                       </div>
                       <div className="w-full flex items-center mb-1">
@@ -724,12 +779,12 @@ const Payment = ({ onClose }) => {
                         <span className="text-sm text-[#000] font-bold ml-1 w-full">
                           {dataTicket?.valor_a_pagar
                             ? dataTicket?.valor_a_pagar.toLocaleString(
-                                "pt-BR",
-                                {
-                                  style: "currency",
-                                  currency: "BRL",
-                                }
-                              )
+                              "pt-BR",
+                              {
+                                style: "currency",
+                                currency: "BRL",
+                              }
+                            )
                             : `R$ 0.00`}
                         </span>
                       </div>
@@ -739,8 +794,8 @@ const Payment = ({ onClose }) => {
                           Tipo de pagamento:
                         </span>
                         {dataTicket?.operacaoPatio &&
-                        dataTicket?.operacaoPatio.pagamento &&
-                        dataTicket?.operacaoPatio.pagamento.length > 0 ? (
+                          dataTicket?.operacaoPatio.pagamento &&
+                          dataTicket?.operacaoPatio.pagamento.length > 0 ? (
                           <>
                             {dataTicket?.operacaoPatio.pagamento.map(
                               (item) => (
