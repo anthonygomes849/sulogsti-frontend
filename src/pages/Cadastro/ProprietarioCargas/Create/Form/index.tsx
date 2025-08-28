@@ -107,7 +107,7 @@ const Form: React.FC<Props> = (props: Props) => {
 
         setLoading(false);
       }catch{
-        FrontendNotification("Erro ao salvar o terminal!", "error");
+        FrontendNotification("Erro ao salvar o Proprietario de Cargas!", "error");
         setLoading(false);
       }
   }, [])

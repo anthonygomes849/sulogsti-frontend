@@ -105,8 +105,14 @@ const CustomFilter = forwardRef<IFilterReactComp, any>((props: any, ref) => {
               value = value.concat("}");
               setFilterValue(value);
             } else {
-              console.log("entrou select", selectedOption);
-              setFilterValue(Number(selectedOption.value));
+              console.log(props.colDef);
+              console.log("entrou select", Number(selectedOption));
+              if(props.colDef.type === "booleanColumn") {
+                setFilterValue(selectedOption.value);
+
+              } else {
+                setFilterValue(Number(selectedOption.value));
+              }
             }
           }}
           title=""
