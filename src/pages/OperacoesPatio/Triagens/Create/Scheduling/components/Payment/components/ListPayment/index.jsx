@@ -284,7 +284,9 @@ const ListPayment = () => {
       case 6:
         return debitPayment(row.quantia_paga)
       case 7:
-        return creditPayment(row.quantia_paga)
+        return creditPayment(row.quantia_paga);
+      default:
+        onDelete(selectedRow.id_operacao_patio_pagamento);
 
     }
   }
