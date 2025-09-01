@@ -72,7 +72,9 @@ const Payment: React.FC<PaymentProps> = ({ onClose }) => {
 
     setAdministrativeCode(String(response.administrativeCode));
     // Process the form submission after successful payment
-    formik.handleSubmit();
+    setTimeout(() => {
+      formik.handleSubmit();
+    }, 1000);
   }
 
   /**
@@ -189,8 +191,28 @@ const Payment: React.FC<PaymentProps> = ({ onClose }) => {
     }
   }, []);
 
+  const onSavePorto = useCallback(async (data: any) => {
+    try {
+      setLoading(true);
+
+
+      const body = {
+        operacaoPatio: data.operacaoPatio,
+      };
+
+      await api.post('/operacaopatio/savePorto', body);
+
+
+      setLoading(false);
+
+      return;
+    } catch {
+      setLoading(false);
+    }
+  }, [])
+
   const handleSubmit = useCallback(
-    async (values: PaymentFormData, dataTicket: PaymentTicketData | undefined) => {
+    async (values: PaymentFormData, dataTicket: PaymentTicketData | undefined, administrativeCode: string | null) => {
       try {
         setLoading(true);
 
@@ -272,21 +294,17 @@ const Payment: React.FC<PaymentProps> = ({ onClose }) => {
 
         if (response.status === 200) {
           FrontendNotification("Pagamento realizado com sucesso!", "success");
-          const custoOperacao = await getPaymentTicket();
 
           setAdministrativeCode(null);
 
-          if (custoOperacao && custoOperacao.valor_a_pagar <= 0) {
-            setShowTicket(true);
-            setTimeout(() => {
-              window.print();
-              setStatus(3);
-            }, 100);
-          } else {
-            // Reset form for next payment
-            formik.resetForm();
-            formik.setFieldValue("valor_pago", custoOperacao?.valor_a_pagar?.toString() || "0");
-          }
+          setShowTicket(false);
+          setShowTicket(true);
+          onSavePorto(dataTicket);
+          setTimeout(() => {
+            onClose();
+          }, 3000);
+
+
         }
 
         setLoading(false);
@@ -320,6 +338,10 @@ const Payment: React.FC<PaymentProps> = ({ onClose }) => {
     }
   }, [linxPayment]);
 
+  const cancelPayments = useCallback(async () => {
+    await linxPayment.cancelPayment();
+  }, [])
+
   const initialValues: PaymentFormData = {
     tipo_pagamento: "",
     desconto: "",
@@ -330,13 +352,14 @@ const Payment: React.FC<PaymentProps> = ({ onClose }) => {
   const formik = useFormik({
     initialValues,
     validationSchema: formValidator,
-    onSubmit: (values) => handleSubmit(values, dataTicket),
+    onSubmit: (values) => handleSubmit(values, dataTicket, administrativeCode),
   });
 
   useEffect(() => {
     getPaymentTicket();
     getPaymentTypes();
-  }, [getPaymentTicket, getPaymentTypes]);
+    cancelPayments();
+  }, [getPaymentTicket, getPaymentTypes, cancelPayments]);
 
   return (
     <Fragment>

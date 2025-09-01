@@ -31,6 +31,7 @@ import {
 
 interface PaymentRowData {
   id_operacao_patio_pagamento: number;
+  administrative_code: string | null;
   data_hora_pagamento: string;
   tipo_pagamento: number;
   tempo_base_triagem: number;
@@ -49,9 +50,13 @@ const ListPayment: React.FC = () => {
   const [gridApi, setGridApi] = useState<any>(null);
   const [currentRow, setCurrentRow] = useState<any>();
   const [isReversedPayment, setIsReversedPayment] = useState(false);
+  const [paymentInProgress, setPaymentInProgress] = useState<PaymentRowData | null>(null);
 
   const { setStatus } = useStatus();
   const gridRef = useRef<AgGridReact>(null);
+
+  const paymentInProgressRef = useRef<PaymentRowData | null>(null);
+
 
   // Use the new Linx payment hook
   const linxPayment = useLinxPayment({
@@ -65,10 +70,17 @@ const ListPayment: React.FC = () => {
    */
   function handleLinxPaymentSuccess(response: LinxPaymentResponse): void {
     console.log('Linx payment reversal successful:', response);
-    // Process the payment reversal after successful payment
-    if (selectedRow) {
-      onDelete(selectedRow.id_operacao_patio_pagamento);
+    console.log('Payment row being processed:', paymentInProgressRef.current);
+    
+    // Use the paymentInProgress row instead of selectedRow
+    if (paymentInProgressRef.current) {
+      onDelete(paymentInProgressRef.current.id_operacao_patio_pagamento);
+    } else {
+      console.error('No payment in progress found for reversal');
     }
+    
+    // Clear the payment in progress
+    setPaymentInProgress(null);
   }
 
   /**
@@ -76,6 +88,11 @@ const ListPayment: React.FC = () => {
    */
   function handleLinxPaymentError(error: LinxPaymentError): void {
     console.error('Linx payment reversal error:', error);
+    console.log('Payment row that failed:', paymentInProgress);
+    
+    // Clear the payment in progress on error
+    setPaymentInProgress(null);
+    
     // Error is already handled by the utility functions
   }
 
@@ -177,19 +194,22 @@ const ListPayment: React.FC = () => {
     }
   }, [defaultColumns, isView, isReversedPayment]);
 
-  const onDelete = useCallback(async (rowId: number) => {
+  const onDelete = useCallback(async (row: any) => {
     try {
       setLoading(true);
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const userId = urlParams.get("userId");
 
-      const body = {
-        id_operacao_patio_pagamento: rowId,
-        id_usuario_historico: userId,
-      };
 
-      await api.post("/operacaopatio/estorno", body);
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("userId");
+
+        const body = {
+          id_operacao_patio_pagamento: row,
+          id_usuario_historico: userId,
+        };
+
+        await api.post("/operacaopatio/estorno", body);
+
 
       setLoading(false);
       setIsRemove(false);
@@ -198,7 +218,7 @@ const ListPayment: React.FC = () => {
       console.error('Delete payment error:', error);
       setLoading(false);
     }
-  }, []);
+  }, [selectedRow]);
 
   /**
    * Handle payment reversal using the new Linx payment integration
@@ -208,18 +228,34 @@ const ListPayment: React.FC = () => {
       const paymentMethod = row.tipo_pagamento.toString();
       const amount = row.quantia_paga;
 
+      console.log('Processing payment reversal for row:', row);
+      
+      // Store the row being processed for the success callback
+      setPaymentInProgress(row);
+      paymentInProgressRef.current = row;
+
+
       // Check if this payment method requires Linx SDK for reversal
-      if (paymentMethod === PaymentMethodType.CREDIT_CARD || 
-          paymentMethod === PaymentMethodType.DEBIT_CARD) {
-        
+      if (row.administrative_code !== null) {
+
+        const request = {
+          administrativeCode: row.administrative_code !== null ? row.administrative_code : '',
+          amount: String(amount),
+          data: '010925'
+        };
+
         // Use the new Linx payment integration for reversal
-        await linxPayment.processPayment(paymentMethod, amount);
+        await linxPayment.cancelPayments(request);
       } else {
         // For non-card payments, delete directly
         onDelete(row.id_operacao_patio_pagamento);
+        // Clear the payment in progress since we're handling it directly
+        setPaymentInProgress(null);
       }
     } catch (error) {
       console.error('Payment reversal error:', error);
+      // Clear the payment in progress on error
+      setPaymentInProgress(null);
     }
   }, [linxPayment, onDelete]);
 
@@ -302,7 +338,7 @@ const ListPayment: React.FC = () => {
       {linxPayment.error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           <span className="block sm:inline">Erro no sistema de pagamento: {linxPayment.error}</span>
-          <button 
+          <button
             onClick={linxPayment.resetError}
             className="float-right font-bold text-red-700 hover:text-red-900"
           >

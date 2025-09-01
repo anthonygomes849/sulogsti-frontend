@@ -13,12 +13,14 @@ import {
   requiresLinxSDK,
   isLinxSDKLoaded,
   reprint,
+  revertPayment,
 } from './utils';
 import type {
   LinxPaymentResponse,
   LinxPaymentError,
   PaymentMethodType,
   LinxReprintRequest,
+  LinxCancelPaymentRequest,
 } from './types';
 
 export interface UseLinxPaymentOptions {
@@ -33,13 +35,14 @@ export interface UseLinxPaymentReturn {
   isAuthenticated: boolean;
   isInitializing: boolean;
   error: string | null;
-  
+
   // Actions
   initializeSDK: () => Promise<void>;
   processPayment: (method: string, amount: number, installments?: number) => Promise<void>;
   cancelPayment: () => void;
-  reprintPayment: (code: string) => void;
-  
+  reprintPayment: (code: string) => Promise<void>;
+  cancelPayments: (request: LinxCancelPaymentRequest) => Promise<void>;
+
   // Utilities
   canProcessPayment: (method: string) => boolean;
   resetError: () => void;
@@ -118,7 +121,7 @@ export const useLinxPayment = (options: UseLinxPaymentOptions = {}): UseLinxPaym
 
     return new Promise((resolve, reject) => {
       const handleSuccess = (response: LinxPaymentResponse) => {
-        handlePaymentSuccess(response);
+        handlePaymentSuccess(response, 'Pagamento realizado com sucesso!');
         onPaymentSuccess?.(response);
         resolve();
       };
@@ -153,18 +156,72 @@ export const useLinxPayment = (options: UseLinxPaymentOptions = {}): UseLinxPaym
       console.error('Failed to cancel payment:', err);
     }
   }, []);
-  
 
-  const reprintPayment = useCallback((code: string): void => { 
-    try {
-      const request: LinxReprintRequest = {
-        administrativeCode: code,
-      };
+  /**
+   * Reimpressão comprovante especifico
+   */
+  const reprintPayment = useCallback((code: string): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const handleSuccess = (response: LinxPaymentResponse) => {
+          handlePaymentSuccess(response, 'Reimpressão realizado com sucesso!');
+          onPaymentSuccess?.(response);
+          resolve();
+        };
 
-      reprint(request);
-    } catch (err) {
-      console.error('Failed to reprint payment:', err);
-    }
+        const handleError = (error: LinxPaymentError) => {
+          const errorMessage = `Payment failed: ${error.reason}`;
+          setError(errorMessage);
+          handlePaymentError(error);
+          onPaymentError?.(error);
+          reject(error);
+        };
+
+        try {
+          const request: LinxReprintRequest = {
+            administrativeCode: code,
+          };
+
+          reprint(request, handleSuccess, handleError);
+        } catch (err) {
+          const error: LinxPaymentError = {
+            reasonCode: -1,
+            reason: err instanceof Error ? err.message : 'Unknown error',
+          };
+          handleError(error);
+        }
+      });
+
+  }, []);
+
+  const cancelPayments = useCallback((request: LinxCancelPaymentRequest): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const handleSuccess = (response: LinxPaymentResponse) => {
+          handlePaymentSuccess(response, 'Cancelamento do Pagamento realizado com sucesso!');
+          onPaymentSuccess?.(response);
+          resolve();
+        };
+
+        const handleError = (error: LinxPaymentError) => {
+          const errorMessage = `Payment failed: ${error.reason}`;
+          setError(errorMessage);
+          handlePaymentError(error);
+          onPaymentError?.(error);
+          reject(error);
+        };
+
+        try {
+          
+
+          revertPayment(request, handleSuccess, handleError);
+        } catch (err) {
+          const error: LinxPaymentError = {
+            reasonCode: -1,
+            reason: err instanceof Error ? err.message : 'Unknown error',
+          };
+          handleError(error);
+        }
+      });
+
   }, []);
 
   /**
@@ -174,7 +231,7 @@ export const useLinxPayment = (options: UseLinxPaymentOptions = {}): UseLinxPaym
     if (!requiresLinxSDK(method)) {
       return true; // Non-card payments can always be processed
     }
-    
+
     return isAuthenticated && isSDKLoaded;
   }, [isAuthenticated, isSDKLoaded]);
 
@@ -196,10 +253,10 @@ export const useLinxPayment = (options: UseLinxPaymentOptions = {}): UseLinxPaym
     };
 
     checkSDKStatus();
-    
+
     // Periodically check if SDK gets loaded externally
     const interval = setInterval(checkSDKStatus, 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -238,13 +295,14 @@ export const useLinxPayment = (options: UseLinxPaymentOptions = {}): UseLinxPaym
     isAuthenticated,
     isInitializing,
     error,
-    
+
     // Actions
     initializeSDK,
     processPayment,
     cancelPayment,
     reprintPayment,
-    
+    cancelPayments,
+
     // Utilities
     canProcessPayment,
     resetError,

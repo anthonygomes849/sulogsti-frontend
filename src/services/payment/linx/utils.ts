@@ -17,6 +17,7 @@ import type {
   LinxAuthenticationErrorCallback,
   LinxPendingPaymentsCallback,
   LinxReprintRequest,
+  LinxCancelPaymentRequest,
 } from './types';
 import { PaymentMethodType } from './types';
 
@@ -39,7 +40,7 @@ export const loadLinxPaykitScript = (): Promise<void> => {
     }
 
     const config = getLinxPaymentConfig();
-    
+
     // Validate configuration
     if (!validateLinxConfig(config)) {
       reject(new Error('Invalid Linx payment configuration'));
@@ -60,7 +61,7 @@ export const loadLinxPaykitScript = (): Promise<void> => {
     script.async = true;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error('Failed to load Linx SDK'));
-    
+
     document.body.appendChild(script);
   });
 };
@@ -71,14 +72,14 @@ export const loadLinxPaykitScript = (): Promise<void> => {
 export const initializeLinxSDK = async (): Promise<any> => {
   try {
     await loadLinxPaykitScript();
-    
+
     if (!isLinxSDKLoaded()) {
       throw new Error('Linx SDK not available after loading');
     }
 
     return new Promise((resolve, reject) => {
       const config = getLinxPaymentConfig();
-      
+
       const authenticationRequest: LinxAuthenticationRequest = {
         authenticationKey: config.authenticationKey,
       };
@@ -177,28 +178,53 @@ export const processDebitPayment = (
 export const undoPayments = (): any => {
   if (!isLinxSDKLoaded()) {
     console.warn('Linx SDK not loaded, cannot undo payments');
+
     return null;
   }
 
   return window.PaykitCheckout!.undoPayments();
 };
 
-export const reprint = (request: LinxReprintRequest): any => {
+export const reprint = (request: LinxReprintRequest, onSuccess: LinxPaymentSuccessCallback, onError: LinxPaymentErrorCallback): any => {
   if (!isLinxSDKLoaded()) {
-    console.warn('Linx SDK not loaded, cannot reprint receipt');
+    const error: LinxPaymentError = {
+      reasonCode: -1,
+      reason: 'Linx SDK not loaded',
+      message: 'Please ensure Linx SDK is properly loaded before processing payments'
+    };
+    onError(error);
     return null;
   }
 
 
-  return window.PaykitCheckout!.reprint(request);
+
+
+  return window.PaykitCheckout!.reprint(request, onSuccess, onError);
+};
+
+export const revertPayment = (request: LinxCancelPaymentRequest, onSuccess: LinxPaymentSuccessCallback, onError: LinxPaymentErrorCallback): any => {
+  if (!isLinxSDKLoaded()) {
+    const error: LinxPaymentError = {
+      reasonCode: -1,
+      reason: 'Linx SDK not loaded',
+      message: 'Please ensure Linx SDK is properly loaded before processing payments'
+    };
+    onError(error);
+    return null;
+  }
+
+
+
+
+  return window.PaykitCheckout!.paymentReversal(request, onSuccess, onError);
 };
 
 /**
  * Determine if payment method requires Linx SDK
  */
 export const requiresLinxSDK = (paymentMethod: string): boolean => {
-  return paymentMethod === PaymentMethodType.CREDIT_CARD || 
-         paymentMethod === PaymentMethodType.DEBIT_CARD
+  return paymentMethod === PaymentMethodType.CREDIT_CARD ||
+    paymentMethod === PaymentMethodType.DEBIT_CARD
 };
 
 /**
@@ -214,10 +240,10 @@ export const processPaymentByMethod = (
   switch (paymentMethod) {
     case PaymentMethodType.CREDIT_CARD:
       return processCreditPayment(amount, onSuccess, onError, installments);
-    
+
     case PaymentMethodType.DEBIT_CARD:
       return processDebitPayment(amount, onSuccess, onError);
-    
+
     default:
       // For non-card payments, call success immediately
       const response: LinxPaymentResponse = {
@@ -254,9 +280,10 @@ export const formatPaymentError = (error: LinxPaymentError): string => {
 /**
  * Handle payment success with notification
  */
-export const handlePaymentSuccess = (response: LinxPaymentResponse): void => {
+export const handlePaymentSuccess = (response: LinxPaymentResponse, message: string): void => {
   console.log('Payment successful:', response);
-  FrontendNotification('Pagamento realizado com sucesso!', 'success');
+
+    FrontendNotification(message, 'success');
 };
 
 /**
@@ -266,7 +293,7 @@ export const handlePaymentError = (error: LinxPaymentError): void => {
   console.error('Payment error:', error);
   const errorMessage = formatPaymentError(error);
   FrontendNotification(errorMessage, 'error');
-  
+
   // Auto-cancel if user cancelled
   if (error.reasonCode === 9) {
     undoPayments();

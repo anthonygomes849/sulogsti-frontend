@@ -32,7 +32,7 @@ import Create from "./Create";
 import Ticket from "./Create/Scheduling/components/Payment/Ticket";
 import Info from "./Info";
 import { ITriagens } from "./types/types";
-import { useLinxPayment } from "../../../services/payment";
+import { LinxPaymentError, LinxPaymentResponse, useLinxPayment } from "../../../services/payment";
 
 // import { Container } from './styles';
 
@@ -229,7 +229,26 @@ const Triagens: React.FC = () => {
 
   const linxPayment = useLinxPayment({
     autoInitialize: true,
+    onPaymentSuccess: handleLinxPaymentSuccess,
+    onPaymentError: handleLinxPaymentError
   });
+
+
+  /**
+    * Handle successful Linx payment
+    */
+  function handleLinxPaymentSuccess(response: LinxPaymentResponse): void {
+    setShowTicket(false);
+    setShowTicket(true);
+  }
+
+  /**
+   * Handle Linx payment error
+   */
+  function handleLinxPaymentError(error: LinxPaymentError): void {
+    console.error('Linx payment error:', error);
+    // Error is already handled by the utility functions
+  }
 
   const getCallDriver = useCallback(async (data: ITriagens) => {
     try {
@@ -311,11 +330,10 @@ const Triagens: React.FC = () => {
 
       if (responseData.length > 0) {
         if (responseData[responseData.length - 1].administrative_code !== null) {
-          linxPayment.reprintPayment(responseData[responseData.length - 1].administrative_code);
+          await linxPayment.reprintPayment(responseData[responseData.length - 1].administrative_code);
 
           setSelectedRow(data);
-          setShowTicket(false);
-          setShowTicket(true);
+
           sessionStorage.setItem("@triagem", JSON.stringify(data));
           sessionStorage.setItem(
             "id_operacao_patio",

@@ -69,6 +69,12 @@ export interface LinxReprintRequest {
   administrativeCode: string;
 }
 
+export interface LinxCancelPaymentRequest {
+  administrativeCode: string;
+  amount: string;
+  data: string;
+}
+
 /**
  * Payment Callbacks
  */
@@ -101,6 +107,13 @@ export interface LinxPaykitCheckout {
   undoPayments: () => any;
   reprint: (
     request: LinxReprintRequest,
+    onSuccess: LinxPaymentSuccessCallback,
+    onError: LinxPaymentErrorCallback
+  ) => any;
+  paymentReversal: (
+    request: LinxCancelPaymentRequest,
+    onSuccess: LinxPaymentSuccessCallback,
+    onError: LinxPaymentErrorCallback
   ) => any;
 }
 
