@@ -28,7 +28,7 @@ export enum PaymentStatus {
  */
 export interface LinxPaymentResponse {
   success: boolean;
-  administrativeCode: number;
+  administrativeCode?: number;
   receipt: {
     merchantReceipt: string;
     customerReceipt: string;
@@ -65,6 +65,10 @@ export interface LinxAuthenticationRequest {
   authenticationKey: string;
 }
 
+export interface LinxReprintRequest {
+  administrativeCode: string;
+}
+
 /**
  * Payment Callbacks
  */
@@ -95,6 +99,9 @@ export interface LinxPaykitCheckout {
     onError: LinxPaymentErrorCallback
   ) => any;
   undoPayments: () => any;
+  reprint: (
+    request: LinxReprintRequest,
+  ) => any;
 }
 
 /**

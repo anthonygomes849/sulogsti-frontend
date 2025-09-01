@@ -12,11 +12,13 @@ import {
   undoPayments,
   requiresLinxSDK,
   isLinxSDKLoaded,
+  reprint,
 } from './utils';
 import type {
   LinxPaymentResponse,
   LinxPaymentError,
   PaymentMethodType,
+  LinxReprintRequest,
 } from './types';
 
 export interface UseLinxPaymentOptions {
@@ -36,6 +38,7 @@ export interface UseLinxPaymentReturn {
   initializeSDK: () => Promise<void>;
   processPayment: (method: string, amount: number, installments?: number) => Promise<void>;
   cancelPayment: () => void;
+  reprintPayment: (code: string) => void;
   
   // Utilities
   canProcessPayment: (method: string) => boolean;
@@ -150,6 +153,19 @@ export const useLinxPayment = (options: UseLinxPaymentOptions = {}): UseLinxPaym
       console.error('Failed to cancel payment:', err);
     }
   }, []);
+  
+
+  const reprintPayment = useCallback((code: string): void => { 
+    try {
+      const request: LinxReprintRequest = {
+        administrativeCode: code,
+      };
+
+      reprint(request);
+    } catch (err) {
+      console.error('Failed to reprint payment:', err);
+    }
+  }, []);
 
   /**
    * Check if payment method can be processed
@@ -227,6 +243,7 @@ export const useLinxPayment = (options: UseLinxPaymentOptions = {}): UseLinxPaym
     initializeSDK,
     processPayment,
     cancelPayment,
+    reprintPayment,
     
     // Utilities
     canProcessPayment,

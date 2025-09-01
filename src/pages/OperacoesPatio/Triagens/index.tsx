@@ -32,6 +32,7 @@ import Create from "./Create";
 import Ticket from "./Create/Scheduling/components/Payment/Ticket";
 import Info from "./Info";
 import { ITriagens } from "./types/types";
+import { useLinxPayment } from "../../../services/payment";
 
 // import { Container } from './styles';
 
@@ -226,6 +227,10 @@ const Triagens: React.FC = () => {
 
   const { setStatus } = useStatus();
 
+  const linxPayment = useLinxPayment({
+    autoInitialize: true,
+  });
+
   const getCallDriver = useCallback(async (data: ITriagens) => {
     try {
       setLoading(true);
@@ -286,6 +291,39 @@ const Triagens: React.FC = () => {
     } catch {
       setLoading(false);
     }
+  }, []);
+
+  const reprintPayment = useCallback(async (data: ITriagens) => {
+    try {
+      const body = {
+        id_operacao_patio: Number(data.id_operacao_patio),
+        qtd_por_pagina: 100,
+        order_by: "data_historico",
+        order_direction: "desc",
+      };
+
+      const response = await api.post(
+        `/operacaopatio/pagamentos?page=1`,
+        body
+      );
+
+      const responseData = response.data.data;
+
+      if (responseData.length > 0) {
+        if (responseData[responseData.length - 1].administrative_code !== null) {
+          linxPayment.reprintPayment(responseData[responseData.length - 1].administrative_code);
+
+          setSelectedRow(data);
+          setShowTicket(false);
+          setShowTicket(true);
+          sessionStorage.setItem("@triagem", JSON.stringify(data));
+          sessionStorage.setItem(
+            "id_operacao_patio",
+            JSON.stringify(data.id_operacao_patio)
+          );
+        }
+      }
+    } catch { }
   }, []);
 
   return (
@@ -455,14 +493,7 @@ const Triagens: React.FC = () => {
               {
                 label: 'Reimpressão',
                 action: (data: any) => {
-                  // setSelectedRow(data);
-                  // sessionStorage.setItem("@triagem", JSON.stringify(data));
-                  // sessionStorage.setItem(
-                  //   "id_operacao_patio",
-                  //   JSON.stringify(data.id_operacao_patio)
-                  // );
-                  // setStatus(3.5);
-                  // openModal();
+                  reprintPayment(data);
                 },
                 status: [11],
                 icon: () => {

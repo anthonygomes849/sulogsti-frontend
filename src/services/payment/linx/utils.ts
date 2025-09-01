@@ -16,6 +16,7 @@ import type {
   LinxAuthenticationSuccessCallback,
   LinxAuthenticationErrorCallback,
   LinxPendingPaymentsCallback,
+  LinxReprintRequest,
 } from './types';
 import { PaymentMethodType } from './types';
 
@@ -180,6 +181,16 @@ export const undoPayments = (): any => {
   }
 
   return window.PaykitCheckout!.undoPayments();
+};
+
+export const reprint = (request: LinxReprintRequest): any => {
+  if (!isLinxSDKLoaded()) {
+    console.warn('Linx SDK not loaded, cannot reprint receipt');
+    return null;
+  }
+
+
+  return window.PaykitCheckout!.reprint(request);
 };
 
 /**
