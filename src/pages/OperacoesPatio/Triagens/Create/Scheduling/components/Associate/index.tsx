@@ -167,7 +167,7 @@ const Associate: React.FC = () => {
       const mappingResponse = response.data.data.map((item: any) => {
         return {
           label: `${formatDateBR(item.data_inicio_operacao)} | ${
-            item.nome_fantasia
+            item.razao_social
           }`,
           value: item.id_operacao_porto_carrossel,
         };
