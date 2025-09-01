@@ -13,6 +13,8 @@ import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
+import PrinterIcon from '../../../assets/images/printerIcon.png';
+
 import {
   formatDateTimeBR,
   getActiveTypes,
@@ -448,6 +450,23 @@ const Triagens: React.FC = () => {
                 status: [11],
                 icon: () => {
                   return IconPayment;
+                }
+              },
+              {
+                label: 'Reimpressão',
+                action: (data: any) => {
+                  // setSelectedRow(data);
+                  // sessionStorage.setItem("@triagem", JSON.stringify(data));
+                  // sessionStorage.setItem(
+                  //   "id_operacao_patio",
+                  //   JSON.stringify(data.id_operacao_patio)
+                  // );
+                  // setStatus(3.5);
+                  // openModal();
+                },
+                status: [11],
+                icon: () => {
+                  return PrinterIcon;
                 }
               },
               {
