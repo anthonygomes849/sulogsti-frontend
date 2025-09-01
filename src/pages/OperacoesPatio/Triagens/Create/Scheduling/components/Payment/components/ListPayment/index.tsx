@@ -24,7 +24,6 @@ import ReversedPayment from "./components/ReversedPayment";
 // Import the new separated Linx payment configuration
 import {
   useLinxPayment,
-  PaymentMethodType,
   type LinxPaymentResponse,
   type LinxPaymentError,
 } from "../../../../../../../../../services/payment/linx";
@@ -225,7 +224,6 @@ const ListPayment: React.FC = () => {
    */
   const onPayment = useCallback(async (row: PaymentRowData) => {
     try {
-      const paymentMethod = row.tipo_pagamento.toString();
       const amount = row.quantia_paga;
 
       console.log('Processing payment reversal for row:', row);

@@ -18,7 +18,6 @@ import {
 import type {
   LinxPaymentResponse,
   LinxPaymentError,
-  PaymentMethodType,
   LinxReprintRequest,
   LinxCancelPaymentRequest,
 } from './types';

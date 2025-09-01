@@ -8,10 +8,6 @@ import api from "../../../../../../../services/api";
 import { ITypePayment } from "./types/types";
 
 // Interface for payment type API response
-interface IPaymentType {
-  id_tipo_pagamento: number;
-  descricao: string;
-}
 import './styles.css';
 import { format } from "date-fns";
 import { useFormik } from "formik";

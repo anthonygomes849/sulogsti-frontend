@@ -238,6 +238,7 @@ const Triagens: React.FC = () => {
     * Handle successful Linx payment
     */
   function handleLinxPaymentSuccess(response: LinxPaymentResponse): void {
+    console.log(response);
     setShowTicket(false);
     setShowTicket(true);
   }
