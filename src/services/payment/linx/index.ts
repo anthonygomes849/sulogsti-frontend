@@ -4,7 +4,13 @@
  */
 
 // Configuration
-export { default as linxPaymentConfig, getLinxPaymentConfig, validateLinxConfig } from './config';
+export { 
+  getLinxPaymentConfig, 
+  getLinxPaymentConfigAsync,
+  getLinxPaymentConfigSafe,
+  validateLinxConfig,
+  resetConfigCache
+} from './config';
 export type { LinxPaymentConfig, LinxPaymentEnvironment } from './config';
 
 // Types

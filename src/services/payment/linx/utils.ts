@@ -4,7 +4,7 @@
  */
 
 import { FrontendNotification } from '../../../shared/Notification';
-import { getLinxPaymentConfig, validateLinxConfig } from './config';
+import { getLinxPaymentConfigSafe, validateLinxConfig } from './config';
 import type {
   LinxPaymentResponse,
   LinxPaymentError,
@@ -29,7 +29,7 @@ export const isLinxSDKLoaded = (): boolean => {
 };
 
 /**
- * Load Linx Paykit SDK script
+ * Load Linx Paykit SDK script with timeout protection
  */
 export const loadLinxPaykitScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -39,7 +39,13 @@ export const loadLinxPaykitScript = (): Promise<void> => {
       return;
     }
 
-    const config = getLinxPaymentConfig();
+    const config = getLinxPaymentConfigSafe();
+    
+    // Check if configuration is available
+    if (!config) {
+      reject(new Error('Linx payment configuration not available'));
+      return;
+    }
 
     // Validate configuration
     if (!validateLinxConfig(config)) {
@@ -50,24 +56,45 @@ export const loadLinxPaykitScript = (): Promise<void> => {
     // Check if script already exists
     const existingScript = document.querySelector(`script[src="${config.scriptUrl}"]`);
     if (existingScript) {
-      existingScript.addEventListener('load', () => resolve());
-      existingScript.addEventListener('error', () => reject(new Error('Failed to load Linx SDK')));
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Script loading timeout'));
+      }, config.connectionTimeout);
+      
+      existingScript.addEventListener('load', () => {
+        clearTimeout(timeoutId);
+        resolve();
+      });
+      existingScript.addEventListener('error', () => {
+        clearTimeout(timeoutId);
+        reject(new Error('Failed to load Linx SDK'));
+      });
       return;
     }
+
+    // Create timeout for script loading
+    const timeoutId = setTimeout(() => {
+      reject(new Error('Script loading timeout'));
+    }, config.connectionTimeout);
 
     // Create and load script
     const script = document.createElement('script');
     script.src = config.scriptUrl;
     script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Linx SDK'));
+    script.onload = () => {
+      clearTimeout(timeoutId);
+      resolve();
+    };
+    script.onerror = () => {
+      clearTimeout(timeoutId);
+      reject(new Error('Failed to load Linx SDK'));
+    };
 
     document.body.appendChild(script);
   });
 };
 
 /**
- * Initialize Linx SDK with authentication
+ * Initialize Linx SDK with authentication and timeout protection
  */
 export const initializeLinxSDK = async (): Promise<any> => {
   try {
@@ -78,18 +105,30 @@ export const initializeLinxSDK = async (): Promise<any> => {
     }
 
     return new Promise((resolve, reject) => {
-      const config = getLinxPaymentConfig();
+      const config = getLinxPaymentConfigSafe();
+      
+      if (!config) {
+        reject(new Error('Linx payment configuration not available'));
+        return;
+      }
+
+      // Set timeout for authentication
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Authentication timeout'));
+      }, config.readTimeout);
 
       const authenticationRequest: LinxAuthenticationRequest = {
         authenticationKey: config.authenticationKey,
       };
 
       const onAuthenticationSuccess: LinxAuthenticationSuccessCallback = (response) => {
+        clearTimeout(timeoutId);
         console.log('Linx authentication successful', response);
         resolve(response);
       };
 
       const onAuthenticationError: LinxAuthenticationErrorCallback = (error) => {
+        clearTimeout(timeoutId);
         console.error('Linx authentication error', error);
         reject(error);
       };
@@ -109,6 +148,7 @@ export const initializeLinxSDK = async (): Promise<any> => {
           onPendingPayments
         );
       } else {
+        clearTimeout(timeoutId);
         reject(new Error('PaykitCheckout not available'));
       }
     });

@@ -10,8 +10,8 @@ export * from './linx';
 export {
   useLinxPayment,
   PaymentMethodType,
-  linxPaymentConfig,
-  getLinxPaymentConfig,
+  getLinxPaymentConfigSafe,
+  getLinxPaymentConfigAsync,
   processPaymentByMethod,
   initializeLinxSDK,
   handlePaymentSuccess,

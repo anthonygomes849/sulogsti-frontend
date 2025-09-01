@@ -329,6 +329,8 @@ const Triagens: React.FC = () => {
 
       const responseData = response.data.data;
 
+      console.log(responseData)
+
       if (responseData.length > 0) {
         if (responseData[responseData.length - 1].administrative_code !== null) {
           await linxPayment.reprintPayment(responseData[responseData.length - 1].administrative_code);
