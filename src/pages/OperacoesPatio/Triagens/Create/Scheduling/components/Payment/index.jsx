@@ -243,6 +243,8 @@ const Payment = ({ onClose }) => {
       if (response.status === 200) {
         setDataTicket(response.data);
 
+        // getUsers(response.data.operacaoPatio.id_usuario_historico);
+
         formik.setFieldValue("valor_pago", response.data.valor_a_pagar);
       }
 
@@ -272,6 +274,19 @@ const Payment = ({ onClose }) => {
 
     setPaymentTypes(filteredData);
   }, []);
+
+  // const getUsers = useCallback(async (userId) => {
+  //   try {
+  //     const body = {
+  //       id_usuario: userId,
+  //     };
+  //     const response = await api.post(`/listar/gruposPermissoes`, body);
+  //     // setUsers(response);
+  //   } catch (error) {
+  //     console.log(error);
+
+  //   }
+  // }, []);
 
   var checkouts;
   var checkout;
