@@ -8,7 +8,7 @@ interface StyledProps {
   disabled?: boolean;
 }
 
-export const Title = styled.span`
+export const Title = styled.label`
   font-family: 'Poppins';
   font-size: 0.875rem;
   color: #000000;

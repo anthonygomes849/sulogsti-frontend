@@ -25,6 +25,7 @@ interface InputProps {
   error?: any;
   value?: any;
   isRequired?: boolean;
+  dataTestid?: string;
 }
 
 const InputCustom: React.FC<InputProps> = (
@@ -44,7 +45,8 @@ const InputCustom: React.FC<InputProps> = (
     value,
     id,
     disabled,
-    isRequired
+    isRequired,
+    dataTestid
   }: InputProps,
   ...rest
 ) => {
@@ -76,7 +78,7 @@ const InputCustom: React.FC<InputProps> = (
           onBlur={onBlur}
           disabled={disabled}
           formatChars={{ '9': '[0-9]', 'a': '[A-Za-z]', '*': '[0-9A-Za-z]' }} // Aceita letras e números após a terceira letra
-
+          data-testid={dataTestid}
           {...rest}
         />
       </div>

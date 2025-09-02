@@ -352,6 +352,7 @@ const Form: React.FC<Props> = (props: Props) => {
             <InputCustom
               title="Data Hora"
               type="datetime-local"
+              dataTestid="dataHora"
               placeholder=""
               onChange={formik.handleChange("data_agendamento_terminal")}
               value={formik.values.data_agendamento_terminal}
@@ -366,6 +367,7 @@ const Form: React.FC<Props> = (props: Props) => {
               title="Tolerância Inicial"
               type="number"
               placeholder=""
+              dataTestid="toleranciaInicial"
               onChange={formik.handleChange("tolerancia_inicial")}
               value={formik.values.tolerancia_inicial}
               touched={formik.touched.tolerancia_inicial}
@@ -375,9 +377,10 @@ const Form: React.FC<Props> = (props: Props) => {
           </div>
           <div>
             <InputCustom
-              title="Tolerância Inicial"
+              title="Tolerância Final"
               type="number"
               placeholder=""
+              dataTestid="toleranciaFinal"
               onChange={formik.handleChange("tolerancia_final")}
               value={formik.values.tolerancia_final}
               touched={formik.touched.tolerancia_final}
@@ -395,6 +398,8 @@ const Form: React.FC<Props> = (props: Props) => {
                 handleCargoType(selectedOption.value, terminais);
               }}
               title="Terminal"
+              dataTestid="terminal"
+              name="terminal"
               touched={formik.touched.id_terminal}
               error={formik.errors.id_terminal}
               disabled={props.isView}
@@ -404,6 +409,7 @@ const Form: React.FC<Props> = (props: Props) => {
           <div>
             <SelectCustom
               data={cargoTypes}
+              name="tipoCarga"
               onChange={(selectedOption: any) => {
                 formik.setFieldValue("tipo_carga", selectedOption.value);
               }}
@@ -417,6 +423,7 @@ const Form: React.FC<Props> = (props: Props) => {
           <div>
             <SelectCustom
               data={operationTypes}
+              name="operationType"
               onChange={(selectedOption: any) => {
                 formik.setFieldValue("tipo_operacao", selectedOption.value);
               }}
@@ -448,6 +455,7 @@ const Form: React.FC<Props> = (props: Props) => {
               typeInput="mask"
               mask="aaa-9*99"
               placeholder=""
+              dataTestid="placaDianteira"
               onChange={formik.handleChange("placa_dianteira_veiculo")}
               value={formik.values.placa_dianteira_veiculo}
               touched={formik.touched.placa_dianteira_veiculo}
@@ -461,6 +469,7 @@ const Form: React.FC<Props> = (props: Props) => {
               typeInput="mask"
               mask="aaa-9*99"
               placeholder=""
+              dataTestid="placaTraseira"
               onChange={formik.handleChange("placa_traseira_veiculo")}
               value={formik.values.placa_traseira_veiculo}
               touched={formik.touched.placa_traseira_veiculo}

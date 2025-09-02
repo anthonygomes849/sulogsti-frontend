@@ -9,6 +9,7 @@ interface Props {
   onChange: (selectedOption: any) => void;
   onInputChange?: (value: string) => void;
   title: string;
+  name?: string;
   touched?: any;
   error?: any;
   value?: any;
@@ -17,6 +18,7 @@ interface Props {
   selectRef?: any;
   async?: boolean;
   defaultValue?: any;
+  dataTestid?: string;
 }
 
 const SelectCustom: React.FC<Props> = (props: Props) => {
@@ -48,9 +50,9 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
   return (
     <>
       <div className="w-full">
-        <h1 className="text-sm font-semibold text-[#000] mb-2">
+        <label htmlFor={props.name} className="text-sm font-semibold text-[#000] mb-2">
           {props.title}
-        </h1>
+        </label>
 
         {props.async ? (
           <AsyncSelect
@@ -63,13 +65,15 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
             isDisabled={props.disabled}
             placeholder="Selecione"
             styles={colourStyles}
-            name="color"
+            name={props.name || "color"}
+            inputId={props.name}
             loadOptions={props.data}
             onChange={props.onChange}
             onInputChange={props.onInputChange}
             value={defaultValue}
             openMenuOnFocus={true} // Abre o menu quando o select recebe foco
             isSearchable={true} // Permite digitação
+            data-testid={props.dataTestid}
           />
         ) : (
           <Select
@@ -81,14 +85,16 @@ const SelectCustom: React.FC<Props> = (props: Props) => {
             defaultValue={props.value}
             isDisabled={props.disabled}
             placeholder="Selecione"
+            inputId={props.name}
             styles={colourStyles}
-            name="color"
+            name={props.name || "color"}
             options={props.data}
             onChange={props.onChange}
             onInputChange={props.onInputChange}
             value={defaultValue}
             openMenuOnFocus={true} // Abre o menu quando o select recebe foco
             isSearchable={true} // Permite digitação
+            data-testid={props.dataTestid}
           />
         )}
       </div>
