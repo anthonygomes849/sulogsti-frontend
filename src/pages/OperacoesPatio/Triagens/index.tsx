@@ -136,8 +136,8 @@ const Triagens: React.FC = () => {
       },
     },
     {
-      headerName: "CPF do Motorista",
-      field: "operacao_porto_agendada.cpf_motorista",
+      headerName: "Nome do Motorista",
+      field: "motorista.nome",
       filter: true,
       fieldName: "cpf_motorista",
       valueFormatter: (params: ValueFormatterParams) => {
