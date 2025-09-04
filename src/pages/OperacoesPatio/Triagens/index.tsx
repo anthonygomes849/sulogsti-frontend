@@ -1,7 +1,7 @@
 import { ValueFormatterParams } from "ag-grid-community";
 import React, { useCallback, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
-import CallDriverActiveIcon from "../../../assets/images/CallDriverActiveIcon.svg";
+import CallDriverActiveIcon from "../../../assets/images/callDriverIconActive.svg";
 import CallDriverIcon from "../../../assets/images/callDriverIcon.svg";
 import IconPayment from "../../../assets/images/iconPayment.svg";
 import IdentifyDriverIcon from "../../../assets/images/identifyDriverIcon.svg";
@@ -205,7 +205,7 @@ const Triagens: React.FC = () => {
       type: "dateColumn",
       valueFormatter: (params: ValueFormatterParams) => {
         if (params.value) {
-          return params.value;
+          return formatDateTimeBR(params.value);
         }
         return "---";
       },
@@ -230,7 +230,7 @@ const Triagens: React.FC = () => {
 
       const body = {
         id_operacao_patio: data.id_operacao_patio,
-        boolean_chamada: true,
+        boolean_chamada: !data.chamada_motorista,
       };
 
       await api.post("/operacaopatio/chamadaMotorista", body);

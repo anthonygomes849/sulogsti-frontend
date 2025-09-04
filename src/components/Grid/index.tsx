@@ -12,7 +12,6 @@ import api from "../../services/api";
 import Loading from "./components/Loading";
 import Status from "./components/Status";
 import { CustomButtons, GridProps } from "./model/Grid";
-
 import { Tooltip } from "@mui/material";
 import CustomFilter from "./components/CustomFilter";
 import CustomStatusFilter from "./components/CustomStatusFilter";
@@ -26,7 +25,9 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
   const [rowSelection] = useState(props.rowSelection);
   const [path] = useState(props.path);
   const [rowData, setRowData] = useState<any[]>();
+  const [pageSize, setPageSize] = useState(20);
   const { addBreadcrumb } = useBreadcrumb();
+  const [loading, setLoading] = useState(false);
 
   const defaultColumns = [
     {
@@ -34,212 +35,202 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
       headerName: "",
       pinned: "right",
       cellRenderer: (params: CustomCellRendererProps) => {
-        console.log(params.data);
-        if (params.data) {
-          return (
-            <div className="flex w-full h-full items-center justify-center">
-              {props.customButtons &&
-                props.customButtons.map((button: CustomButtons) => {
-                  let showButtonStatus = false;
-                  if (params.data) {
-                    if (button.status.length > 0) {
-                      const findButtonStatus = button.status.find(
-                        (item) => item == params.data.status
-                      );
-
-                      if (findButtonStatus != undefined) {
-                        showButtonStatus = true;
-                      }
-                    }
-                  }
-                  return (
-                    <>
-                      {showButtonStatus && (
-                        <div
-                          className="flex cursor-pointer items-center justify-center h-full mr-4"
-                          onClick={() => button.action(params.data)}
-                          id={"btnDelete"}
-                        >
-                          <Tooltip title={button.label}>
-                            <img className="w-[22px] h-[22px]" src={button.icon(params.data)} alt="" />
-                          </Tooltip>
-                        </div>
-                      )}
-                    </>
+        if (!params.data) return null;
+        return (
+          <div className="flex w-full h-full items-center justify-center">
+            {props.customButtons &&
+              props.customButtons.map((button: CustomButtons) => {
+                let showButtonStatus = false;
+                if (button.status.length > 0) {
+                  const findButtonStatus = button.status.find(
+                    (item) => item == params.data.status
                   );
-                })}
-              {usePermissions("CONHECER") && (
+                  if (findButtonStatus != undefined) {
+                    showButtonStatus = true;
+                  }
+                }
+                return (
+                  <React.Fragment key={button.label}>
+                    {showButtonStatus && (
+                      <div
+                        className="flex cursor-pointer items-center justify-center h-full mr-4"
+                        onClick={() => button.action(params.data)}
+                        id={"btnDelete"}
+                      >
+                        <Tooltip title={button.label}>
+                          <img
+                            className="w-[22px] h-[22px]"
+                            src={button.icon(params.data)}
+                            alt=""
+                          />
+                        </Tooltip>
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            {usePermissions("CONHECER") && (
+              <button
+                className="mr-4"
+                onClick={() => {
+                  addBreadcrumb("Conhecer");
+                  props.onView(params.data);
+                }}
+              >
+                <img src={InfoIcon} style={{ width: 16, height: 16 }} />
+              </button>
+            )}
+            {usePermissions("SALVAR") &&
+              !window.location.pathname.includes("triagens") && (
                 <button
                   className="mr-4"
                   onClick={() => {
-                    addBreadcrumb("Conhecer");
-                    props.onView(params.data);
+                    addBreadcrumb("Editar");
+                    props.onUpdate(params.data);
                   }}
                 >
-                  <img src={InfoIcon} style={{ width: 16, height: 16 }} />
+                  <img src={EditIcon} style={{ width: 16, height: 16 }} />
                 </button>
               )}
-              {/* {hasPermissions("CONHECER") && (
-            )} */}
-              {usePermissions("SALVAR") &&
-                !window.location.pathname.includes("triagens") && (
-                  <>
-                    <button
-                      className="mr-4"
-                      onClick={() => {
-                        addBreadcrumb("Editar");
-                        props.onUpdate(params.data);
-                      }}
-                    >
-                      <img src={EditIcon} style={{ width: 16, height: 16 }} />
-                    </button>
-                  </>
-                )}
-              {usePermissions("REMOVER") && params.data.status <= 10 && (
-                <button
-                  onClick={() => {
-                    props.onDelete(params.data);
-                  }}
-                >
-                  <img src={DeleteIcon} style={{ width: 16, height: 16 }} />
-                </button>
-              )}
-            </div>
-          );
-        }
+            {usePermissions("REMOVER") && params.data.status <= 10 && (
+              <button onClick={() => props.onDelete(params.data)}>
+                <img src={DeleteIcon} style={{ width: 16, height: 16 }} />
+              </button>
+            )}
+          </div>
+        );
       },
     },
   ];
 
-  const [loading, setLoading] = useState(false);
+  const loadingOverlayComponent = useMemo(() => Loading, []);
 
-  const onGridReady = useCallback(async (params: any) => {
-    let cols: any[] = [];
+  const onGridReady = useCallback(
+    (params: any) => {
+      gridRef.current = params.api;
 
-    console.log(params);
-
-    defaultColumns.forEach((defaultColumn: any) => {
-      cols.unshift(defaultColumn);
-    });
-
-    if (props.isShowStatus) {
-      cols.unshift({
-        field: "status",
-        fieldName: "status",
-        headerName: "Status",
-        filter: CustomStatusFilter,
-        filterParams: {
-          status: props.status,
-        },
-        // width: 310,
-        cellStyle: { textAlign: "center" },
-        // pinned: "left",
-        cellRenderer: (params: CustomCellRendererProps) => {
-          if (params.data) {
-            return <Status data={props.status} status={params.data.status} />;
-          }
-        },
+      // Monta colunas
+      let cols: any[] = [];
+      defaultColumns.forEach((defaultColumn: any) => {
+        cols.unshift(defaultColumn);
       });
-    }
 
-    columns.forEach((column) => {
-      // Realiza a tradução da key.
-      if (column.headerName) {
-        column.headerName = column.headerName;
+      if (props.isShowStatus) {
+        cols.unshift({
+          field: "status",
+          fieldName: "status",
+          headerName: "Status",
+          filter: CustomStatusFilter,
+          filterParams: { status: props.status },
+          cellStyle: { textAlign: "center" },
+          cellRenderer: (params: CustomCellRendererProps) => {
+            if (params.data) {
+              return <Status data={props.status} status={params.data.status} />;
+            }
+          },
+        });
       }
 
-      if (column.filter) {
-        column.filter = CustomFilter;
-      }
+      columns.forEach((column) => {
+        if (column.headerName) {
+          column.headerName = column.headerName;
+        }
+        if (column.filter) {
+          column.filter = CustomFilter;
+        }
+        cols.push(column);
+      });
 
-      cols.push(column);
-    });
+      setColDefs(cols);
 
-    setColDefs(cols);
+      // Datasource
+      const dataSource = {
+        getRows: async (gridParams: any) => {
+          try {
+            setLoading(true);
+            console.log(gridParams);
+            const pageSize = gridParams.endRow - gridParams.startRow; 
+            console.log(pageSize);
+            const page = Math.floor(gridParams.startRow / pageSize) + 1;
+            let filters: any = {};
 
-    const dataSource = {
-      getRows: async (params: any) => {
-        try {
-          setLoading(true);
-          // Fazer uma requisição ao servidor passando os parâmetros da página
-          const page = params.endRow / 100 - 1;
-
-          let filters: any = {};
-
-          // Adiciona os filtros de colunas customizados.
-          if (params.filterModel != null) {
-            console.log(params);
-            for (const customFilter in params.filterModel) {
-              // Tem que fazer o teste se é um array, pois caso o receba
-              // será um filtro por período.
-              let newFilter: any = params.filterModel[customFilter];
-
-              console.log(newFilter);
-
-              if (newFilter.field === "data_historico") {
-                if (newFilter.value.length > 0) {
-                  filters["data_inicial"] = newFilter.value[0];
-                  filters["data_final"] = newFilter.value[1];
+            if (gridParams.filterModel != null) {
+              for (const customFilter in gridParams.filterModel) {
+                let newFilter: any = gridParams.filterModel[customFilter];
+                if (newFilter.field === "data_historico") {
+                  if (newFilter.value.length > 0) {
+                    filters["data_inicial"] = newFilter.value[0];
+                    filters["data_final"] = newFilter.value[1];
+                  }
+                } else if (newFilter.field.includes("data")) {
+                  if (newFilter.value.length > 0) {
+                    filters[`${newFilter.field}1`] = newFilter.value[0];
+                    filters[`${newFilter.field}2`] = newFilter.value[1];
+                  }
+                } else {
+                  let field = newFilter.field;
+                  const valueFilter =
+                    field === "status"
+                      ? Number(newFilter.value)
+                      : newFilter.value;
+                  filters[`${field}`] = newFilter.filter || valueFilter;
                 }
-              } else if (newFilter.field.includes("data")) {
-                if (newFilter.value.length > 0) {
-                  filters[`${newFilter.field}1`] = newFilter.value[0];
-                  filters[`${newFilter.field}2`] = newFilter.value[1];
-                }
-              } 
-              else {
-                console.log(newFilter.field);
-                let field = newFilter.field;
-                // if(new === "placa_dianteira_veiculo" || customFilter === "placa_traseira_veiculo") {
-                //   field = "placa";
-                // }
-
-                const vauleFilter =
-                  field === "status"
-                    ? Number(newFilter.value)
-                    : newFilter.value;
-
-                filters[`${field}`] = newFilter.filter || vauleFilter;
-                console.log(filters);
               }
             }
+
+            const reqDTO = {
+              qtd_por_pagina: pageSize,
+              order_by:
+                gridParams.sortModel.length > 0
+                  ? gridParams.sortModel[0].colId.replace(
+                      "uf_estado",
+                      "id_estado"
+                    )
+                  : "data_historico",
+              order_direction:
+                gridParams.sortModel.length > 0
+                  ? gridParams.sortModel[0].sort
+                  : "desc",
+              ...filters,
+            };
+
+            const response = await api.post(
+              `${path}?page=${page}`,
+              reqDTO
+            );
+
+            const mappingResponse = response.data.data.map((item: any) => {
+              return {
+                ...item,
+                status: item.status ? item.status : 0
+              }
+            })
+
+            gridParams.successCallback(
+              mappingResponse,
+              response.data.total
+            );
+            setRowData(mappingResponse);
+            setLoading(false);
+          } catch {
+            setLoading(false);
           }
+        },
+      };
 
-          const reqDTO = {
-            qtd_por_pagina: 100,
-            order_by:
-              params.sortModel.length > 0
-                ? params.sortModel[0].colId.replace("uf_estado", "id_estado")
-                : "data_historico",
-            order_direction:
-              params.sortModel.length > 0 ? params.sortModel[0].sort : "desc",
-            ...filters,
-          };
+      params.api.setDatasource(dataSource);
 
-          const response = await api.post(`${path}?page=${page + 1}`, reqDTO);
-
-          params.successCallback(response.data.data, response.data.total);
-          setRowData(response.data.data);
-
-          setLoading(false);
-        } catch {
-          setLoading(false);
+      // Escuta quando o tamanho de página muda
+      params.api.addEventListener("paginationChanged", () => {
+        const newSize = params.api.paginationGetPageSize();
+        if (newSize !== pageSize) {
+          setPageSize(newSize);
+           // força getRows com novo tamanho
         }
-      },
-    };
-
-    // params.api.setGridOption('datasource', dataSource)
-
-    params.api.sizeColumnsToFit();
-
-    params.api.setDatasource(dataSource);
-
-    // setGridApi(params.api);
-  }, []);
-
-  const loadingOverlayComponent = useMemo(() => {
-    return Loading;
-  }, []);
+      });
+    },
+    [pageSize]
+  );
 
   return (
     <div
@@ -254,6 +245,8 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         columnDefs={colDefs}
         rowModelType="infinite"
         pagination={pagination}
+        paginationPageSize={pageSize}
+        cacheBlockSize={pageSize}
         rowSelection={rowSelection}
         loadingOverlayComponent={loadingOverlayComponent}
         loadingCellRenderer={loadingOverlayComponent}

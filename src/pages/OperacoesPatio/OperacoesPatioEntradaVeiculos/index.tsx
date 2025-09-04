@@ -56,7 +56,7 @@ const OperacoesPatioEntradaVeiculos: React.FC = () => {
       type: "dateColumn",
       valueFormatter: (params: ValueFormatterParams) => {
         if(params.value) {
-          return params.value;
+          return formatDateTimeBR(params.value);
         }
         return "---";
       }

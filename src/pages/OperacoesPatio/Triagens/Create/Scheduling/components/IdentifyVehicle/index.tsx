@@ -18,6 +18,9 @@ import CreateVeiculos from "../../../../../../Cadastro/Veiculos/components/Creat
 import { ITriagens } from "../../../../types/types";
 import formValidator from "./validators/formValidator";
 import formValidator2 from "./validators/formValidator2";
+import * as Yup from 'yup';
+import ModalConfirm from "../../../../../../../components/ModalConfirm";
+
 
 // import { Container } from './styles';
 
@@ -44,6 +47,7 @@ const IdentifyVehicle: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showCreateVehicle, setShowCreateVehicle] = useState<boolean>(false);
   const [rowData, setRowData] = useState<ITriagens>();
+  const [showBackPlateModal, setShowBackPlateModal] = useState<boolean>(false);
 
   const pageVariants = {
     initial: { opacity: 0, x: 100 },
@@ -85,17 +89,37 @@ const IdentifyVehicle: React.FC = () => {
 
       const response = await api.post('/operacaopatio/deleteIdMotorista', body);
 
-      if(response.status === 200) {
+      if (response.status === 200) {
         setStatus(1);
       }
 
       setLoading(false);
-    }catch{
+    } catch {
       setLoading(false);
     }
   }, []);
 
-  const onPaymentInvoiced = useCallback(async () => {
+  const onSavePorto = useCallback(async (data: any) => {
+    try {
+      setLoading(true);
+
+
+      const body = {
+        operacaoPatio: data.operacaoPatio,
+      };
+
+      await api.post('/operacaopatio/savePorto', body);
+
+
+      setLoading(false);
+
+      return;
+    } catch {
+      setLoading(false);
+    }
+  }, []);
+
+  const onPaymentInvoiced = useCallback(async (values: FormValues, data: any[], isInvoiced: boolean) => {
     try {
       setLoading(true);
 
@@ -122,7 +146,7 @@ const IdentifyVehicle: React.FC = () => {
 
       const body = {
         id_operacao_patio,
-        tipo_pagamento: 3,
+        tipo_pagamento: isInvoiced ? 3 : 9,
         desconto: 0.0,
         quantia_paga: dataTicket?.valor_a_pagar,
         valor_total: dataTicket?.valor_a_pagar, //Desconto
@@ -164,7 +188,33 @@ const IdentifyVehicle: React.FC = () => {
       );
       if (response.status === 200) {
         FrontendNotification("Triagem faturada com sucesso!", "success");
-        setStatus(4);
+
+        const custoOperacao = await getPaymentTicket();
+
+        if (custoOperacao && custoOperacao !== null) {
+          onSavePorto(custoOperacao);
+        }
+        const findCarrierById = data.find(
+          (item: any) =>
+            String(item.id_transportadora) == String(values.id_transportadora)
+        );
+
+        console.log(findCarrierById)
+
+        if(isInvoiced) {
+
+          
+          if (
+            findCarrierById &&
+            (findCarrierById.faturamento_triagem || findCarrierById.faturamento_estadia)
+          ) {
+            setStatus(4);
+          } else {
+            setStatus(3);
+          }
+        } else {
+          setStatus(4);
+        }
       }
 
       setLoading(false);
@@ -183,9 +233,18 @@ const IdentifyVehicle: React.FC = () => {
       try {
         setLoading(true);
 
+        console.log("Entrou autorizacao");
+
         const isInvoiced: boolean = isInvoicedCarrier(values, data);
 
-        console.log(values);
+        console.log("isInvoiced", isInvoiced);
+
+        let currentRow: any = sessionStorage.getItem("@triagem");
+        if (currentRow) {
+          currentRow = JSON.parse(currentRow);
+        }
+
+        console.log("currentRow", currentRow);
 
         const body = {
           id_operacao_patio: idOperacaoPatio,
@@ -200,17 +259,73 @@ const IdentifyVehicle: React.FC = () => {
           id_usuario_historico: idUser,
         };
 
+        console.log("body", body);
+
         const response = await api.post(
           "/operacaopatio/adicionarAutorizacao",
           body
         );
 
+        let isDevolucaoContainerVazio = false;
+
+        if (currentRow.operacao_porto_agendada !== null) {
+          isDevolucaoContainerVazio = currentRow.operacao_porto_agendada.tipo_carga === 3 && currentRow.operacao_porto_agendada.tipo_operacao === 2;
+        }
+
+        console.log("isDevolucaoContainerVazio", isDevolucaoContainerVazio);
         if (response.status === 200) {
-          if (isInvoiced) {
-            onPaymentInvoiced();
+          const custoOperacao = await getPaymentTicket();
+          if (custoOperacao && custoOperacao.valor_a_pagar > 0) {
+            if (isDevolucaoContainerVazio && !values.identificacao_carga) {
+              console.log("isContainerVazio");
+              if (custoOperacao && custoOperacao.valor_a_pagar > 0 && isInvoiced) {
+                console.log("isContainerVazio faturado vazio");
+                await onPaymentInvoiced(values, data, true);
+              } else {
+                const isAvulso = values.id_transportadora === "-1";
+                if (isAvulso) {
+                  console.log("isContainerVazio avulso");
+                  setStatus(3);
+                } else {
+                  console.log("isContainerVazio faturado");
+                  const findCarrierById = data.find((item: any) => String(item.id_transportadora) == String(values.id_transportadora));
+
+                  if (findCarrierById && findCarrierById.faturamento_triagem || findCarrierById.faturamento_estadia) {
+                    console.log("isContainerVazio faturado faturado");
+                    await onPaymentInvoiced(values, data, true);
+                  } else {
+                    console.log("isContainerVazio payment");
+                    setStatus(3);
+                  }
+                }
+              }
+            } else if (!isDevolucaoContainerVazio && values.identificacao_carga) {
+              if (values.identificacao_carga && custoOperacao && custoOperacao !== null && custoOperacao.valor_a_pagar <= 0) {
+                console.log("isContainerCheio faturado");
+                setStatus(4);
+              } else {
+                if (isInvoiced) {
+                  console.log("isContainerCheio faturado payment");
+                  onPaymentInvoiced(values, data, true);
+                } else {
+                  console.log("isContainerCheio payment");
+                  setStatus(3);
+                }
+              }
+            } else {
+              if (isInvoiced) {
+                onPaymentInvoiced(values, data, true);
+              } else {
+                setStatus(3);
+              }
+            }
+
           } else {
-            setStatus(3);
+            onPaymentInvoiced(values, data, false);
           }
+
+
+
         } else {
           FrontendNotification("Erro na identificação do veiculo!", "error");
         }
@@ -224,7 +339,7 @@ const IdentifyVehicle: React.FC = () => {
     []
   );
 
-  const handleSubmit = useCallback(async (values: FormValues, data: any[]) => {
+  const onSubmit = useCallback(async (values: FormValues, data: any[]) => {
     try {
       setLoading(true);
 
@@ -266,10 +381,13 @@ const IdentifyVehicle: React.FC = () => {
         body
       );
 
-      if (response.status === 200) {
+      console.log("response", response.status);
+
+      if (response.status == 200) {
         sessionStorage.setItem("id_operacao_patio", response.data);
         onUpdateAutorizacao(values, id, userId, data);
       } else {
+        console.log("entrou2")
         FrontendNotification(
           "Erro ao realizar a identificação do veiculo!",
           "error"
@@ -278,17 +396,13 @@ const IdentifyVehicle: React.FC = () => {
 
       setLoading(false);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch(error: any) {
+    } catch (error: any) {
       console.log(error);
       setLoading(false);
-      if(error.response && error.response.data && error.response.data.error_msg) {
-        FrontendNotification(error.response.data.error_msg, "error");
-      } else {
-        FrontendNotification(
-          "Erro ao realizar a identificação do veiculo!",
-          "error"
-        );
-      }
+      FrontendNotification(
+        "Erro ao realizar a identificação do veiculo!",
+        "error"
+      );
     }
   }, []);
 
@@ -302,7 +416,7 @@ const IdentifyVehicle: React.FC = () => {
           order_direction: "desc",
           qtd_por_pagina: 100,
           liscense_plate: value,
-          tipo_placa: value,
+          placa: value,
         };
 
         const response = await api.post("/listar/veiculos", body);
@@ -338,15 +452,15 @@ const IdentifyVehicle: React.FC = () => {
       );
 
       if (response.status === 200) {
-        if(response.data.id_veiculo) {
+        if (response.data.id_veiculo) {
 
           let data = [];
-          
+
           data.push(response.data);
-          
+
           setDetailVehicle(data);
 
-          if(licensePlate) {
+          if (licensePlate) {
             formik.setFieldValue(
               "id_veiculo_parte_nao_motorizada",
               String(response.data.id_veiculo)
@@ -385,12 +499,12 @@ const IdentifyVehicle: React.FC = () => {
 
         if (response.status === 200) {
 
-          if(response.data.id_veiculo) {
+          if (response.data.id_veiculo) {
 
             let data = [];
-            
+
             data.push(response.data);
-            
+
             setDetailVehicleMotorized(data);
             // if(response.data.tipo_veiculo == TipoVeiculo.TRUCK) {
             //   formik.setFieldValue('tipo_veiculo', "1");
@@ -400,7 +514,7 @@ const IdentifyVehicle: React.FC = () => {
             //   formik.setFieldValue('tipo_veiculo', "3");
             // }
 
-            if(licensePlate) {
+            if (licensePlate) {
               formik.setFieldValue(
                 "id_veiculo_parte_motorizada",
                 String(response.data.id_veiculo)
@@ -529,12 +643,50 @@ const IdentifyVehicle: React.FC = () => {
         String(item.id_transportadora) == String(values.id_transportadora)
     );
 
-    return findCarrierById &&
-      findCarrierById.faturamento_triagem &&
-      findCarrierById.faturamento_estadia
-      ? true
-      : false;
+    console.log(findCarrierById);
+
+    let result = false;
+
+    if (findCarrierById) {
+      if (findCarrierById.faturamento_triagem ||
+        findCarrierById.faturamento_estadia) {
+        result = true;
+      }
+    }
+
+    console.log("result", result);
+
+    return result;
+
   };
+
+  const checkIfVehicleIsBackPlate = (values: FormValues) => {
+    let getDataTriagem: any = sessionStorage.getItem("@triagem");
+    if (getDataTriagem) {
+      getDataTriagem = JSON.parse(getDataTriagem);
+    }
+
+    if (values.tipo_veiculo == '1' && getDataTriagem.entrada_veiculos.placa_dianteira !== null && getDataTriagem.entrada_veiculos.placa_dianteira.length > 0 && getDataTriagem.entrada_veiculos.placa_traseira !== null) {
+      if (getDataTriagem.entrada_veiculos.placa_dianteira !== getDataTriagem.entrada_veiculos.placa_traseira) {
+        return true;
+      }
+      return false;
+    }
+
+    return false;
+  }
+
+  const handleSubmit = useCallback((values: FormValues, data: any[]) => {
+
+    const result = checkIfVehicleIsBackPlate(values);
+
+    if (result) {
+      setShowBackPlateModal(true);
+    } else {
+      onSubmit(values, data);
+    }
+
+  }, []);
 
   const onLoadFormValues = useCallback(() => {
     let getDataTriagem: any = sessionStorage.getItem("@triagem");
@@ -543,17 +695,17 @@ const IdentifyVehicle: React.FC = () => {
     }
 
     if (getDataTriagem && getDataTriagem.entrada_veiculos !== null) {
-      if(getDataTriagem.entrada_veiculos.placa_dianteira !== null && getDataTriagem.entrada_veiculos.placa_dianteira.length > 0) {
+      if (getDataTriagem.entrada_veiculos.placa_dianteira !== null && getDataTriagem.entrada_veiculos.placa_dianteira.length > 0) {
 
         formik.setFieldValue(
           "license_plate_motorized",
           getDataTriagem.entrada_veiculos.placa_dianteira
         );
-       
+
         onSearchDetailVehicleMotorized(formik.values, getDataTriagem.entrada_veiculos.placa_dianteira);
       }
 
-      if(getDataTriagem.entrada_veiculos.placa_traseira !== null && getDataTriagem.entrada_veiculos.placa_traseira.length > 0) {
+      if (getDataTriagem.entrada_veiculos.placa_traseira !== null && getDataTriagem.entrada_veiculos.placa_traseira.length > 0) {
 
         formik.setFieldValue(
           "license_plate",
@@ -579,15 +731,16 @@ const IdentifyVehicle: React.FC = () => {
 
   const formik = useFormik({
     initialValues,
-    validationSchema:
-      detailVehicleMotorized.length > 0 &&
-      detailVehicleMotorized[0].tipo_veiculo != TipoVeiculo.TRUCK
-        ? formValidator2
-        : formValidator,
+    validationSchema: Yup.lazy((values: FormValues) =>
+      Number(values.tipo_veiculo) > 1 ? formValidator2 : formValidator
+    ),
     onSubmit: (values: FormValues) => {
       handleSubmit(values, transportadoras);
     },
   });
+
+
+
 
   useEffect(() => {
     getTransportadoras();
@@ -610,6 +763,20 @@ const IdentifyVehicle: React.FC = () => {
           }}
           onConfirm={() => {
             setShowCreateVehicle(!showCreateVehicle);
+          }}
+        />
+      )}
+      {showBackPlateModal && (
+        <ModalConfirm
+          isOpen={showBackPlateModal}
+          title="Confirmar"
+          message="A placa traseira e a placa dianteira da entrada são diferentes. Deseja continuar?"
+          onConfirm={() => {
+            setShowBackPlateModal(false);
+            onSubmit(formik.values, transportadoras);
+          }}
+          onCancel={() => {
+            setShowBackPlateModal(false);
           }}
         />
       )}
@@ -763,129 +930,129 @@ const IdentifyVehicle: React.FC = () => {
             </div>
             <div className="w-[50%] h-full flex flex-col">
               {formik.values.tipo_veiculo.length > 0 && formik.values.tipo_veiculo !== "1" && (
-                  <div className="w-full h-full flex ml-4">
+                <div className="w-full h-full flex ml-4">
+                  <motion.div
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    variants={vehicleVariants}
+                    className="page w-full h-full flex flex-col"
+                  >
+                    <div className="w-full flex">
+                      <div className="flex flex-col w-full">
+                        <SelectCustom
+                          data={listVehicle}
+                          onChange={(selectedOption: any) => {
+                            formik.setFieldValue(
+                              "id_veiculo_parte_nao_motorizada",
+                              String(selectedOption.value)
+                            );
+                            formik.setFieldValue(
+                              "license_plate",
+                              selectedOption.label
+                            );
+                          }}
+                          onInputChange={(value) => {
+                            if (value.length >= 3) {
+                              onSearchVehicle(value);
+                            }
+                          }}
+                          title="Placa Traseira"
+                          touched={
+                            formik.touched.id_veiculo_parte_nao_motorizada
+                          }
+                          error={
+                            formik.errors.id_veiculo_parte_nao_motorizada
+                          }
+                          value={
+                            formik.values.id_veiculo_parte_nao_motorizada
+                          }
+                        />
+                      </div>
+
+                      <button
+                        className="w-full max-w-28 h-10 flex items-center justify-center border-none rounded-full bg-[#0A4984] text-base text-[#fff] font-bold mt-6 ml-3 cursor-pointer"
+                        type="button"
+                        onClick={() => {
+                          if (
+                            String(formik.values.license_plate).length > 0
+                          ) {
+                            onSearchDetailVehicle(formik.values);
+                          }
+                        }}
+                      >
+                        Procurar
+                      </button>
+                    </div>
+                    {detailVehicle.length > 0 && (
+                      <div className="w-full h-[2px] bg-[#DBDEDF] mt-4" />
+                    )}
+
                     <motion.div
                       initial="initial"
                       animate="animate"
                       exit="exit"
-                      variants={vehicleVariants}
-                      className="page w-full h-full flex flex-col"
+                      variants={detailVehicleVariants}
+                      className="page w-full h-full p-2"
                     >
-                      <div className="w-full flex">
-                        <div className="flex flex-col w-full">
-                          <SelectCustom
-                            data={listVehicle}
-                            onChange={(selectedOption: any) => {
-                              formik.setFieldValue(
-                                "id_veiculo_parte_nao_motorizada",
-                                String(selectedOption.value)
-                              );
-                              formik.setFieldValue(
-                                "license_plate",
-                                selectedOption.label
-                              );
-                            }}
-                            onInputChange={(value) => {
-                              if (value.length >= 3) {
-                                onSearchVehicle(value);
-                              }
-                            }}
-                            title="Placa Traseira"
-                            touched={
-                              formik.touched.id_veiculo_parte_nao_motorizada
-                            }
-                            error={
-                              formik.errors.id_veiculo_parte_nao_motorizada
-                            }
-                            value={
-                              formik.values.id_veiculo_parte_nao_motorizada
-                            }
-                          />
-                        </div>
-
-                        <button
-                          className="w-full max-w-28 h-10 flex items-center justify-center border-none rounded-full bg-[#0A4984] text-base text-[#fff] font-bold mt-6 ml-3 cursor-pointer"
-                          type="button"
-                          onClick={() => {
-                            if (
-                              String(formik.values.license_plate).length > 0
-                            ) {
-                              onSearchDetailVehicle(formik.values);
-                            }
-                          }}
-                        >
-                          Procurar
-                        </button>
-                      </div>
                       {detailVehicle.length > 0 && (
-                        <div className="w-full h-[2px] bg-[#DBDEDF] mt-4" />
-                      )}
-
-                      <motion.div
-                        initial="initial"
-                        animate="animate"
-                        exit="exit"
-                        variants={detailVehicleVariants}
-                        className="page w-full h-full p-2"
-                      >
-                        {detailVehicle.length > 0 && (
-                          <div className="flex flex-col mb-1 mt-3">
-                            <span className="text-sm text-[#000] font-bold">
-                              Dados da placa
-                            </span>
-                            <span className="text-sm text-[#666666] font-normal mt-3">
-                              Dados da placa do veículo
-                            </span>
-                          </div>
-                        )}
-                        <div className="grid grid-cols-2 gap-3 mb-4">
-                          {detailVehicle.map((item: IVeiculos) => (
-                            <React.Fragment>
-                              <div className="flex flex-col items-start">
-                                <span className="text-sm text-[#1E2121] font-bold mt-2">
-                                  Placa Dianteira
-                                </span>
-                                <span className="text-sm text-[#1E2121] font-light mt-1">
-                                  {item.placa}
-                                </span>
-                              </div>
-                              <div className="flex flex-col items-start">
-                                <span className="text-sm text-[#1E2121] font-bold mt-2">
-                                  RENAVAM
-                                </span>
-                                <span className="text-sm text-[#1E2121] font-light mt-1">
-                                  {item.renavam}
-                                </span>
-                              </div>
-                              <div className="flex flex-col items-start">
-                                <span className="text-sm text-[#1E2121] font-bold mt-2">
-                                  Ano de exercício do CRLV
-                                </span>
-                                <span className="text-sm text-[#1E2121] font-light mt-1">
-                                  {item.ano_exercicio_crlv}
-                                </span>
-                              </div>
-                              <div className="flex flex-col items-start">
-                                <span className="text-sm text-[#1E2121] font-bold mt-2">
-                                  Data expiração do RNTRC
-                                </span>
-                                <span className="text-sm text-[#1E2121] font-light mt-1">
-                                  {item.data_expiracao_rntrc}
-                                </span>
-                              </div>
-                            </React.Fragment>
-                          ))}
+                        <div className="flex flex-col mb-1 mt-3">
+                          <span className="text-sm text-[#000] font-bold">
+                            Dados da placa
+                          </span>
+                          <span className="text-sm text-[#666666] font-normal mt-3">
+                            Dados da placa do veículo
+                          </span>
                         </div>
+                      )}
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        {detailVehicle.map((item: IVeiculos) => (
+                          <React.Fragment>
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm text-[#1E2121] font-bold mt-2">
+                                Placa Dianteira
+                              </span>
+                              <span className="text-sm text-[#1E2121] font-light mt-1">
+                                {item.placa}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm text-[#1E2121] font-bold mt-2">
+                                RENAVAM
+                              </span>
+                              <span className="text-sm text-[#1E2121] font-light mt-1">
+                                {item.renavam}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm text-[#1E2121] font-bold mt-2">
+                                Ano de exercício do CRLV
+                              </span>
+                              <span className="text-sm text-[#1E2121] font-light mt-1">
+                                {item.ano_exercicio_crlv}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm text-[#1E2121] font-bold mt-2">
+                                Data expiração do RNTRC
+                              </span>
+                              <span className="text-sm text-[#1E2121] font-light mt-1">
+                                {item.data_expiracao_rntrc}
+                              </span>
+                            </div>
+                          </React.Fragment>
+                        ))}
+                      </div>
 
-                        {detailVehicleMotorized.length > 0 &&
-                          detailVehicleMotorized[0].tipo_veiculo !=
-                            TipoVeiculo.TRUCK && (
-                            <div className="w-full h-[1px] bg-[#0A4984] mr-4" />
-                          )}
-                      </motion.div>
+                      {detailVehicleMotorized.length > 0 &&
+                        detailVehicleMotorized[0].tipo_veiculo !=
+                        TipoVeiculo.TRUCK && (
+                          <div className="w-full h-[1px] bg-[#0A4984] mr-4" />
+                        )}
                     </motion.div>
-                  </div>
-                )}
+                  </motion.div>
+                </div>
+              )}
               {detailVehicleMotorized.length > 0 && (
                 <div className="w-full h-full ml-4 mt-2">
                   <div>
@@ -942,7 +1109,7 @@ const IdentifyVehicle: React.FC = () => {
         </div>
       </motion.div>
       <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
-      <button
+        <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
           onClick={() => onHandleBack()}

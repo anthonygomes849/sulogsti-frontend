@@ -3,7 +3,7 @@ import { ColumnDef } from "../../../components/Grid/model/Grid.ts";
 import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
 import Grid from "../../../components/Grid";
 import { useModal } from "../../../hooks/ModalContext.tsx";
-import { formatDateBR, formatDateTimeBR } from "../../../helpers/format.ts";
+import { formatDateBR, formatDateTimeBR, getActiveTypes, maskCnpj } from "../../../helpers/format.ts";
 import { ITransportadoras } from "./types/types.ts";
 import ModalDelete from "../../../components/ModalDelete";
 import Info from "./Info";
@@ -17,6 +17,13 @@ const Transportadoras: React.FC = () => {
       field: "cnpj",
       headerName: "CNPJ",
       filter: true,
+      valueFormatter: (params) => {
+        if(params.value) {
+          return maskCnpj(params.value)
+        }
+
+        return '---';
+      }
     },
     {
       field: "razao_social",
@@ -44,6 +51,13 @@ const Transportadoras: React.FC = () => {
       field: "faturamento_triagem",
       headerName: "Faturamento Triagem",
       filter: true,
+      type: "booleanColumn",
+      filterParams: {
+        selected: {
+          isMultiple: false,
+          data: getActiveTypes(),
+        },
+      },
       valueFormatter: (params) => {
         if (params.value) {
           return "SIM";

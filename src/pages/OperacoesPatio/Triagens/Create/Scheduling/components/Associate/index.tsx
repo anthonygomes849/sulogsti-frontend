@@ -34,7 +34,6 @@ const Associate: React.FC = () => {
   const [operacaoPortoCarrossel, setOperacaoPortoCarrossel] = useState([]);
   const [, setSearchQueryEntrada] = useState<string>("");
   const [, setSearchQueryAgendada] = useState<string>("");
-  const [isAssociate, setIsAssociate] = useState(false);
 
   const selectRef: any = useRef(null);
 
@@ -62,7 +61,7 @@ const Associate: React.FC = () => {
   const { setStatus } = useStatus();
 
   const onSubmit = useCallback(
-    async (values: FormValues, isAssociate: boolean) => {
+    async (values: FormValues) => {
       try {
         setLoading(true);
 
@@ -93,11 +92,7 @@ const Associate: React.FC = () => {
 
           sessionStorage.setItem("@triagem", JSON.stringify(response.data));
 
-          if (isAssociate) {
-            window.location.reload();
-          } else {
-            setStatus(1);
-          }
+          setStatus(1);
         } else {
           setLoading(false);
           FrontendNotification("Erro ao associar a entrada a triagem", "error");
@@ -118,7 +113,7 @@ const Associate: React.FC = () => {
       const body = {
         order_by: "data_hora",
         order_direction: "desc",
-        qtd_por_pagina: 100,
+        qtd_por_pagina: 1,
         triagem: "sim",
         placa_dianteira: value.toUpperCase(),
       };
@@ -163,6 +158,8 @@ const Associate: React.FC = () => {
         order_direction: "desc",
         qtd_por_pagina: 100,
         triagem: "sim",
+        status: 0,
+        ativo: true
       };
 
       const response = await api.post("/listar/operacaoPortoCarrossel", body);
@@ -170,7 +167,7 @@ const Associate: React.FC = () => {
       const mappingResponse = response.data.data.map((item: any) => {
         return {
           label: `${formatDateBR(item.data_inicio_operacao)} | ${
-            item.nome_fantasia
+            item.razao_social
           }`,
           value: item.id_operacao_porto_carrossel,
         };
@@ -248,7 +245,7 @@ const Associate: React.FC = () => {
     initialValues,
     validationSchema: formValidator,
     onSubmit: (values: FormValues) => {
-      onSubmit(values, isAssociate);
+      onSubmit(values);
     },
   });
 
@@ -410,17 +407,7 @@ const Associate: React.FC = () => {
       </motion.div>
 
       <div className="sticky bottom-0 w-full h-14 flex items-center justify-end bg-[#FFFFFF] shadow-xl">
-        <button
-          type="button"
-          className="w-36 h-9 pl-3 pr-3 flex items-center justify-center bg-[#F9FAFA] text-sm text-[#000] font-bold rounded-full mr-2 shadow-md"
-          onClick={() => {
-            setIsAssociate(true);
-            formik.handleSubmit();
-          }}
-          style={{ border: "1px solid #DBDEDF" }}
-        >
-          Entrou no Pátio
-        </button>
+        
         <button
           type="button"
           className="w-24 h-9 pl-3 pr-3 flex items-center justify-center bg-[#0A4984] text-sm text-[#fff] font-bold rounded-full mr-2"
