@@ -34,7 +34,7 @@ const LINX_PAYMENT_ENVIRONMENTS: LinxPaymentEnvironment = {
     authenticationKey: '91749225000109',
     environment: 'development',
     timeout: 3000, // Increased timeout for development
-    retryAttempts: 0,
+    retryAttempts: 3,
     connectionTimeout: 15000,
     readTimeout: 30000,
   },
@@ -53,13 +53,11 @@ const LINX_PAYMENT_ENVIRONMENTS: LinxPaymentEnvironment = {
  * Get current environment from Vite environment variables
  * Cached to avoid repeated calls
  */
-let currentEnvironment: 'development' | 'production' | null = null;
+// let currentEnvironment: 'development' | 'production' | null = null;
 
 const getCurrentEnvironment = (): 'development' | 'production' => {
-  if (currentEnvironment === null) {
-    currentEnvironment = import.meta.env.MODE === 'production' ? 'production' : 'development';
-  }
-  return currentEnvironment;
+  
+  return 'development';
 };
 
 /**
@@ -115,7 +113,7 @@ export const validateLinxConfig = (config: LinxPaymentConfig): boolean => {
  */
 export const resetConfigCache = (): void => {
   cachedConfig = null;
-  currentEnvironment = null;
+  // currentEnvironment = null;
 };
 
 /**
