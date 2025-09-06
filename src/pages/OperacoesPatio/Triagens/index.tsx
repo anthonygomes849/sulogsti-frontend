@@ -13,6 +13,8 @@ import Grid from "../../../components/Grid";
 import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import Loading from "../../../core/common/Loading";
+import PrinterIcon from '../../../assets/images/printerIcon.png';
+
 import {
   formatDateTimeBR,
   getActiveTypes,
@@ -30,6 +32,7 @@ import Create from "./Create";
 import Ticket from "./Create/Scheduling/components/Payment/Ticket";
 import Info from "./Info";
 import { ITriagens } from "./types/types";
+import { useLinxPayment } from "../../../hooks/Payment/LinxPaymentContext";
 
 // import { Container } from './styles';
 
@@ -224,6 +227,14 @@ const Triagens: React.FC = () => {
 
   const { setStatus } = useStatus();
 
+  const linxPayment = useLinxPayment({
+    autoInitialize: true,
+    // onPaymentSuccess: handleLinxPaymentSuccess,
+    // onPaymentError: handleLinxPaymentError
+  });
+
+
+
   const getCallDriver = useCallback(async (data: ITriagens) => {
     try {
       setLoading(true);
@@ -284,6 +295,42 @@ const Triagens: React.FC = () => {
     } catch {
       setLoading(false);
     }
+  }, []);
+
+  const reprintPayment = useCallback(async (data: ITriagens) => {
+    try {
+
+
+      const body = {
+        id_operacao_patio: Number(data.id_operacao_patio),
+        qtd_por_pagina: 100,
+        order_by: "data_historico",
+        order_direction: "desc",
+      };
+
+      const response = await api.post(
+        `/operacaopatio/pagamentos?page=1`,
+        body
+      );
+
+      const responseData = response.data.data;
+
+      console.log(responseData)
+
+      if (responseData.length > 0) {
+        if (responseData[responseData.length - 1].administrative_code !== null) {
+          await linxPayment.reprintPayment(responseData[responseData.length - 1].administrative_code);
+
+          setSelectedRow(data);
+
+          sessionStorage.setItem("@triagem", JSON.stringify(data));
+          sessionStorage.setItem(
+            "id_operacao_patio",
+            JSON.stringify(data.id_operacao_patio)
+          );
+        }
+      }
+    } catch { }
   }, []);
 
   return (
@@ -448,6 +495,16 @@ const Triagens: React.FC = () => {
                 status: [11],
                 icon: () => {
                   return IconPayment;
+                }
+              },
+              {
+                label: 'Reimpressão',
+                action: (data: any) => {
+                  reprintPayment(data);
+                },
+                status: [11],
+                icon: () => {
+                  return PrinterIcon;
                 }
               },
               {
