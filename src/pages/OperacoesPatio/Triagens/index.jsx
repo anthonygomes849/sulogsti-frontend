@@ -456,6 +456,9 @@ const Triagens = () => {
 
       <div className="flex flex-col w-full h-screen bg-[#F5F5F5] p-5">
         <div className="flex items-center justify-between w-full mb-3">
+          <div>
+            <h1 className="text-2xl text-[#000000] font-bold">Triagens</h1>
+          </div>
           <div className="mr-14">
             <button
               className="flex items-center justify-center h-12 w-36 bg-[#062D4E] text-[#FFFFFF] text-sm font-light border-none rounded-full"
