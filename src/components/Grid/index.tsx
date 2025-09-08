@@ -106,6 +106,35 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
 
   const loadingOverlayComponent = useMemo(() => Loading, []);
 
+  const onFilterChanged = useCallback((params: any) => {
+    console.log("entrou", params);
+    const gridApi = params.api;
+    const columnApi = params.columnApi;
+
+    const filter = gridApi.getFilterModel()["operacao_porto_agendada.tipo_carga"];
+
+    console.log(filter);
+
+    const isTriagens = window.location.pathname.includes("triagens");
+
+
+    if (isTriagens && filter && filter.value === 2) {
+      columnApi.moveColumn("entrada_veiculo.data_hora", 1);
+      columnApi.moveColumn("entrada_veiculo.placa_dianteira", 2);
+      columnApi.moveColumn("chamada_motorista", 3);
+      columnApi.moveColumn("operacao_porto_agendada.tipo_carga", 4);
+      columnApi.moveColumn("operacao_porto_carrossel.proprietarioDeCarga.razao_social", 5);
+      columnApi.moveColumn("motorista.nome", 7);
+    } else {
+      columnApi.moveColumn("entrada_veiculo.data_hora", 1);
+      columnApi.moveColumn("entrada_veiculo.placa_dianteira", 2);
+      columnApi.moveColumn("chamada_motorista", 4);
+      columnApi.moveColumn("operacao_porto_agendada.tipo_carga", 5);
+      columnApi.moveColumn("operacao_porto_carrossel.proprietarioDeCarga.razao_social", 9);
+      columnApi.moveColumn("motorista.nome", 7);
+    }
+  }, []);
+
   const onGridReady = useCallback(
     (params: any) => {
       gridRef.current = params.api;
@@ -150,10 +179,12 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
           try {
             setLoading(true);
             console.log(gridParams);
-            const pageSize = gridParams.endRow - gridParams.startRow; 
+            const pageSize = gridParams.endRow - gridParams.startRow;
             console.log(pageSize);
             const page = Math.floor(gridParams.startRow / pageSize) + 1;
             let filters: any = {};
+
+            console.log(params);
 
             if (gridParams.filterModel != null) {
               for (const customFilter in gridParams.filterModel) {
@@ -179,15 +210,22 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
               }
             }
 
+            console.log(gridParams.sortModel);
+
+            // Get the field name for sorting
+            let orderBy = "data_historico";
+            if (gridParams.sortModel.length > 0) {
+              const sortColId = gridParams.sortModel[0].colId;
+              // Find the column definition to get fieldName
+              const colDef = cols.find(col => col.field === sortColId);
+              orderBy = colDef?.fieldName || sortColId;
+              // Keep the existing replacement for uf_estado -> id_estado
+              orderBy = orderBy.replace("uf_estado", "id_estado");
+            }
+
             const reqDTO = {
               qtd_por_pagina: pageSize,
-              order_by:
-                gridParams.sortModel.length > 0
-                  ? gridParams.sortModel[0].colId.replace(
-                      "uf_estado",
-                      "id_estado"
-                    )
-                  : "data_historico",
+              order_by: orderBy,
               order_direction:
                 gridParams.sortModel.length > 0
                   ? gridParams.sortModel[0].sort
@@ -226,7 +264,7 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         const newSize = params.api.paginationGetPageSize();
         if (newSize !== pageSize) {
           setPageSize(newSize);
-           // força getRows com novo tamanho
+          // força getRows com novo tamanho
         }
       });
     },
@@ -252,6 +290,23 @@ const Grid: React.FC<GridProps> = (props: GridProps) => {
         loadingOverlayComponent={loadingOverlayComponent}
         loadingCellRenderer={loadingOverlayComponent}
         onGridReady={onGridReady}
+        onFilterChanged={onFilterChanged}
+        onSortChanged={(params: any) => {
+          const sortModel = params.api.getSortModel();
+          console.log("Current sort model:", sortModel);
+
+          // Log the adjusted sort model with fieldName
+          const adjustedSortModel = sortModel.map((sm: any) => {
+            const colDef = colDefs.find((col: any) => col.field === sm.colId);
+            return {
+              ...sm,
+              colId: colDef?.field || sm.colId,
+            };
+          });
+
+          console.log("Sort model with fieldName:", adjustedSortModel);
+        }}
+
       />
     </div>
   );

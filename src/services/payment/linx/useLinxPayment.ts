@@ -254,9 +254,9 @@ export const useLinxPayment = (options: UseLinxPaymentOptions = {}): UseLinxPaym
     checkSDKStatus();
 
     // Periodically check if SDK gets loaded externally
-    const interval = setInterval(checkSDKStatus, 1000);
+    // const interval = setInterval(checkSDKStatus, 1000);
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, []);
 
   /**
@@ -268,7 +268,7 @@ export const useLinxPayment = (options: UseLinxPaymentOptions = {}): UseLinxPaym
         // Error is handled in initializeSDK
       });
     }
-  }, [autoInitialize, initializeSDK, isInitializing]);
+  }, []);
 
   /**
    * Handle beforeunload event to prevent data loss
@@ -286,7 +286,7 @@ export const useLinxPayment = (options: UseLinxPaymentOptions = {}): UseLinxPaym
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [isInitializing]);
+  }, []);
 
   return {
     // State
