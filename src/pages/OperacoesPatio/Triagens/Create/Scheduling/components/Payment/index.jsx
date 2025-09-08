@@ -22,6 +22,7 @@ import { FrontendNotification, NotificationType } from "../../../../../../../sha
 import Ticket from "./Ticket";
 import formValidator from "./validators/formValidator";
 import InputCustom from "../../../../../../../components/InputCustom";
+import { usePaykit } from "../../../../../../../hooks/PaykitContext";
 
 const Payment = ({ onClose }) => {
   const [dataTicket, setDataTicket] = useState();
@@ -29,7 +30,7 @@ const Payment = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [showTicket, setShowTicket] = useState(false);
   const [administrativeCode, setAdministrativeCode] = useState(null);
-  
+
 
   const authenticatedRef = useRef(false);
 
@@ -40,6 +41,9 @@ const Payment = ({ onClose }) => {
   };
 
   const { setStatus } = useStatus();
+
+  const { authenticated, error, creditPayment, debitPayment } = usePaykit();
+
 
   const onHandleBack = useCallback(async () => {
     try {
@@ -201,7 +205,7 @@ const Payment = ({ onClose }) => {
             FrontendNotification("Pagamento realizado com sucesso!", "success");
             const custoOperacao = await getPaymentTicket();
 
-            console.log(custoOperacao.valor_a_pagar);
+            // console.log(custoOperacao.);
 
             if (custoOperacao.valor_a_pagar <= 0) {
               setShowTicket(false);
@@ -279,47 +283,6 @@ const Payment = ({ onClose }) => {
     setPaymentTypes(filteredData);
   }, []);
 
-  // const getUsers = useCallback(async (userId) => {
-  //   try {
-  //     const body = {
-  //       id_usuario: userId,
-  //     };
-  //     const response = await api.post(`/listar/gruposPermissoes`, body);
-  //     // setUsers(response);
-  //   } catch (error) {
-  //     console.log(error);
-
-  //   }
-  // }, []);
-
-  var checkouts;
-  var checkout;
-  var authSuccessMessage = 'Autenticado com sucesso.';
-
-  function canStartMultiplePaymentsSession() {
-    return multiplePaymentsSessionInProgress === false && $('input[name="rbMultiplePayments"]:checked').val() === 'true';
-  }
-
-  var multiplePaymentsSessionInProgress = false;
-
-
-  function startMultiplePayments() {
-    try {
-      var numberOfPayments = parseInt(document.getElementById('txtNumberOfPayments').value);
-
-      checkout.startMultiplePayments(numberOfPayments, function () {
-        alert('Sessão multiplos pagamentos encerrada!');
-        document.getElementById('txtNumberOfPayments').value = 0;
-        handlerMultiplePaymentsElements(false);
-
-      });
-
-      multiplePaymentsSessionInProgress = true;
-      handlerMultiplePaymentsElements(true);
-    } catch (ex) {
-      alert(ex);
-    }
-  }
 
   var onPaymentSuccess = function (response) {
     console.log(response);
@@ -336,109 +299,37 @@ const Payment = ({ onClose }) => {
     console.log(error);
     console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
 
-    if (error.reasonCode == 9) {
-      checkout = window.PaykitCheckout.undoPayments();
-    }
+    // if (error.reasonCode == 9) {
+    //   checkout = window.PaykitCheckout.undoPayments();
+    // }
   };
 
-  const creditPayment = (value) => {
+  const creditPayments = (value) => {
+    var creditRequest = {
+      amount: parseFloat(value),
+      requestKey: null,
+    };
 
-    try {
-      var creditRequest = {
-        amount: parseFloat(value),
-        requestKey: null,
-      };
-
-      console.log(window.PaykitCheckout);
-
-      if (window.PaykitCheckout) {
-
-        checkout = window.PaykitCheckout.creditPayment(creditRequest, onPaymentSuccess, onPaymentError);
-      } else {
-        FrontendNotification("Erro ao carregar o SDK Paykit", "error")
-      }
-
-    } catch (err) {
-      console.log(err);
+    if(authenticated) { 
+      creditPayment(creditRequest, (response) => onPaymentSuccess(response), (error) => onPaymentError(error))
     }
-
   }
 
 
-  function debitPayment(value) {
+  function debitPayments(value) {
     const amount = parseFloat(value);
-    if(window.PaykitCheckout) {
-      checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
-    } else {
-      FrontendNotification("Erro ao carregar o SDK Paykit", "error")
+    if(authenticated) {
+      debitPayment({ amount }, (response) => onPaymentSuccess(response), (error) => onPaymentError(error))
     }
   }
-
-  const onAuthenticationSuccess = function (response) {
-    console.log(authSuccessMessage);
-  };
-
-  const onAuthenticationError = function (error) {
-    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
-  };
-
-  const onPendingPayments = function (response) {
-    var codesWithLinebreak = "";
-    var pendingPayments = response.details.administrativeCodes;
-
-    checkout = window.PaykitCheckout.undoPayments();
-
-
-  };
-
-  function authenticate() {
-    console.log(window.PaykitCheckout);
-    if (window.PaykitCheckout) {
-      const authenticationRequest = {
-        authenticationKey: '91749225000109',
-      };
-      checkout = window.PaykitCheckout.authenticate(
-        authenticationRequest,
-        onAuthenticationSuccess,
-        onAuthenticationError,
-        onPendingPayments
-      );
-    } else {
-      console.error("PaykitCheckout não está carregado.");
-    }
-  }
-
-  const loadPaykitScript = () => {
-    return new Promise((resolve, reject) => {
-      if (window.PaykitCheckout) {
-        resolve();
-        return;
-      }
-
-      const existingScript = document.querySelector('script[src="https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js"]');
-      if (existingScript) {
-        existingScript.addEventListener('load', resolve);
-        return;
-      }
-
-      const script = document.createElement('script');
-      script.src = 'https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js';
-      script.async = true;
-      script.onload = resolve;
-      script.onerror = () => reject('Erro ao carregar o SDK Paykit');
-      document.body.appendChild(script);
-    });
-  };
-
-
   const onPayment = (values) => {
     const typePayment = values.tipo_pagamento;
 
     switch (typePayment) {
       case "4":
-        return creditPayment(values.valor_pago)
+        return creditPayments(values.valor_pago)
       case "5":
-        return debitPayment(values.valor_pago)
+        return debitPayments(values.valor_pago)
       default:
         setAdministrativeCode(null);
         formik.handleSubmit();
@@ -457,44 +348,13 @@ const Payment = ({ onClose }) => {
   const formik = useFormik({
     initialValues,
     validationSchema: formValidator,
-    onSubmit: (values) => handleSubmit(values, dataTicket),
+    onSubmit: (values) => handleSubmit(values, dataTicket, administrativeCode),
   });
 
   useEffect(() => {
     getPaymentTicket();
     getPaymentTypes();
   }, [getPaymentTicket, getPaymentTypes]);
-
-  const loaderPaykit = useCallback(async () => {
-    try {
-      await loadPaykitScript();
-      if (window.PaykitCheckout) {
-        authenticate();
-        authenticatedRef.current = true;
-      } else {
-        console.error("PaykitCheckout ainda não está disponível após carregar o script.");
-      }
-    } catch (error) {
-      FrontendNotification("Erro ao carregar o SDK Paykit:", "error");
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!authenticatedRef.current) {
-      loaderPaykit();
-    }
-
-    const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue = '';
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
 
   return (
     <Fragment>

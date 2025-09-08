@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import CallDriverActiveIcon from "../../../assets/images/callDriverIconActive.svg";
 import CallDriverIcon from "../../../assets/images/callDriverIcon.svg";
@@ -9,9 +9,9 @@ import PaymentIcon from "../../../assets/images/paymentIcon.svg";
 import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
 import TicketIcon from "../../../assets/images/ticketIcon.svg";
 import Grid from "../../../components/Grid";
-import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import PrinterIcon from '../../../assets/images/printerIcon.png';
+import { usePaykit } from "../../../hooks/PaykitContext";
 
 import Loading from "../../../core/common/Loading";
 import {
@@ -211,15 +211,18 @@ const Triagens = () => {
       },
     },
   ]);
-  const [isRemove, setIsRemove] = useState < boolean > (false);
+  const [isRemove, setIsRemove] = useState(false);
   const [selectedRow, setSelectedRow] = useState();
-  const [isView, setIsView] = useState < boolean > (false);
-  const [isEdit, setIsEdit] = useState < boolean > (false);
-  const [loading, setLoading] = useState < boolean > (false);
-  const [showTicket, setShowTicket] = useState < boolean > (false);
+  const [isView, setIsView] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showTicket, setShowTicket] = useState(false);
 
   const gridRef = useRef();
   const authenticatedRef = useRef(false);
+
+  const { authenticated, error, authenticate, reprint } = usePaykit();
+
 
 
   const { openModal, isModalOpen, closeModal } = useModal();
@@ -288,93 +291,45 @@ const Triagens = () => {
     }
   }, []);
 
-  var checkouts;
-  var checkout;
-  var authSuccessMessage = 'Autenticado com sucesso.';
-
-  function canStartMultiplePaymentsSession() {
-    return multiplePaymentsSessionInProgress === false && $('input[name="rbMultiplePayments"]:checked').val() === 'true';
-  }
-
-  var multiplePaymentsSessionInProgress = false;
-
   var onPaymentSuccess = function (response) {
-    sessionStorage.setItem("@triagem", JSON.stringify(data));
-    sessionStorage.setItem(
-      "id_operacao_patio",
-      JSON.stringify(data.id_operacao_patio)
-    );
+    console.log("Payment operation successful:", response);
+
 
     setShowTicket(false);
     setShowTicket(true);
+
+    FrontendNotification("Payment operation completed successfully!", "success");
   };
+
   var onPaymentError = function (error) {
-    console.log(error);
-    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
+    console.error("Payment operation error:", error);
+    console.log('Code: ' + error.reasonCode + ' - ' + error.reason);
+
+    let errorMessage = error.reason || "Payment operation failed";
 
     if (error.reasonCode == 9) {
-      checkout = window.PaykitCheckout.undoPayments();
-    }
-  };
-
-  const onAuthenticationSuccess = function (response) {
-    console.log(authSuccessMessage);
-  };
-
-  const onAuthenticationError = function (error) {
-    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
-  };
-
-  const onPendingPayments = function (response) {
-    var codesWithLinebreak = "";
-    var pendingPayments = response.details.administrativeCodes;
-
-    checkout = window.PaykitCheckout.undoPayments();
-
-
-  };
-
-  function authenticate() {
-    console.log(window.PaykitCheckout);
-    if (window.PaykitCheckout) {
-      const authenticationRequest = {
-        authenticationKey: '91749225000109',
-      };
-      checkout = window.PaykitCheckout.authenticate(
-        authenticationRequest,
-        onAuthenticationSuccess,
-        onAuthenticationError,
-        onPendingPayments
-      );
-    } else {
-      console.error("PaykitCheckout não está carregado.");
-    }
-  }
-
-  const loadPaykitScript = () => {
-    return new Promise((resolve, reject) => {
-      if (window.PaykitCheckout) {
-        resolve();
-        return;
+      if (window.PaykitCheckout && authenticated) {
+        try {
+          const result = window.PaykitCheckout.undoPayments();
+          console.log("Payments undone:", result);
+          errorMessage = "Transaction cancelled and payments undone";
+        } catch (err) {
+          console.error("Error undoing payments:", err);
+          errorMessage = "Transaction cancelled but failed to undo payments";
+        }
       }
+    }
 
-      const existingScript = document.querySelector('script[src="https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js"]');
-      if (existingScript) {
-        existingScript.addEventListener('load', resolve);
-        return;
-      }
-
-      const script = document.createElement('script');
-      script.src = 'https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js';
-      script.async = true;
-      script.onload = resolve;
-      script.onerror = () => reject('Erro ao carregar o SDK Paykit');
-      document.body.appendChild(script);
-    });
+    FrontendNotification(errorMessage, "error");
   };
 
-  const reprintPayment = useCallback(async (data) => {
+
+
+
+
+  const reprintPayment = useCallback(async (data, isAuthenticate) => {
     try {
+
       const body = {
         id_operacao_patio: Number(data.id_operacao_patio),
         qtd_por_pagina: 100,
@@ -387,53 +342,70 @@ const Triagens = () => {
         body
       );
 
-      const responseData = response.data.data;
-
+      const responseData = response.data.data.sort((a, b) => a.id_operacao_patio_pagamento - b.id_operacao_patio_pagamento);
       console.log(responseData)
 
+      console.log(responseData);
+      console.log(isAuthenticate)
+
       if (responseData.length > 0) {
-        if (responseData[responseData.length - 1].administrative_code !== null) {
+        const lastPayment = responseData[responseData.length - 1];
+        if (lastPayment.administrative_code !== null) {
           const request = {
-            administrativeCode: code,
+            administrativeCode: lastPayment.administrative_code,
           };
-          checkout = window.PaykitCheckout.reprint(request, onPaymentSuccess, onPaymentError);
 
-
+          // Use the Paykit SDK directly for reprint since it's not in the new hook yet
+          if (isAuthenticate) {
+            try {
+              console.log("entrou")
+              reprint(
+                request,
+                (response) => {
+                  console.log("Reprint successful:", response);
+                  onPaymentSuccess(response);
+                },
+                (error) => {
+                  console.error("Reprint error:", error);
+                  onPaymentError(error);
+                }
+              );
+            } catch (err) {
+              console.error("Error calling reprint:", err);
+              FrontendNotification("Error during reprint operation", "error");
+            }
+          } else {
+            FrontendNotification("PaykitCheckout not available or not authenticated", "error");
+          }
+        } else {
+          FrontendNotification("No administrative code found for this payment", "warning");
         }
-      }
-    } catch { }
-  }, []);
-
-  const loaderPaykit = useCallback(async () => {
-    try {
-      await loadPaykitScript();
-      if (window.PaykitCheckout) {
-        authenticate();
-        authenticatedRef.current = true;
       } else {
-        console.error("PaykitCheckout ainda não está disponível após carregar o script.");
+        FrontendNotification("No payments found for this operation", "warning");
       }
-    } catch (error) {
-      FrontendNotification("Erro ao carregar o SDK Paykit:", "error");
+    } catch (err) {
+      console.error("Error getting payment data:", err);
+      FrontendNotification("Error retrieving payment data", "error");
     }
-  }, [])
+  }, [authenticated]);
+
+
+
+
 
   useEffect(() => {
-    if (!authenticatedRef.current) {
-      loaderPaykit();
+    console.log(authenticated)
+    authenticatedRef.current = authenticated;
+    if (!authenticated) {
+      authenticate()
     }
+    if (error) {
+      FrontendNotification(`Paykit error: ${error}`, "error");
+    }
+  }, [authenticated]);
 
-    const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue = '';
-    };
+  console.log(authenticatedRef.current)
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
 
   return (
     <>
@@ -484,9 +456,6 @@ const Triagens = () => {
 
       <div className="flex flex-col w-full h-screen bg-[#F5F5F5] p-5">
         <div className="flex items-center justify-between w-full mb-3">
-          <div>
-            <h1 className="text-2xl text-[#000000] font-bold">Triagens</h1>
-          </div>
           <div className="mr-14">
             <button
               className="flex items-center justify-center h-12 w-36 bg-[#062D4E] text-[#FFFFFF] text-sm font-light border-none rounded-full"
@@ -601,9 +570,19 @@ const Triagens = () => {
               },
               {
                 label: 'Reimpressão',
-                action: (data) => {
+                action: async (data) => {
                   setSelectedRow(data);
-                  reprintPayment(data);
+                  sessionStorage.setItem("@triagem", JSON.stringify(data));
+                  sessionStorage.setItem(
+                    "id_operacao_patio",
+                    JSON.stringify(data?.id_operacao_patio)
+                  );
+                  console.log(authenticatedRef.current)
+                  if (authenticated) {
+                    await authenticate(); // garante autenticação antes
+                  }
+
+                  reprintPayment(data, authenticatedRef.current)
                 },
                 status: [11],
                 icon: () => {
