@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { LinxPaykitCheckout } from "../services/payment/linx/types";
 
 export function usePaykitSdk() {
   const [loaded, setLoaded] = useState(false);
