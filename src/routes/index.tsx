@@ -8,6 +8,7 @@ import Login from "../pages/Login";
 import RedefinicaoSenha from "../pages/RedefinicaoSenha";
 import OperacoesPatioEntradaVeiculos from "../pages/OperacoesPatio/OperacoesPatioEntradaVeiculos";
 import ListOperacoesPatioServicos from "../pages/OperacoesPatio/OperacoesPatioServicos";
+// @ts-ignore
 import Triagens from "../pages/OperacoesPatio/Triagens/index.jsx";
 import OperacoesPortoAgendada from "../pages/OperacoesPorto/OperacoesPortoAgendada";
 import PrivateRoute from "./privateRoute";
