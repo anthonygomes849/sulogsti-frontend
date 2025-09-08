@@ -10,7 +10,7 @@ export function usePaykitSdk() {
     }
 
     const script = document.createElement("script");
-    script.src = "https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js"; // ⚠️ ajuste para URL real
+    script.src = "https://linxpaykitapi.linx.com.br/LinxPaykitApi/paykit-checkout.js"; // ⚠️ ajuste para URL real
     script.async = true;
 
     script.onload = () => {
