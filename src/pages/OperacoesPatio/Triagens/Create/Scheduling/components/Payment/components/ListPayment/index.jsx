@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./styles.css";
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
@@ -21,98 +21,38 @@ import api from "../../../../../../../../../services/api";
 import Info from "./components/Info";
 import ReversedPayment from "./components/ReversedPayment";
 
-// Import the new separated Linx payment configuration
-import {
-  useLinxPayment,
-  type LinxPaymentResponse,
-  type LinxPaymentError,
-} from "../../../../../../../../../services/payment/linx";
-
-interface PaymentRowData {
-  id_operacao_patio_pagamento: number;
-  administrative_code: string | null;
-  data_hora_pagamento: string;
-  tipo_pagamento: number;
-  tempo_base_triagem: number;
-  quantia_paga: number;
-  status: number;
-}
-
-const ListPayment: React.FC = () => {
-  const [columns, setColumns] = useState<any[]>([]);
-  const [rowData, setRowData] = useState<PaymentRowData[]>([]);
-  const [selectedRow, setSelectedRow] = useState<PaymentRowData>();
+const ListPayment = () => {
+  const [columns, setColumns] = useState([]);
+  const [rowData, setRowData] = useState([]);
+  const [selectedRow, setSelectedRow] = useState();
   const [isView, setIsView] = useState(false);
   const [isRemove, setIsRemove] = useState(false);
   const [loading, setLoading] = useState(false);
   const [update, setUpdate] = useState(false);
-  const [gridApi, setGridApi] = useState<any>(null);
-  const [currentRow, setCurrentRow] = useState<any>();
+  const [gridApi, setGridApi] = useState(null);
+  const [currentRow, setCurrentRow] = useState();
   const [isReversedPayment, setIsReversedPayment] = useState(false);
-  const [paymentInProgress, setPaymentInProgress] = useState<PaymentRowData | null>(null);
-
-  const { setStatus } = useStatus();
-  const gridRef = useRef<AgGridReact>(null);
-
-  const paymentInProgressRef = useRef<PaymentRowData | null>(null);
-
-
-  // Use the new Linx payment hook
-  const linxPayment = useLinxPayment({
-    autoInitialize: true,
-    onPaymentSuccess: handleLinxPaymentSuccess,
-    onPaymentError: handleLinxPaymentError,
-  });
-
-  /**
-   * Handle successful Linx payment for reversal
-   */
-  function handleLinxPaymentSuccess(response: LinxPaymentResponse): void {
-    console.log('Linx payment reversal successful:', response);
-    console.log('Payment row being processed:', paymentInProgressRef.current);
-    
-    // Use the paymentInProgress row instead of selectedRow
-    if (paymentInProgressRef.current) {
-      onDelete(paymentInProgressRef.current.id_operacao_patio_pagamento);
-    } else {
-      console.error('No payment in progress found for reversal');
-    }
-    
-    // Clear the payment in progress
-    setPaymentInProgress(null);
-  }
-
-  /**
-   * Handle Linx payment error for reversal
-   */
-  function handleLinxPaymentError(error: LinxPaymentError): void {
-    console.error('Linx payment reversal error:', error);
-    console.log('Payment row that failed:', paymentInProgress);
-    
-    // Clear the payment in progress on error
-    setPaymentInProgress(null);
-    
-    // Error is already handled by the utility functions
-  }
 
   const defaultColumns = [
     {
       field: "data_hora_pagamento",
       headerName: "Data do pagamento",
-      valueFormatter: (params: any) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return formatDateTimeBR(params.value);
         }
+
         return "---";
       },
     },
     {
       field: "tipo_pagamento",
       headerName: "Tipo de pagamento",
-      valueFormatter: (params: any) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return renderPaymentTypes(params.value);
         }
+
         return "---";
       },
     },
@@ -123,10 +63,11 @@ const ListPayment: React.FC = () => {
     {
       field: "quantia_paga",
       headerName: "Valor Pago",
-      valueFormatter: (params: any) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return `R$ ${params.value}`;
         }
+
         return "---";
       },
     },
@@ -134,26 +75,29 @@ const ListPayment: React.FC = () => {
       field: "",
       headerName: "",
       pinned: "right",
-      cellRenderer: (params: any) => {
+      cellRenderer: (params) => {
         if (params.data) {
           return (
             <div>
               <button
                 className="mr-4"
                 onClick={() => {
+                  // addBreadcrumb("Conhecer");
+                  // props.onView(params.data);
                   setSelectedRow(params.data);
                   setIsView(!isView);
                 }}
               >
-                <img src={InfoIcon} style={{ width: 16, height: 16 }} alt="Info" />
+                <img src={InfoIcon} style={{ width: 16, height: 16 }} />
               </button>
               <button
                 onClick={() => {
+                  // props.onDelete(params.data);
                   setSelectedRow(params.data);
                   setIsReversedPayment(!isReversedPayment);
                 }}
               >
-                <img src={DeleteIcon} style={{ width: 16, height: 16 }} alt="Delete" />
+                <img src={DeleteIcon} style={{ width: 16, height: 16 }} />
               </button>
             </div>
           );
@@ -162,22 +106,29 @@ const ListPayment: React.FC = () => {
     },
   ];
 
-  const onGridReady = useCallback(async (params: any) => {
-    try {
-      console.log("Grid ready");
-      let cols: any[] = [...defaultColumns];
+  const authenticatedRef = useRef(false);
 
-      console.log("passou");
+  const { setStatus } = useStatus();
+
+  const gridRef = useRef(null);
+
+  const onGridReady = useCallback(async (params) => {
+    try {
+      console.log("entrou");
+      let cols = defaultColumns;
 
       cols.unshift({
         field: "status",
+        fieldName: "status",
         headerName: "Status",
         filter: CustomStatusFilter,
         filterParams: {
           status: STATUS_PAGAMENTO,
         },
+        // width: 310,
         cellStyle: { textAlign: "center" },
-        cellRenderer: (params: any) => {
+        // pinned: "left",
+        cellRenderer: (params) => {
           if (params.data) {
             return (
               <Status data={STATUS_PAGAMENTO} status={params.data.status} />
@@ -187,47 +138,146 @@ const ListPayment: React.FC = () => {
       });
 
       setColumns(cols);
-      setGridApi(params.api);
-    } catch (error) {
-      console.error('Grid ready error:', error);
-    }
-  }, [defaultColumns, isView, isReversedPayment]);
 
-  const onDelete = useCallback(async (row: any) => {
+      console.log(cols);
+
+      setGridApi(params.api);
+    } catch { }
+  }, []);
+
+  const onDelete = useCallback(async (rowId) => {
     try {
       setLoading(true);
 
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("userId");
 
+      const body = {
+        id_operacao_patio_pagamento: rowId,
+        id_usuario_historico: userId,
+      };
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get("userId");
+      console.log("Passou", body);
 
-        const body = {
-          id_operacao_patio_pagamento: row,
-          id_usuario_historico: userId,
-        };
-
-        await api.post("/operacaopatio/estorno", body);
-
+      await api.post("/operacaopatio/estorno", body);
 
       setLoading(false);
+
       setIsRemove(false);
-      setUpdate(prev => !prev);
-    } catch (error) {
-      console.error('Delete payment error:', error);
+
+      setUpdate(false);
+      setUpdate(true);
+    } catch {
       setLoading(false);
     }
-  }, [selectedRow]);
+  }, []);
 
-  /**
-   * Handle payment reversal using the new Linx payment integration
-   */
-  const onPayment = useCallback(async (row: PaymentRowData) => {
+  var checkouts;
+  var checkout;
+  var authSuccessMessage = 'Autenticado com sucesso.';
+
+  var onPaymentSuccess = function (response) {
+    console.log(response.receipt.merchantReceipt + '<br>' + response.receipt.customerReceipt);
+    console.log(response);
+
+    onDelete(selectedRow.id_operacao_patio_pagamento);
+  };
+  var onPaymentError = function (error) {
+    console.log(error);
+    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
+
+    if (error.reasonCode == 9) {
+      checkout = window.PaykitCheckout.undoPayments();
+    }
+  };
+
+  const creditPayment = (value) => {
+    var creditRequest = {
+      amount: parseFloat(value),
+      requestKey: null,
+    };
+
+    if (window.PaykitCheckout) {
+      checkout = window.PaykitCheckout.creditPayment(creditRequest, onPaymentSuccess, onPaymentError);
+    } else {
+      FrontendNotification("Erro ao carregar o SDK Paykit", "error")
+    }
+
+  }
+
+
+  function debitPayment(value) {
+    console.log(value);
+    const amount = parseFloat(value);
+    if (window.PaykitCheckout) {
+      checkout = window.PaykitCheckout.debitPayment({ amount: amount }, onPaymentSuccess, onPaymentError);
+    } else {
+      FrontendNotification("Erro ao carregar o SDK Paykit", "error")
+    }
+  }
+
+  const onAuthenticationSuccess = function (response) {
+    console.log(authSuccessMessage);
+  };
+
+  const onAuthenticationError = function (error) {
+    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
+  };
+
+  const onPendingPayments = function (response) {
+    var codesWithLinebreak = "";
+    var pendingPayments = response.details.administrativeCodes;
+
+    checkout = window.PaykitCheckout.undoPayments();
+
+
+  };
+
+  function authenticate() {
+    console.log(window.PaykitCheckout)
+    if (window.PaykitCheckout) {
+      const authenticationRequest = {
+        authenticationKey: '91749225000109',
+      };
+      checkout = window.PaykitCheckout.authenticate(
+        authenticationRequest,
+        onAuthenticationSuccess,
+        onAuthenticationError,
+        onPendingPayments
+      );
+    } else {
+      console.error("PaykitCheckout não está carregado.");
+    }
+  }
+
+  const loadPaykitScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.PaykitCheckout) {
+        resolve();
+        return;
+      }
+
+      const existingScript = document.querySelector('script[src="https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js"]');
+      if (existingScript) {
+        existingScript.addEventListener('load', resolve);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js';
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = () => reject('Erro ao carregar o SDK Paykit');
+      document.body.appendChild(script);
+    });
+  };
+
+  const onPayment = useCallback(async (row) => {
     try {
       const amount = row.quantia_paga;
 
       console.log('Processing payment reversal for row:', row);
-      
+
       // Store the row being processed for the success callback
       setPaymentInProgress(row);
       paymentInProgressRef.current = row;
@@ -243,7 +293,7 @@ const ListPayment: React.FC = () => {
         };
 
         // Use the new Linx payment integration for reversal
-        await linxPayment.cancelPayments(request);
+       checkout = window.PaykitCheckout.paymentReversal(request, onPaymentSuccess, onPaymentError);
       } else {
         // For non-card payments, delete directly
         onDelete(row.id_operacao_patio_pagamento);
@@ -255,24 +305,49 @@ const ListPayment: React.FC = () => {
       // Clear the payment in progress on error
       setPaymentInProgress(null);
     }
-  }, [linxPayment, onDelete]);
+  }, []);
+
+
+
+  const loaderPaykit = useCallback(async () => {
+    try {
+      await loadPaykitScript();
+      if (window.PaykitCheckout) {
+        authenticate();
+        authenticatedRef.current = true;
+      } else {
+        console.error("PaykitCheckout ainda não está disponível após carregar o script.");
+      }
+    } catch (error) {
+      FrontendNotification("Erro ao carregar o SDK Paykit:", "error");
+    }
+  }, []);
+
 
   useEffect(() => {
+
+    if (!authenticatedRef.current) {
+      loaderPaykit();
+    }
+
     if (gridApi) {
       const dataSource = {
-        getRows: async (params: any) => {
+        getRows: async (params) => {
           try {
+            // Fazer uma requisição ao servidor passando os parâmetros da página
             const page = params.endRow / 100 - 1;
 
             let currentRow = sessionStorage.getItem("@triagem");
 
             if (currentRow) {
-              setCurrentRow(JSON.parse(currentRow));
+              currentRow = JSON.parse(currentRow);
             }
+
+            setCurrentRow(currentRow);
 
             const id_operacao_patio =
               sessionStorage.getItem("id_operacao_patio") ||
-              (currentRow ? JSON.parse(currentRow).id_operacao_patio : null);
+              currentRow.id_operacao_patio;
 
             const body = {
               id_operacao_patio: Number(id_operacao_patio),
@@ -288,10 +363,7 @@ const ListPayment: React.FC = () => {
 
             params.successCallback(response.data.data, response.data.total);
             setRowData(response.data.data);
-          } catch (error) {
-            console.error('Data loading error:', error);
-            params.failCallback();
-          }
+          } catch { }
         },
       };
 
@@ -307,9 +379,7 @@ const ListPayment: React.FC = () => {
         <ReversedPayment
           onConfirm={() => {
             setIsReversedPayment(false);
-            if (selectedRow) {
-              onPayment(selectedRow);
-            }
+            onPayment(selectedRow)
           }}
           onCancel={() => setIsReversedPayment(!isReversedPayment)}
         />
@@ -321,30 +391,16 @@ const ListPayment: React.FC = () => {
           message="Por favor, confirme que você deseja estornar o seguinte registro:"
           onCancel={() => setIsRemove(!isRemove)}
           onConfirm={() => setIsReversedPayment(true)}
-          row={selectedRow?.id_operacao_patio_pagamento?.toString()}
+          row={selectedRow?.id_operacao_patio_pagamento}
         />
       )}
-
-      {isView && selectedRow && (
+      {isView && (
         <Info
           data={selectedRow}
           title="Conhecer - Pagamentos"
           onClose={() => setIsView(!isView)}
         />
       )}
-
-      {linxPayment.error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          <span className="block sm:inline">Erro no sistema de pagamento: {linxPayment.error}</span>
-          <button
-            onClick={linxPayment.resetError}
-            className="float-right font-bold text-red-700 hover:text-red-900"
-          >
-            ×
-          </button>
-        </div>
-      )}
-
       {currentRow && currentRow.status < 11 && (
         <div className="w-full h-full flex justify-end">
           <button
@@ -355,7 +411,6 @@ const ListPayment: React.FC = () => {
           </button>
         </div>
       )}
-
       <div className="ag-theme-quartz h-96 mt-4">
         <AgGridReact
           ref={gridRef}
