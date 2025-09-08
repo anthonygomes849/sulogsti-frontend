@@ -5,9 +5,9 @@ import IdentifyDriver from "./components/IdentifyDriver";
 import IdentifyVehicle from "./components/IdentifyVehicle";
 import Invoiced from "./components/Invocied";
 // @ts-ignore
-import Payment from "./components/Payment/index.jsx";
+import Payment from "./components/Payment";
 // @ts-ignore
-import ListPayment from "./components/Payment/components/ListPayment/index.jsx";
+import ListPayment from "./components/Payment/components/ListPayment";
 
 // import { Container } from './styles';
 interface Props {

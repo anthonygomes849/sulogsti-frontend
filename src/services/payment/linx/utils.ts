@@ -121,6 +121,8 @@ export const initializeLinxSDK = async (): Promise<any> => {
         authenticationKey: config.authenticationKey,
       };
 
+      console.log("chegou", config.scriptUrl)
+
       const onAuthenticationSuccess: LinxAuthenticationSuccessCallback = (response) => {
         clearTimeout(timeoutId);
         console.log('Linx authentication successful', response);
