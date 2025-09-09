@@ -298,7 +298,7 @@ export const PaykitProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 console.error("Auto-authentication failed:", err);
             });
         }
-    }, [sdkLoaded, authenticated, loading, authenticate]);
+    }, []);
 
     return (
         <PaykitContext.Provider 
