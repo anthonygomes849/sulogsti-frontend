@@ -52,7 +52,7 @@ export const PaykitProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [checkout, setCheckout] = useState<LinxPaykitCheckout | null>(null);
 
     const authenticate = useCallback(async (authKey?: string) => {
-        if (!sdkLoaded || !window.PaykitCheckout) {
+        if (!window.PaykitCheckout) {
             const errorMsg = "PaykitCheckout SDK not loaded yet";
             console.error("⚠️", errorMsg);
             setError(errorMsg);
@@ -298,7 +298,7 @@ export const PaykitProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 console.error("Auto-authentication failed:", err);
             });
         }
-    }, []);
+    }, [sdkLoaded]);
 
     return (
         <PaykitContext.Provider 

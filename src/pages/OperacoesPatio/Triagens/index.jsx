@@ -396,13 +396,7 @@ const Triagens = () => {
   useEffect(() => {
     console.log(authenticated)
     authenticatedRef.current = authenticated;
-    if (!authenticated) {
-      authenticate()
-    }
-    if (error) {
-      FrontendNotification(`Paykit error: ${error}`, "error");
-    }
-  }, [authenticated]);
+  }, []);
 
   console.log(authenticatedRef.current)
 
