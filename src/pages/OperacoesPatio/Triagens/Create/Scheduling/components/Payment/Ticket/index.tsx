@@ -208,7 +208,7 @@ const Ticket = (props: Props) => {
                         .transportadora !== null
                       ? item.operacaoPatio.operacao_porto_agendada
                         .transportadora.razao_social
-                      : "---"}
+                      : item.operacaoPatio.transportadora !== null ? item.operacaoPatio.transportadora.razao_social : "---"}
                   </span>
                 </div>
                 <div className="w-full flex items-center mb-1">
