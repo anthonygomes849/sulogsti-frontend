@@ -67,6 +67,8 @@ export const PaykitProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 authenticationKey: authKey || "11166491000161", // Default or from parameter
             };
 
+            console.log(authenticationRequest)
+
             const onAuthenticationSuccess = (response: any) => {
                 console.log("✅ Authentication successful", response);
                 setAuthenticated(true);

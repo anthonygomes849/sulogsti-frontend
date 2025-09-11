@@ -5,6 +5,7 @@ export function usePaykitSdk() {
 
   useEffect(() => {
     if (window.PaykitCheckout) {
+      console.log("sdk carregado")
       setLoaded(true);
       return;
     }

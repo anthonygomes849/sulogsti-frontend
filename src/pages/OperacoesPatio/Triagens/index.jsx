@@ -394,7 +394,8 @@ const Triagens = () => {
 
 
   useEffect(() => {
-    console.log(authenticated)
+    console.log(authenticated);
+    
     authenticatedRef.current = authenticated;
   }, []);
 
