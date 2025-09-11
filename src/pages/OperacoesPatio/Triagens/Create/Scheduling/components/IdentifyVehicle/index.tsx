@@ -735,6 +735,8 @@ const IdentifyVehicle: React.FC = () => {
       Number(values.tipo_veiculo) > 1 ? formValidator2 : formValidator
     ),
     onSubmit: (values: FormValues) => {
+      console.log("values", values);
+      console.log(values.tipo_veiculo);
       handleSubmit(values, transportadoras);
     },
   });
@@ -788,7 +790,7 @@ const IdentifyVehicle: React.FC = () => {
         className="page"
       >
         <ToastContainer />
-        <div className="overflow-y-scroll max-h-[calc(90vh)] p-5">
+        <div className="overflow-y-scroll max-h-[calc(80vh)] p-5 mb-10">
           <div className="flex mb-3 mt-3">
             <div className="flex flex-col">
               <span className="text-sm text-[#000] font-bold">
@@ -943,10 +945,10 @@ const IdentifyVehicle: React.FC = () => {
                         <SelectCustom
                           data={listVehicle}
                           onChange={(selectedOption: any) => {
-                            formik.setFieldValue(
-                              "id_veiculo_parte_nao_motorizada",
-                              String(selectedOption.value)
-                            );
+                            // formik.setFieldValue(
+                            //   "id_veiculo_parte_nao_motorizada",
+                            //   String(selectedOption.value)
+                            // );
                             formik.setFieldValue(
                               "license_plate",
                               selectedOption.label
@@ -977,7 +979,7 @@ const IdentifyVehicle: React.FC = () => {
                           if (
                             String(formik.values.license_plate).length > 0
                           ) {
-                            onSearchDetailVehicle(formik.values);
+                            onSearchDetailVehicle(formik.values, formik.values.license_plate);
                           }
                         }}
                       >
