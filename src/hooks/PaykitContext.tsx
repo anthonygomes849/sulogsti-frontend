@@ -64,7 +64,7 @@ export const PaykitProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         return new Promise<void>((resolve, reject) => {
             const authenticationRequest: LinxAuthenticationRequest = {
-                authenticationKey: authKey || "91749225000109", // Default or from parameter
+                authenticationKey: authKey || "11166491000161", // Default or from parameter
             };
 
             const onAuthenticationSuccess = (response: any) => {
