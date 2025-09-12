@@ -292,8 +292,11 @@ const Payment = ({ onClose }) => {
 
     setAdministrativeCode(String(response.administrativeCode));
 
+    const screenWidth = window.screen.width;
+  const screenHeight = window.screen.height;
 
-    const printWindow = window.open('', '', 'width=600,height=600');
+
+    const printWindow = window.open('', '', `width=${screenWidth},height=${screenHeight},top=0,left=0`);
     printWindow.document.write(`<!DOCTYPE html>
     <html lang="pt-BR">
       <head>
@@ -363,11 +366,16 @@ const Payment = ({ onClose }) => {
   const onPayment = (values) => {
     const typePayment = values.tipo_pagamento;
 
+    const valorPago = Number(values.valor_pago).toFixed(2);
+    const desconto = Number(values.desconto).toFixed(2);
+
+    const valorTotalPago = Number(valorPago - desconto).toFixed(2)
+
     switch (typePayment) {
       case "4":
-        return creditPayments(values.valor_pago)
+        return creditPayments(valorTotalPago)
       case "5":
-        return debitPayments(values.valor_pago)
+        return debitPayments(valorTotalPago)
       default:
         setAdministrativeCode(null);
         formik.handleSubmit();

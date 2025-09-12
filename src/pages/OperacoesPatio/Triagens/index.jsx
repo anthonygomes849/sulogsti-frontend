@@ -297,7 +297,11 @@ const Triagens = () => {
 
 
 
-    const printWindow = window.open('', '', 'width=600,height=600');
+    const screenWidth = window.screen.width;
+  const screenHeight = window.screen.height;
+
+
+    const printWindow = window.open('', '', `width=${screenWidth},height=${screenHeight},top=0,left=0`);
     printWindow.document.write(`<!DOCTYPE html>
     <html lang="pt-BR">
       <head>
