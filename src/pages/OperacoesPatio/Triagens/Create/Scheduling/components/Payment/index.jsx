@@ -307,9 +307,11 @@ const Payment = ({ onClose }) => {
   const creditPayments = (value) => {
     var creditRequest = {
       amount: parseFloat(value),
+      installments: 1,
+      installmentType: 1, //Parcelamento Administradora
     };
 
-    if(authenticated) { 
+    if (authenticated) {
       creditPayment(creditRequest, (response) => onPaymentSuccess(response), (error) => onPaymentError(error))
     }
   }
@@ -317,7 +319,7 @@ const Payment = ({ onClose }) => {
 
   function debitPayments(value) {
     const amount = parseFloat(value);
-    if(authenticated) {
+    if (authenticated) {
       debitPayment({ amount }, (response) => onPaymentSuccess(response), (error) => onPaymentError(error))
     }
   }
