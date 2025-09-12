@@ -356,7 +356,6 @@ const Triagens = () => {
           };
 
           // Use the Paykit SDK directly for reprint since it's not in the new hook yet
-          if (isAuthenticate) {
             try {
               console.log("entrou")
               reprint(
@@ -374,14 +373,10 @@ const Triagens = () => {
               console.error("Error calling reprint:", err);
               FrontendNotification("Error during reprint operation", "error");
             }
-          } else {
-            FrontendNotification("PaykitCheckout not available or not authenticated", "error");
-          }
+         
         } else {
-          FrontendNotification("No administrative code found for this payment", "warning");
+          FrontendNotification("Reimpressão não disponivel pra essa triagem!", "warning");
         }
-      } else {
-        FrontendNotification("No payments found for this operation", "warning");
       }
     } catch (err) {
       console.error("Error getting payment data:", err);
