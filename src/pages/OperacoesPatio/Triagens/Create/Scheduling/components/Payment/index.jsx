@@ -307,7 +307,6 @@ const Payment = ({ onClose }) => {
   const creditPayments = (value) => {
     var creditRequest = {
       amount: parseFloat(value),
-      requestKey: null,
     };
 
     if(authenticated) { 
