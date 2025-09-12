@@ -355,7 +355,7 @@ const Payment = ({ onClose }) => {
 
 
   function debitPayments(value) {
-    const amount = parseFloat(0.01);
+    const amount = parseFloat(value);
     if (authenticated) {
       debitPayment({ amount }, (response) => onPaymentSuccess(response), (error) => onPaymentError(error))
     }
