@@ -12,6 +12,7 @@ import Grid from "../../../components/Grid";
 import ModalDelete from "../../../components/ModalDelete";
 import PrinterIcon from '../../../assets/images/printerIcon.png';
 import { usePaykit } from "../../../hooks/PaykitContext";
+import { useReactToPrint } from "react-to-print";
 
 import Loading from "../../../core/common/Loading";
 import {
@@ -224,7 +225,6 @@ const Triagens = () => {
   const { authenticated, error, authenticate, reprint } = usePaykit();
 
 
-
   const { openModal, isModalOpen, closeModal } = useModal();
 
   const { setStatus } = useStatus();
@@ -295,10 +295,49 @@ const Triagens = () => {
     console.log("Payment operation successful:", response);
 
 
+
+
+    const printWindow = window.open('', '', 'width=600,height=600');
+    printWindow.document.write(`<!DOCTYPE html>
+    <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title></title> <!-- Deixe o título vazio -->
+        <style>
+          body {
+            font-family: monospace;
+            white-space: pre;
+            font-size: 14px;
+            margin: 0;
+            padding: 20px;
+          }
+
+          @media print {
+            @page {
+              margin: 0;
+            }
+            body {
+              margin: 0;
+              padding: 2px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <pre>${response.receipt.merchantReceipt}</pre>
+      </body>
+    </html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
+    // setContentTicket(response.receipt.merchantReceipt);
+
     setShowTicket(false);
     setShowTicket(true);
 
-    FrontendNotification("Payment operation completed successfully!", "success");
+
   };
 
   var onPaymentError = function (error) {
@@ -356,24 +395,24 @@ const Triagens = () => {
           };
 
           // Use the Paykit SDK directly for reprint since it's not in the new hook yet
-            try {
-              console.log("entrou")
-              reprint(
-                request,
-                (response) => {
-                  console.log("Reprint successful:", response);
-                  onPaymentSuccess(response);
-                },
-                (error) => {
-                  console.error("Reprint error:", error);
-                  onPaymentError(error);
-                }
-              );
-            } catch (err) {
-              console.error("Error calling reprint:", err);
-              FrontendNotification("Error during reprint operation", "error");
-            }
-         
+          try {
+            console.log("entrou")
+            reprint(
+              request,
+              (response) => {
+                console.log("Reprint successful:", response);
+                onPaymentSuccess(response);
+              },
+              (error) => {
+                console.error("Reprint error:", error);
+                onPaymentError(error);
+              }
+            );
+          } catch (err) {
+            console.error("Error calling reprint:", err);
+            FrontendNotification("Error during reprint operation", "error");
+          }
+
         } else {
           FrontendNotification("Reimpressão não disponivel pra essa triagem!", "warning");
         }
@@ -390,7 +429,7 @@ const Triagens = () => {
 
   useEffect(() => {
     console.log(authenticated);
-    
+
     authenticatedRef.current = authenticated;
   }, []);
 

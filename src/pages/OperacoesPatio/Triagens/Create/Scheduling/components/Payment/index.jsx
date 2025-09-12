@@ -30,6 +30,7 @@ const Payment = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [showTicket, setShowTicket] = useState(false);
   const [administrativeCode, setAdministrativeCode] = useState(null);
+  const printRef = useRef();
 
 
   const authenticatedRef = useRef(false);
@@ -291,6 +292,42 @@ const Payment = ({ onClose }) => {
 
     setAdministrativeCode(String(response.administrativeCode));
 
+
+    const printWindow = window.open('', '', 'width=600,height=600');
+    printWindow.document.write(`<!DOCTYPE html>
+    <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title></title> <!-- Deixe o título vazio -->
+        <style>
+          body {
+            font-family: monospace;
+            white-space: pre;
+            font-size: 14px;
+            margin: 0;
+            padding: 20px;
+          }
+
+          @media print {
+            @page {
+              margin: 0;
+            }
+            body {
+              margin: 0;
+              padding: 2px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <pre>${response.receipt.merchantReceipt}</pre>
+      </body>
+    </html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
     setTimeout(() => {
       formik.handleSubmit();
     }, 1000)
@@ -318,7 +355,7 @@ const Payment = ({ onClose }) => {
 
 
   function debitPayments(value) {
-    const amount = parseFloat(value);
+    const amount = parseFloat(0.01);
     if (authenticated) {
       debitPayment({ amount }, (response) => onPaymentSuccess(response), (error) => onPaymentError(error))
     }
