@@ -1,5 +1,4 @@
-import { ValueFormatterParams } from "ag-grid-community";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import CallDriverActiveIcon from "../../../assets/images/callDriverIconActive.svg";
 import CallDriverIcon from "../../../assets/images/callDriverIcon.svg";
@@ -10,8 +9,10 @@ import PaymentIcon from "../../../assets/images/paymentIcon.svg";
 import PlusButtonIcon from "../../../assets/images/PlusButtonIcon.svg";
 import TicketIcon from "../../../assets/images/ticketIcon.svg";
 import Grid from "../../../components/Grid";
-import { ColumnDef } from "../../../components/Grid/model/Grid";
 import ModalDelete from "../../../components/ModalDelete";
+import PrinterIcon from '../../../assets/images/printerIcon.png';
+import { usePaykit } from "../../../hooks/PaykitContext";
+
 import Loading from "../../../core/common/Loading";
 import {
   formatDateTimeBR,
@@ -29,12 +30,11 @@ import { FrontendNotification } from "../../../shared/Notification";
 import Create from "./Create";
 import Ticket from "./Create/Scheduling/components/Payment/Ticket";
 import Info from "./Info";
-import { ITriagens } from "./types/types";
 
 // import { Container } from './styles';
 
-const Triagens: React.FC = () => {
-  const [columns] = useState<ColumnDef[]>([
+const Triagens = () => {
+  const [columns] = useState([
     {
       headerName: "Data de Entrada",
       field: "entrada_veiculo.data_hora",
@@ -44,7 +44,7 @@ const Triagens: React.FC = () => {
         dateBetween: true,
       },
       type: "dateColumn",
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return formatDateTimeBR(params.value);
         }
@@ -57,7 +57,7 @@ const Triagens: React.FC = () => {
       field: "entrada_veiculo.placa_dianteira",
       fieldName: "placa",
       filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return params.value;
         }
@@ -69,7 +69,7 @@ const Triagens: React.FC = () => {
       field: "operacao_porto_agendada.identificadores_conteineres",
       fieldName: "identificadores_conteineres",
       filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return params.value.replace("{", "").replace("}", "");
         }
@@ -86,7 +86,7 @@ const Triagens: React.FC = () => {
           data: getActiveTypes(),
         },
       },
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return "SIM";
         }
@@ -104,7 +104,7 @@ const Triagens: React.FC = () => {
           data: getOperationTypesPorto(),
         },
       },
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.data) {
           if (params.data.id_operacao_porto_agendada !== null) {
             return "TRIAGEM";
@@ -128,7 +128,7 @@ const Triagens: React.FC = () => {
           data: getCargoTypes(),
         },
       },
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return renderCargoTypes(params.value).replaceAll(",", "");
         }
@@ -140,7 +140,7 @@ const Triagens: React.FC = () => {
       field: "motorista.nome",
       filter: true,
       fieldName: "cpf_motorista",
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return params.value;
         }
@@ -152,7 +152,7 @@ const Triagens: React.FC = () => {
       field: "operacao_porto_agendada.terminal.razao_social",
       fieldName: "terminal",
       filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return params.value;
         }
@@ -163,7 +163,7 @@ const Triagens: React.FC = () => {
       headerName: "Proprietario de Carga",
       field: "operacao_porto_carrossel.proprietarioDeCarga.razao_social",
       filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return params.value;
         }
@@ -175,7 +175,7 @@ const Triagens: React.FC = () => {
       field: "operacao_porto_agendada.transportadora.razao_social",
       fieldName: "transportadora",
       filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return params.value;
         }
@@ -187,7 +187,7 @@ const Triagens: React.FC = () => {
       field: "operacao_porto_agendada.transportadora.cnpj",
       fieldName: "cnpj_transportadora",
       filter: true,
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return maskCnpj(params.value);
         }
@@ -203,7 +203,7 @@ const Triagens: React.FC = () => {
         dateBetween: true,
       },
       type: "dateColumn",
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params) => {
         if (params.value) {
           return formatDateTimeBR(params.value);
         }
@@ -211,20 +211,25 @@ const Triagens: React.FC = () => {
       },
     },
   ]);
-  const [isRemove, setIsRemove] = useState<boolean>(false);
-  const [selectedRow, setSelectedRow] = useState<ITriagens>();
-  const [isView, setIsView] = useState<boolean>(false);
-  const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [showTicket, setShowTicket] = useState<boolean>(false);
+  const [isRemove, setIsRemove] = useState(false);
+  const [selectedRow, setSelectedRow] = useState();
+  const [isView, setIsView] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showTicket, setShowTicket] = useState(false);
 
-  const gridRef: any = useRef();
+  const gridRef = useRef();
+  const authenticatedRef = useRef(false);
+
+  const { authenticated, error, authenticate, reprint } = usePaykit();
+
+
 
   const { openModal, isModalOpen, closeModal } = useModal();
 
   const { setStatus } = useStatus();
 
-  const getCallDriver = useCallback(async (data: ITriagens) => {
+  const getCallDriver = useCallback(async (data) => {
     try {
       setLoading(true);
 
@@ -252,7 +257,7 @@ const Triagens: React.FC = () => {
     }
   }, []);
 
-  const onDelete = useCallback(async (rowId?: number, data?: ITriagens) => {
+  const onDelete = useCallback(async (rowId, data) => {
     try {
       setLoading(true);
 
@@ -285,6 +290,117 @@ const Triagens: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
+  var onPaymentSuccess = function (response) {
+    console.log("Payment operation successful:", response);
+
+
+    setShowTicket(false);
+    setShowTicket(true);
+
+    FrontendNotification("Payment operation completed successfully!", "success");
+  };
+
+  var onPaymentError = function (error) {
+    console.error("Payment operation error:", error);
+    console.log('Code: ' + error.reasonCode + ' - ' + error.reason);
+
+    let errorMessage = error.reason || "Payment operation failed";
+
+    if (error.reasonCode == 9) {
+      if (window.PaykitCheckout && authenticated) {
+        try {
+          const result = window.PaykitCheckout.undoPayments();
+          console.log("Payments undone:", result);
+          errorMessage = "Transaction cancelled and payments undone";
+        } catch (err) {
+          console.error("Error undoing payments:", err);
+          errorMessage = "Transaction cancelled but failed to undo payments";
+        }
+      }
+    }
+
+    FrontendNotification(errorMessage, "error");
+  };
+
+
+
+
+
+  const reprintPayment = useCallback(async (data, isAuthenticate) => {
+    try {
+
+      const body = {
+        id_operacao_patio: Number(data.id_operacao_patio),
+        qtd_por_pagina: 100,
+        order_by: "data_historico",
+        order_direction: "desc",
+      };
+
+      const response = await api.post(
+        `/operacaopatio/pagamentos?page=1`,
+        body
+      );
+
+      const responseData = response.data.data.sort((a, b) => a.id_operacao_patio_pagamento - b.id_operacao_patio_pagamento);
+      console.log(responseData)
+
+      console.log(responseData);
+      console.log(isAuthenticate)
+
+      if (responseData.length > 0) {
+        const lastPayment = responseData[responseData.length - 1];
+        if (lastPayment.administrative_code !== null) {
+          const request = {
+            administrativeCode: lastPayment.administrative_code,
+          };
+
+          // Use the Paykit SDK directly for reprint since it's not in the new hook yet
+          if (isAuthenticate) {
+            try {
+              console.log("entrou")
+              reprint(
+                request,
+                (response) => {
+                  console.log("Reprint successful:", response);
+                  onPaymentSuccess(response);
+                },
+                (error) => {
+                  console.error("Reprint error:", error);
+                  onPaymentError(error);
+                }
+              );
+            } catch (err) {
+              console.error("Error calling reprint:", err);
+              FrontendNotification("Error during reprint operation", "error");
+            }
+          } else {
+            FrontendNotification("PaykitCheckout not available or not authenticated", "error");
+          }
+        } else {
+          FrontendNotification("No administrative code found for this payment", "warning");
+        }
+      } else {
+        FrontendNotification("No payments found for this operation", "warning");
+      }
+    } catch (err) {
+      console.error("Error getting payment data:", err);
+      FrontendNotification("Error retrieving payment data", "error");
+    }
+  }, [authenticated]);
+
+
+
+
+
+  useEffect(() => {
+    console.log(authenticated);
+    
+    authenticatedRef.current = authenticated;
+  }, []);
+
+  console.log(authenticatedRef.current)
+
 
   return (
     <>
@@ -354,17 +470,17 @@ const Triagens: React.FC = () => {
             filters={[]}
             pagination
             path="/listar/operacaoPatioTriagem"
-            onDelete={(data: any) => {
+            onDelete={(data) => {
               setIsRemove(!isRemove);
               setSelectedRow(data);
             }}
             isShowStatus
             status={STATUS_OPERACOES_PATIO_TRIAGEM}
-            onView={(data: any) => {
+            onView={(data) => {
               setSelectedRow(data);
               setIsView(!isView);
             }}
-            onUpdate={(data: any) => {
+            onUpdate={(data) => {
               setSelectedRow(data);
               setIsEdit(!isEdit);
               openModal();
@@ -372,7 +488,7 @@ const Triagens: React.FC = () => {
             customButtons={[
               {
                 label: "Identificar Motorista",
-                action: (data: ITriagens) => {
+                action: (data) => {
                   setSelectedRow(data);
                   sessionStorage.setItem("@triagem", JSON.stringify(data));
                   sessionStorage.setItem(
@@ -389,7 +505,7 @@ const Triagens: React.FC = () => {
               },
               {
                 label: "Identificar Veiculo",
-                action: (data: ITriagens) => {
+                action: (data) => {
                   setSelectedRow(data);
                   sessionStorage.setItem("@triagem", JSON.stringify(data));
                   sessionStorage.setItem(
@@ -406,11 +522,11 @@ const Triagens: React.FC = () => {
               },
               {
                 label: "Chamar Motorista",
-                action: (data: ITriagens) => {
+                action: (data) => {
                   getCallDriver(data);
                 },
                 status: [2, 3, 4, 5],
-                icon: (data: ITriagens) => {
+                icon: (data) => {
                   return data.chamada_motorista
                     ? CallDriverActiveIcon
                     : CallDriverIcon;
@@ -418,7 +534,7 @@ const Triagens: React.FC = () => {
               },
               {
                 label: "Pagamento",
-                action: (data: any) => {
+                action: (data) => {
                   setSelectedRow(data);
                   sessionStorage.setItem("@triagem", JSON.stringify(data));
                   sessionStorage.setItem(
@@ -435,7 +551,7 @@ const Triagens: React.FC = () => {
               },
               {
                 label: 'Listar Pagamento',
-                action: (data: any) => {
+                action: (data) => {
                   setSelectedRow(data);
                   sessionStorage.setItem("@triagem", JSON.stringify(data));
                   sessionStorage.setItem(
@@ -451,8 +567,29 @@ const Triagens: React.FC = () => {
                 }
               },
               {
+                label: 'Reimpressão',
+                action: async (data) => {
+                  setSelectedRow(data);
+                  sessionStorage.setItem("@triagem", JSON.stringify(data));
+                  sessionStorage.setItem(
+                    "id_operacao_patio",
+                    JSON.stringify(data?.id_operacao_patio)
+                  );
+                  console.log(authenticatedRef.current)
+                  if (authenticated) {
+                    await authenticate(); // garante autenticação antes
+                  }
+
+                  reprintPayment(data, authenticatedRef.current)
+                },
+                status: [11],
+                icon: () => {
+                  return PrinterIcon;
+                }
+              },
+              {
                 label: "Comprovante",
-                action: (row: any) => {
+                action: (row) => {
                   setSelectedRow(row);
                   setShowTicket(false);
                   setShowTicket(true);

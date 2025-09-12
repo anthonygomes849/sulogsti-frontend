@@ -5,6 +5,7 @@ import { StatusProvider } from "./hooks/StatusContext";
 import router from "./routes";
 import api from "./services/api";
 import { useAxiosInterceptor } from "./services/interceptors";
+import { PaykitProvider } from "./hooks/PaykitContext";
 
 function App() {
   useAxiosInterceptor();
@@ -34,8 +35,11 @@ function App() {
     <div className="flex w-full h-[calc(100vh - 90px)]">
       <AuthenticateProvider>
         <StatusProvider>
+        <PaykitProvider>
+
 
         <RouterProvider router={router} />
+        </PaykitProvider>
         </StatusProvider>
       </AuthenticateProvider>
     </div>

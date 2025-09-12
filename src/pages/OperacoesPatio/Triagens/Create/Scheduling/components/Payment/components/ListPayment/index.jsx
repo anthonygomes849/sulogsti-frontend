@@ -20,6 +20,7 @@ import { useStatus } from "../../../../../../../../../hooks/StatusContext";
 import api from "../../../../../../../../../services/api";
 import Info from "./components/Info";
 import ReversedPayment from "./components/ReversedPayment";
+import { usePaykit } from "../../../../../../../../../hooks/PaykitContext";
 
 const ListPayment = () => {
   const [columns, setColumns] = useState([]);
@@ -112,6 +113,9 @@ const ListPayment = () => {
 
   const gridRef = useRef(null);
 
+    const { authenticated, error, reveralPayment } = usePaykit();
+  
+
   const onGridReady = useCallback(async (params) => {
     try {
       console.log("entrou");
@@ -176,11 +180,11 @@ const ListPayment = () => {
   var checkout;
   var authSuccessMessage = 'Autenticado com sucesso.';
 
-  var onPaymentSuccess = function (response) {
+  var onPaymentSuccess = function (response, row) {
     console.log(response.receipt.merchantReceipt + '<br>' + response.receipt.customerReceipt);
     console.log(response);
 
-    onDelete(selectedRow.id_operacao_patio_pagamento);
+    onDelete(row.id_operacao_patio_pagamento);
   };
   var onPaymentError = function (error) {
     console.log(error);
@@ -216,101 +220,40 @@ const ListPayment = () => {
     }
   }
 
-  const onAuthenticationSuccess = function (response) {
-    console.log(authSuccessMessage);
-  };
-
-  const onAuthenticationError = function (error) {
-    console.log('Código: ' + error.reasonCode + '<br>' + error.reason);
-  };
-
-  const onPendingPayments = function (response) {
-    var codesWithLinebreak = "";
-    var pendingPayments = response.details.administrativeCodes;
-
-    checkout = window.PaykitCheckout.undoPayments();
-
-
-  };
-
-  function authenticate() {
-    console.log(window.PaykitCheckout)
-    if (window.PaykitCheckout) {
-      const authenticationRequest = {
-        authenticationKey: '91749225000109',
-      };
-      checkout = window.PaykitCheckout.authenticate(
-        authenticationRequest,
-        onAuthenticationSuccess,
-        onAuthenticationError,
-        onPendingPayments
-      );
-    } else {
-      console.error("PaykitCheckout não está carregado.");
-    }
-  }
-
-  const loadPaykitScript = () => {
-    return new Promise((resolve, reject) => {
-      if (window.PaykitCheckout) {
-        resolve();
-        return;
-      }
-
-      const existingScript = document.querySelector('script[src="https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js"]');
-      if (existingScript) {
-        existingScript.addEventListener('load', resolve);
-        return;
-      }
-
-      const script = document.createElement('script');
-      script.src = 'https://linxpaykitapi-hmg.linx.com.br/LinxPaykitApi/paykit-checkout.js';
-      script.async = true;
-      script.onload = resolve;
-      script.onerror = () => reject('Erro ao carregar o SDK Paykit');
-      document.body.appendChild(script);
-    });
-  };
-
-  const onPayment = (row) => {
-    console.log(row);
-    switch (row.tipo_pagamento) {
-      case 4:
-        console.log("Entrou")
-        return creditPayment(row.quantia_paga)
-      case 5:
-        console.log("Debito")
-        return debitPayment(row.quantia_paga)
-      case 6:
-        return debitPayment(row.quantia_paga)
-      case 7:
-        return creditPayment(row.quantia_paga);
-      default:
-        onDelete(selectedRow.id_operacao_patio_pagamento);
-
-    }
-  }
-
-  const loaderPaykit = useCallback(async () => {
+  
+  const onPayment = useCallback(async (row) => {
     try {
-      await loadPaykitScript();
-      if (window.PaykitCheckout) {
-        authenticate();
-        authenticatedRef.current = true;
+      const amount = row.quantia_paga;
+
+      console.log(row);
+      // Check if this payment method requires Linx SDK for reversal
+      if (row.administrative_code !== null) {
+
+        const request = {
+          administrativeCode: row.administrative_code !== null ? row.administrative_code : '',
+          amount: String(amount),
+          data: '010925'
+        };
+
+        if(authenticated) {
+          reveralPayment(request, (response) => onPaymentSuccess(response, row), (error) => onPaymentError(error))
+        }
+
       } else {
-        console.error("PaykitCheckout ainda não está disponível após carregar o script.");
+        // For non-card payments, delete directly
+        onDelete(row.id_operacao_patio_pagamento);
+        // Clear the payment in progress since we're handling it directly
+        setPaymentInProgress(null);
       }
     } catch (error) {
-      FrontendNotification("Erro ao carregar o SDK Paykit:", "error");
+      console.error('Payment reversal error:', error);
+      // Clear the payment in progress on error
+      setPaymentInProgress(null);
     }
   }, []);
 
 
   useEffect(() => {
-
-    if (!authenticatedRef.current) {
-      loaderPaykit();
-    }
 
     if (gridApi) {
       const dataSource = {
