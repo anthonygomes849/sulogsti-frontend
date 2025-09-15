@@ -184,6 +184,45 @@ const ListPayment = () => {
     console.log(response.receipt.merchantReceipt + '<br>' + response.receipt.customerReceipt);
     console.log(response);
 
+     const screenWidth = window.screen.width;
+  const screenHeight = window.screen.height;
+
+
+    const printWindow = window.open('', '', `width=${screenWidth},height=${screenHeight},top=0,left=0`);
+    printWindow.document.write(`<!DOCTYPE html>
+    <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title></title> <!-- Deixe o título vazio -->
+        <style>
+          body {
+            font-family: monospace;
+            white-space: pre;
+            font-size: 14px;
+            margin: 0;
+            padding: 20px;
+          }
+
+          @media print {
+            @page {
+              margin: 0;
+            }
+            body {
+              margin: 0;
+              padding: 2px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <pre>${response.receipt.merchantReceipt}</pre>
+      </body>
+    </html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
     onDelete(row.id_operacao_patio_pagamento);
   };
   var onPaymentError = function (error) {

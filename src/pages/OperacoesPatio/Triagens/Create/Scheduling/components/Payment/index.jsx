@@ -30,6 +30,7 @@ const Payment = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [showTicket, setShowTicket] = useState(false);
   const [administrativeCode, setAdministrativeCode] = useState(null);
+  const printRef = useRef();
 
 
   const authenticatedRef = useRef(false);
@@ -291,6 +292,45 @@ const Payment = ({ onClose }) => {
 
     setAdministrativeCode(String(response.administrativeCode));
 
+    const screenWidth = window.screen.width;
+  const screenHeight = window.screen.height;
+
+
+    const printWindow = window.open('', '', `width=${screenWidth},height=${screenHeight},top=0,left=0`);
+    printWindow.document.write(`<!DOCTYPE html>
+    <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title></title> <!-- Deixe o título vazio -->
+        <style>
+          body {
+            font-family: monospace;
+            white-space: pre;
+            font-size: 14px;
+            margin: 0;
+            padding: 20px;
+          }
+
+          @media print {
+            @page {
+              margin: 0;
+            }
+            body {
+              margin: 0;
+              padding: 2px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <pre>${response.receipt.merchantReceipt}</pre>
+      </body>
+    </html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
     setTimeout(() => {
       formik.handleSubmit();
     }, 1000)
@@ -307,10 +347,11 @@ const Payment = ({ onClose }) => {
   const creditPayments = (value) => {
     var creditRequest = {
       amount: parseFloat(value),
-      requestKey: null,
+      installments: 1,
+      installmentType: 1, //Parcelamento Administradora
     };
 
-    if(authenticated) { 
+    if (authenticated) {
       creditPayment(creditRequest, (response) => onPaymentSuccess(response), (error) => onPaymentError(error))
     }
   }
@@ -318,18 +359,23 @@ const Payment = ({ onClose }) => {
 
   function debitPayments(value) {
     const amount = parseFloat(value);
-    if(authenticated) {
+    if (authenticated) {
       debitPayment({ amount }, (response) => onPaymentSuccess(response), (error) => onPaymentError(error))
     }
   }
   const onPayment = (values) => {
     const typePayment = values.tipo_pagamento;
 
+    const valorPago = Number(values.valor_pago).toFixed(2);
+    const desconto = Number(values.desconto).toFixed(2);
+
+    const valorTotalPago = Number(valorPago - desconto).toFixed(2)
+
     switch (typePayment) {
       case "4":
-        return creditPayments(values.valor_pago)
+        return creditPayments(valorTotalPago)
       case "5":
-        return debitPayments(values.valor_pago)
+        return debitPayments(valorTotalPago)
       default:
         setAdministrativeCode(null);
         formik.handleSubmit();
